@@ -29,6 +29,9 @@ jobs:
       with:
           submodules: true
 
+    - name: Install MPI compiler
+      run: sudo apt-get install libblacs-mpi-dev
+
     - name: Configure (${{ matrix.configuration }})
       run: cmake -S . -Bbuild -DCMAKE_BUILD_TYPE=${{ matrix.configuration }}
 
