@@ -1,3 +1,4 @@
+
 name: CI
 
 on:
@@ -29,14 +30,37 @@ jobs:
       with:
           submodules: true
 
-    - name: Install MPI compiler
-      run: sudo apt-get install libblacs-mpi-dev
+    - name: Install MPI compiler & Doxygen
+      run: sudo apt-get install libblacs-mpi-dev doxygen
 
     - name: Configure (${{ matrix.configuration }})
       run: cmake -S . -Bbuild -DCMAKE_BUILD_TYPE=${{ matrix.configuration }}
 
+    - name: Generate Documentation
+      run: cd /home/runner/work/knn-mpi/knn-mpi/build/ && make doc
+
     - name: Build with ${{ matrix.compiler }}
       run: cmake --build build
+
+    - name: Doxygen Action
+      # You may pin to the exact commit or the version.
+      # uses: mattnotmitt/doxygen-action@26c5585d9d0077c5c6f6c700bc6434ef03956fd4
+      uses: mattnotmitt/doxygen-action@v1.2.1
+      with:
+        # Working directory
+        working-directory: '/home/runner/work/knn-mpi/knn-mpi/build/'
+        # Path to Doxyfile
+        doxyfile-path: '/home/runner/work/knn-mpi/knn-mpi/build/Doxyfile'
+        # Generate latex documentation
+        enable-latex: false
+
+    - name: Deploy Documentation
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        enable_jekyll: true
+        publish_branch: gh-pages
+        publish_dir: /home/runner/work/knn-mpi/knn-mpi/build/html
 
     - name: Test
       working-directory: build
