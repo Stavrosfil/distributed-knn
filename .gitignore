@@ -34,3 +34,5 @@
 
 # Build directory
 build/
+.public
+.vscode

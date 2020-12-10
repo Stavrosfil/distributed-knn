@@ -9,6 +9,8 @@
 #include "exampleConfig.h"
 #include "example.h"
 
+#include "knn.h"
+
 /*
  * Simple main program that demontrates how access
  * CMake definitions (here the version number) from source code.
@@ -16,8 +18,6 @@
 int main() {
     std::cout << "This is a test to check that everything is working as intended." << std::endl;
 
-    // Bring in the dummy class from the example source,
-    // just to show that it is accessible from main.cpp.
-    Dummy d = Dummy();
-    return d.doSomething() ? 0 : -1;
+    struct knnresult res = knnresult();
+    std::cout << res.ndist << std::endl;
 }
