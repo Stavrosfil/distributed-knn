@@ -31,28 +31,39 @@ jobs:
           submodules: true
 
     - name: Install MPI compiler & Doxygen
-      run: sudo apt-get install libblacs-mpi-dev doxygen
+      run: sudo apt-get install libblacs-mpi-dev doxygen python-jinja2 python-pygments
+      # For latex purposes
+      # sudo apt install \
+      # texlive-base \
+      # texlive-latex-extra \
+      # texlive-fonts-extra \
+      # texlive-fonts-recommended
 
     - name: Configure (${{ matrix.configuration }})
       run: cmake -S . -Bbuild -DCMAKE_BUILD_TYPE=${{ matrix.configuration }}
 
-    - name: Generate Documentation
-      run: cd /home/runner/work/knn-mpi/knn-mpi/build/ && make doc
+    # - name: Generate Documentation
+    #   run: cd /home/runner/work/knn-mpi/knn-mpi/build/ && make doc
+
+    - name: Generate Documentation with Custom Theme
+      run: git clone git://github.com/mosra/m.css
+      run: cp Doxyfile-mcss ./build/
+      run: ./m.css/documentation/doxygen.py ./build/Doxyfile-mcss
 
     - name: Build with ${{ matrix.compiler }}
       run: cmake --build build
 
-    - name: Doxygen Action
-      # You may pin to the exact commit or the version.
-      # uses: mattnotmitt/doxygen-action@26c5585d9d0077c5c6f6c700bc6434ef03956fd4
-      uses: mattnotmitt/doxygen-action@v1.2.1
-      with:
-        # Working directory
-        working-directory: '/home/runner/work/knn-mpi/knn-mpi/build/'
-        # Path to Doxyfile
-        doxyfile-path: '/home/runner/work/knn-mpi/knn-mpi/build/Doxyfile'
-        # Generate latex documentation
-        enable-latex: false
+    # - name: Doxygen Action
+    #   # You may pin to the exact commit or the version.
+    #   # uses: mattnotmitt/doxygen-action@26c5585d9d0077c5c6f6c700bc6434ef03956fd4
+    #   uses: mattnotmitt/doxygen-action@v1.2.1
+    #   with:
+    #     # Working directory
+    #     working-directory: '/home/runner/work/knn-mpi/knn-mpi/build/'
+    #     # Path to Doxyfile
+    #     doxyfile-path: '/home/runner/work/knn-mpi/knn-mpi/build/Doxyfile'
+    #     # Generate latex documentation
+    #     enable-latex: false
 
     - name: Deploy Documentation
       uses: peaceiris/actions-gh-pages@v3
@@ -60,7 +71,7 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         enable_jekyll: true
         publish_branch: gh-pages
-        publish_dir: /home/runner/work/knn-mpi/knn-mpi/build/html
+        publish_dir: ./.public/html
 
     - name: Test
       working-directory: build
