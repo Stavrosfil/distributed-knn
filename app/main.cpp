@@ -17,13 +17,6 @@
  */
 int main() {
 
-    // int n = 2;
-    // int m = 3;
-    // int d = 2;
-    // int k = 2;
-    // int X[n][d] = {{3, 3}, {5, 1}};
-    // int Y[m][d] = {{0, 1}, {2, 5}, {4, 1}};
-
     int n = 7;
     int m = 3;
     int d = 1;
@@ -43,7 +36,23 @@ int main() {
     double X[][1] = {{1.0}, {2.0}, {4.0}, {15.0}, {16.0}, {18.0}, {40.0}};
     double Y[][1] = {{0.0}, {17.0}, {30.0}};
 
-    kNN(*X, *Y, n, m, d, k);
+    struct knnresult res = kNN(*X, *Y, n, m, d, k);
+
+    std::cout << "kNN distances: " << std::endl;
+
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < k; j++)
+            std::cout << res.ndist[i][j] << " ";
+        std::cout << std::endl;
+    }
+
+    std::cout << std::endl << "kNN indeces: " << std::endl;
+
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < k; j++)
+            std::cout << res.nidx[i][j] << " ";
+        std::cout << std::endl;
+    }
 
     return 0;
 }

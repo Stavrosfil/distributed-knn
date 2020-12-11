@@ -12,10 +12,10 @@
  *
  */
 typedef struct knnresult {
-    int *nidx;     //!< Indices (0-based) of nearest neighbors [m-by-k]
-    double *ndist; //!< Distance of nearest neighbors          [m-by-k]
-    int m;         //!< Number of query points                 [scalar]
-    int k;         //!< Number of nearest neighbors            [scalar]
+    int **nidx;     //!< Indices (0-based) of nearest neighbors [m-by-k]
+    double **ndist; //!< Distance of nearest neighbors          [m-by-k]
+    int m;          //!< Number of query points                 [scalar]
+    int k;          //!< Number of nearest neighbors            [scalar]
 } knnresult;
 
 /**
@@ -90,23 +90,7 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k) {
         }
     }
 
-    std::cout << "kNN distances: " << std::endl;
-
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < k; j++)
-            std::cout << ndist[i][j] << " ";
-        std::cout << std::endl;
-    }
-
-    std::cout << std::endl << "kNN indeces: " << std::endl;
-
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < k; j++)
-            std::cout << nidx[i][j] << " ";
-        std::cout << std::endl;
-    }
-
-    struct knnresult res = {*nidx, *ndist, m, n};
+    struct knnresult res = {nidx, ndist, m, n};
 
     return res;
 }
