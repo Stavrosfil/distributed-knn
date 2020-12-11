@@ -84,9 +84,11 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k) {
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < n; j++) {
             double dist = abs(Y[i * d + 0] - X[j * d + 0]);
-            if (dist < ndist[i][k - 1]) {
+            if (dist == 0)
+                continue;
+            if (dist < ndist[i][k - 1]) 
                 addTokNN(dist, j, ndist[i], nidx[i], k);
-            }
+            
         }
     }
 
