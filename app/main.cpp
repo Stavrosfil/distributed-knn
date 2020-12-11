@@ -46,7 +46,7 @@ int main() {
         std::cout << std::endl;
     }
 
-    std::cout << std::endl << "kNN indeces: " << std::endl;
+    std::cout << std::endl << "kNN indices: " << std::endl;
 
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < k; j++)

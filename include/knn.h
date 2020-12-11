@@ -24,8 +24,8 @@ typedef struct knnresult {
  * @param dist  Distance between point x (X[j]) and y (Y[i])
  * @param x     X[j]
  * @param ndist kNN distances of Y
- * @param nidx  kNN indeces of Y
- * @param k     Number of nearest neighbors to search for
+ * @param nidx  kNN indices of Y
+ * @param k     Number of nearest neighbors
  */
 void addTokNN(double dist, int x, double *ndist, int *nidx, int k) {
 
@@ -86,9 +86,8 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k) {
             double dist = abs(Y[i * d + 0] - X[j * d + 0]);
             if (dist == 0)
                 continue;
-            if (dist < ndist[i][k - 1]) 
+            if (dist < ndist[i][k - 1])
                 addTokNN(dist, j, ndist[i], nidx[i], k);
-            
         }
     }
 
