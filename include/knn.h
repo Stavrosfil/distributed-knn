@@ -19,38 +19,34 @@ typedef struct knnresult {
     int k;          //!< Number of nearest neighbors            [scalar]
 } knnresult;
 
+void swap(double* a, double* b) {
+    double temp = *a;
+    *a          = *b;
+    *b          = temp;
+}
+
 /**
  * @brief Add an element to knn arrays and sort ndist[y][:].
  *
  * @param dist  Distance between point x (X[j]) and y (Y[i])
- * @param x     X[j]
+ * @param x     Index j of X[j]
  * @param ndist kNN distances of Y
  * @param nidx  kNN indices of Y
  * @param k     Number of nearest neighbors
  */
-void addTokNN(double dist, int x, double* ndist, int* nidx, int k) {
+void addTokNN(double dist, int xi, double* ndist, int* nidx, int k) {
 
-    // TODO: Binary search for insertion
+    int i    = k - 1;
+    ndist[i] = dist;
 
-    for (int i = k - 1; i > 0; i--) {
-        if (ndist[i - 1] < dist) {
-            for (int j = k - 1; j > i; j--) {
-                ndist[j] = ndist[j - 1];
-                nidx[j]  = nidx[j - 1];
-            }
-            ndist[i] = dist;
-            nidx[i]  = x;
+    for (; i > 0; i--) {
+        if (ndist[i - 1] > ndist[i]) {
+            swap(&ndist[i - 1], &ndist[i]);
+        } else {
             break;
         }
     }
-    if (ndist[0] >= dist) {
-        for (int j = k - 1; j > 0; j--) {
-            ndist[j] = ndist[j - 1];
-            nidx[j]  = nidx[j - 1];
-        }
-        ndist[0] = dist;
-        nidx[0]  = x;
-    }
+    nidx[i] = xi;
 }
 
 void euclideanDistance(double* X, double* Y, double* D, int n, int m, int d) {
