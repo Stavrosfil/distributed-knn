@@ -31,7 +31,7 @@ jobs:
           submodules: true
 
     - name: Install MPI compiler & Doxygen
-      run: sudo apt-get install libblacs-mpi-dev libopenblas-base libopenblas-dev doxygen python-jinja2 python-pygments; sudo apt-get install locate; sudo updatedb; locate libopenblas
+      run: sudo apt-get install libblacs-mpi-dev openblas libopenblas-base libopenblas-dev doxygen python-jinja2 python-pygments; sudo apt-get install locate; sudo updatedb; locate libopenblas
       
       # For latex purposes
       # sudo apt install \
