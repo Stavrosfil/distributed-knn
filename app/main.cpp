@@ -11,32 +11,18 @@
 
 #include "knn.h"
 
-/*
- * Simple main program that demontrates how access
- * CMake definitions (here the version number) from source code.
- */
 int main() {
 
-    int n = 7;
-    int m = 3;
-    int d = 1;
-    int k = 3;
+    const int n = 2;
+    const int m = 3;
+    const int d = 2;
+    const int k = 2;
 
-    // double **X = new double *[n];
-    // double **Y = new double *[m];
+    double X[n * d] = {3, 3, 5, 1};
+    double Y[m * d] = {0, 1, 2, 5, 4, 1};
+    double D[n * m];
 
-    // for (int i = 0; i < n; i++) {
-    //     X[i] = new double[d];
-    // }
-
-    // for (int i = 0; i < m; i++) {
-    //     Y[i] = new double[d];
-    // }
-
-    double X[][1] = {{0.0}, {2.0}, {4.0}, {15.0}, {16.0}, {18.0}, {40.0}};
-    double Y[][1] = {{0.0}, {17.0}, {30.0}};
-
-    struct knnresult res = kNN(*X, *Y, n, m, d, k);
+    struct knnresult res = kNN(X, Y, D, n, m, d, k);
 
     std::cout << "kNN distances: " << std::endl;
 

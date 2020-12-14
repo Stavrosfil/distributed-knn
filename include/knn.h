@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <cmath>
 #include <limits>
+#include <cblas.h>
 
 #define D_MAX std::numeric_limits<double>::max()
 
@@ -12,8 +13,8 @@
  *
  */
 typedef struct knnresult {
-    int **nidx;     //!< Indices (0-based) of nearest neighbors [m-by-k]
-    double **ndist; //!< Distance of nearest neighbors          [m-by-k]
+    int** nidx;     //!< Indices (0-based) of nearest neighbors [m-by-k]
+    double** ndist; //!< Distance of nearest neighbors          [m-by-k]
     int m;          //!< Number of query points                 [scalar]
     int k;          //!< Number of nearest neighbors            [scalar]
 } knnresult;
@@ -27,7 +28,7 @@ typedef struct knnresult {
  * @param nidx  kNN indices of Y
  * @param k     Number of nearest neighbors
  */
-void addTokNN(double dist, int x, double *ndist, int *nidx, int k) {
+void addTokNN(double dist, int x, double* ndist, int* nidx, int k) {
 
     // TODO: Binary search for insertion
 
@@ -52,6 +53,38 @@ void addTokNN(double dist, int x, double *ndist, int *nidx, int k) {
     }
 }
 
+void euclideanDistance(double* X, double* Y, double* D, int n, int m, int d) {
+
+    double* XH = new double[n];
+    double* YH = new double[m];
+
+    // XH = sum(X.^2,2)
+    for (int i = 0; i < n; i++) {
+        XH[i] = 0;
+        for (int j = 0; j < d; j++) {
+            XH[i] += X[i * d + j] * X[i * d + j];
+        }
+    }
+
+    // YH = sum(Y.^2,2)
+    for (int i = 0; i < m; i++) {
+        YH[i] = 0;
+        for (int j = 0; j < d; j++) {
+            YH[i] += Y[i * d + j] * Y[i * d + j];
+        }
+    }
+
+    // D = 2*X*Y.'
+    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, n, m, d, -2, X, d, Y, d, 0, D, m);
+
+    // D = sqrt(sum(X.^2,2) - 2*X*Y.' + sum(Y.^2,2).')
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            D[i * m + j] = sqrt(D[i * m + j] + XH[i] + YH[j]);
+        }
+    }
+}
+
 /**
  * @brief Compute k nearest neighbors of each point in X [n-by-d]
  *
@@ -64,10 +97,10 @@ void addTokNN(double dist, int x, double *ndist, int *nidx, int k) {
  *
  * \return  The kNN result
  */
-knnresult kNN(double *X, double *Y, int n, int m, int d, int k) {
+knnresult kNN(double* X, double* Y, double* D, int n, int m, int d, int k) {
 
-    int **nidx     = new int *[m];
-    double **ndist = new double *[m];
+    int** nidx     = new int*[m];
+    double** ndist = new double*[m];
 
     for (int i = 0; i < m; i++) {
         nidx[i]  = new int[k];
@@ -80,10 +113,11 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k) {
         }
     }
 
-    // TODO: Use BLAS for distance function for n-dimensions.
+    euclideanDistance(X, Y, D, n, m, d);
+
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < n; j++) {
-            double dist = abs(Y[i * d + 0] - X[j * d + 0]);
+            double dist = D[j * m + i];
             if (dist == 0)
                 continue;
             if (dist < ndist[i][k - 1])
