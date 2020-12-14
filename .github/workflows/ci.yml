@@ -31,7 +31,7 @@ jobs:
           submodules: true
 
     - name: Install MPI compiler & Doxygen
-      run: sudo apt-get install libblacs-mpi-dev libopenblas-dev doxygen python-jinja2 python-pygments
+      run: sudo apt-get install libblacs-mpi-dev libopenblas-dev doxygen python-jinja2 python-pygments; sudo update-alternatives --config libblas.so.3
       
       # For latex purposes
       # sudo apt install \
@@ -47,8 +47,7 @@ jobs:
     #   run: cd /home/runner/work/knn-mpi/knn-mpi/build/ && make doc
 
     - name: Build with ${{ matrix.compiler }}
-#       run: cmake --build build --verbose
-      run: cd build; make; cd ..
+      run: cmake --build build --verbose
 
     - name: Generate Documentation with Custom Theme
       run: git clone git://github.com/mosra/m.css && cp Doxyfile-mcss build && ./m.css/documentation/doxygen.py build/Doxyfile-mcss && ls -la
