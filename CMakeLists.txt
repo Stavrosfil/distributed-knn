@@ -9,6 +9,8 @@ cmake_minimum_required(VERSION 3.8.2)
 
 set(CMAKE_CXX_COMPILER "/usr/bin/mpic++")
 
+set( CMAKE_VERBOSE_MAKEFILE on )
+
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -lopenblas")
 SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -lopenblas")
 # set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wc99-extensions")
