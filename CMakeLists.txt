@@ -11,8 +11,8 @@ set(CMAKE_CXX_COMPILER "/usr/bin/mpic++")
 
 set( CMAKE_VERBOSE_MAKEFILE on )
 
-set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS}-lopenblas")
-SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS}-lopenblas")
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS}-lopenblas -L/usr/lib/x86_64-linux-gnu/")
+SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS}-lopenblas -L/usr/lib/x86_64-linux-gnu/")
 # set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wc99-extensions")
 
 # Set project name, version and laguages here. (change as needed)
