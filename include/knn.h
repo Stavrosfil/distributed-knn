@@ -39,12 +39,9 @@ void addTokNN(double dist, int xi, double* ndist, int* nidx, int k) {
     int i    = k - 1;
     ndist[i] = dist;
 
-    for (; i > 0; i--) {
-        if (ndist[i - 1] > ndist[i]) {
-            swap(&ndist[i - 1], &ndist[i]);
-        } else {
-            break;
-        }
+    while (i > 0 && ndist[i - 1] > ndist[i]) {
+        swap(&ndist[i - 1], &ndist[i]);
+        i--;
     }
     nidx[i] = xi;
 }
