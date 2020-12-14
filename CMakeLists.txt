@@ -9,6 +9,10 @@ cmake_minimum_required(VERSION 3.8.2)
 
 set(CMAKE_CXX_COMPILER "/usr/bin/mpic++")
 
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -lopenblas")
+# set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wc99-extensions")
+# SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_COVERAGE_LINK_FLAGS}")
+
 # Set project name, version and laguages here. (change as needed)
 # Version numbers are available by including "exampleConfig.h" in 
 # the source. See exampleConfig.h.in for some more details.
@@ -81,3 +85,4 @@ set_target_properties(
 
 # Set up tests (see tests/CMakeLists.txt).
 add_subdirectory(tests)
+
