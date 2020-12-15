@@ -1,9 +1,9 @@
 MPICC=mpic++
-CFLAGS= -O3 -w -lopenblas
+CFLAGS= -O3 -Wall -lopenblas
 
-BUILD_DIR=build
-SRC_DIR=src
-INCLUDE_DIR=include
+BUILD_DIR=./build
+SRC_DIR=./src
+INCLUDE_DIR=./include
 SOURCES := $(shell find $(SRC_DIR) -name '*.cpp')
 
 $(info $(shell mkdir -p $(BUILD_DIR)))
@@ -12,7 +12,7 @@ $(info $(shell mkdir -p $(BUILD_DIR)))
 default: all
 
 mpi:
-	$(MPICC) $(CFLAGS) -o $(BUILD_DIR)/main -I$(INCLUDE_DIR) $(SOURCES)
+	$(MPICC) -o $(BUILD_DIR)/main -I$(INCLUDE_DIR) $(SOURCES) $(CFLAGS) 
 
 .PHONY: clean
 
