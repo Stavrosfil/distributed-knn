@@ -5,6 +5,8 @@
 
 int main() {
 
+    std::cout << std::endl;
+    
     const int n = 5;
     const int m = 3;
     const int d = 1;
@@ -45,5 +47,7 @@ int main() {
         std::cout << std::endl;
     }
 
+    std::cout << std::endl;
+    
     return 0;
 }
