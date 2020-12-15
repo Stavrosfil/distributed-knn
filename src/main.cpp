@@ -1,12 +1,14 @@
 #include <iostream>
 #include <stdlib.h>
 
-#include "knn.h"
+#include "knn.hpp"
+#include "utils.hpp"
+#include "distributed.hpp"
 
 int main() {
 
-    std::cout << std::endl;
-    
+    /* ---------------------------------- DATA ---------------------------------- */
+
     const int n = 5;
     const int m = 3;
     const int d = 1;
@@ -21,33 +23,24 @@ int main() {
 
     const int k = 2;
 
+    /* ----------------------------------- kNN ---------------------------------- */
+
     struct knnresult res = kNN(X, Y, D, n, m, d, k);
 
-    std::cout << "kNN distances: " << std::endl;
+    /* ----------------------------------- MPI ---------------------------------- */
 
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < k; j++)
-            std::cout << res.ndist[i][j] << " ";
-        std::cout << std::endl;
-    }
+    mpi::test();
 
-    std::cout << std::endl << "kNN indices: " << std::endl;
+    /* --------------------------------- PRINTS --------------------------------- */
 
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < k; j++)
-            std::cout << res.nidx[i][j] << " ";
-        std::cout << std::endl;
-    }
+    // std::cout << "kNN distances: " << std::endl;
+    // prt::twoDim(res.ndist, m, k);
 
-    std::cout << std::endl;
+    // std::cout << std::endl << "kNN indices: " << std::endl;
+    // prt::twoDim(res.nidx, m, k);
 
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++)
-            std::cout << D[i * m + j] << " ";
-        std::cout << std::endl;
-    }
+    // std::cout << std::endl << "Distance matrix: " << std::endl;
+    // prt::rowMajor(D, n, m);
 
-    std::cout << std::endl;
-    
     return 0;
 }

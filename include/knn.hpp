@@ -1,5 +1,6 @@
-#ifndef KNN
-#define KNN
+#ifndef __KNN_H__
+#define __KNN_H__
+
 #include <iostream>
 #include <stdio.h>
 #include <cmath>
@@ -119,4 +120,4 @@ knnresult kNN(double* X, double* Y, double* D, int n, int m, int d, int k) {
     return res;
 }
 
-#endif
+#endif // __KNN_H__
