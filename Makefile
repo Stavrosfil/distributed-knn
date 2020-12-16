@@ -20,7 +20,7 @@ all: mpi test
 
 test:
 	@printf "\n** Testing\n\n"
-	./build/main
+	mpirun -np 4 ./build/main
 
 clean:
 	rm -rf $(BUILD_DIR)
