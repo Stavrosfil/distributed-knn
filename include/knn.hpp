@@ -87,10 +87,11 @@ void euclideanDistance(double* X, double* Y, double* D, int n, int m, int d) {
  *
  * \return  The kNN result
  */
-knnresult kNN(double* X, double* Y, double* D, int n, int m, int d, int k) {
+knnresult kNN(double* X, double* Y, int n, int m, int d, int k) {
 
     int** nidx     = new int*[m];
     double** ndist = new double*[m];
+    double* D      = new double[n * m];
 
     for (int i = 0; i < m; i++) {
         nidx[i]  = new int[k];
