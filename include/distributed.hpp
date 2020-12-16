@@ -31,6 +31,7 @@ knnresult distrAllkNN(double* X, int n, int d, int k) {
     int process_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
 
+    int chunk_size  = N / world_size;
     int xlen        = N / world_size;
     double* X_local = new double[xlen];
 
@@ -38,19 +39,34 @@ knnresult distrAllkNN(double* X, int n, int d, int k) {
 
     /* ------------------------------ Calculations ------------------------------ */
 
+    // index = i + process_rank * chunk_size
+
     if (process_rank == world_size - 1)
-        xlen = N - xlen * process_rank;
+        xlen = N - chunk_size * process_rank;
 
     for (int i = 0; i < xlen; i++) {
         std::cout << "Rank: " << process_rank << ", cs: " << xlen << " -> " << X_local[i] << std::endl;
     }
 
     int* buffer = new int[world_size];
+    // struct knnresult* ans = new knnresult[world_size];
+    struct knnresult ans = knnresult();
 
-    struct knnresult res = kNN(X_local, X_local, xlen, xlen, d, k);
+    for (int i = 0; i < world_size; i++) {
+        // ans[i] = kNN(X_local, X_local, xlen, xlen, d, k);
+        ans = kNN(X_local, X_local, i * chunk_size, xlen, xlen, d, k);
 
-    prt::twoDim(res.nidx, xlen, k);
-    prt::twoDim(res.ndist, xlen, k);
+        MPI_Send(X_local, 1, MPI_DOUBLE, (process_rank + 1) % world_size, 0, MPI_COMM_WORLD);
+
+        if (process_rank == 0) {
+            MPI_Recv(X_local, 1, MPI_DOUBLE, world_size - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        } else {
+            MPI_Recv(X_local, 1, MPI_DOUBLE, process_rank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        }
+    }
+
+    prt::twoDim(ans.nidx, xlen, k);
+    prt::twoDim(ans.ndist, xlen, k);
 
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Finalize();

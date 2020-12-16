@@ -1,5 +1,5 @@
 MPICC=mpic++
-CFLAGS= -O3 -lopenblas
+CFLAGS= -O3 -lopenblas -std=c++17
 
 BUILD_DIR=./build
 SRC_DIR=./src
