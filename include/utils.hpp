@@ -14,18 +14,18 @@ void rowMajor(double* a, int n, int m) {
     }
 }
 
-void twoDim(int** a, int n, int m) {
+void twoDim(int* a, int n, int m) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++)
-            std::cout << a[i][j] << " ";
+            std::cout << a[i * m + j] << " ";
         std::cout << std::endl;
     }
 }
 
-void twoDim(double** a, int n, int m) {
+void twoDim(double* a, int n, int m) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++)
-            std::cout << a[i][j] << " ";
+            std::cout << a[i * m + j] << " ";
         std::cout << std::endl;
     }
 }

@@ -87,7 +87,7 @@ void euclideanDistance(double* X, double* Y, double* D, int n, int m, int d) {
  *
  * \return  The kNN result
  */
-void kNN(knnresult res, double* X, double* Y, int offset, int n, int m, int d, int k) {
+void kNN(knnresult res, double* X, double* Y, int displacement, int n, int m, int d, int k) {
 
     double* D = new double[n * m];
 
@@ -97,7 +97,7 @@ void kNN(knnresult res, double* X, double* Y, int offset, int n, int m, int d, i
         for (int j = 0; j < n; j++) {
             double dist = D[j * m + i];
             if (dist < res.ndist[i * k + k - 1])
-                addTokNN(dist, j, &res.ndist[i], &res.nidx[i], k);
+                addTokNN(dist, j + displacement, &res.ndist[i], &res.nidx[i], k);
         }
     }
 }
