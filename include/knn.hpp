@@ -10,10 +10,10 @@
 #define D_MAX std::numeric_limits<double>::max()
 
 typedef struct knnresult {
-    int** nidx;     //!< Indices (0-based) of nearest neighbors [m-by-k]
-    double** ndist; //!< Distance of nearest neighbors          [m-by-k]
-    int m;          //!< Number of query points                 [scalar]
-    int k;          //!< Number of nearest neighbors            [scalar]
+    int* nidx;     //!< Indices (0-based) of nearest neighbors [m-by-k]
+    double* ndist; //!< Distance of nearest neighbors          [m-by-k]
+    int m;         //!< Number of query points                 [scalar]
+    int k;         //!< Number of nearest neighbors            [scalar]
 } knnresult;
 
 void swap(double* a, double* b) {
@@ -64,7 +64,7 @@ void euclideanDistance(double* X, double* Y, double* D, int n, int m, int d) {
         }
     }
 
-    // D = 2*X*Y.'
+    // D = -2*X*Y.'
     cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, n, m, d, -2, X, d, Y, d, 0, D, m);
 
     // D = sqrt(sum(X.^2,2) - 2*X*Y.' + sum(Y.^2,2).')
@@ -87,38 +87,19 @@ void euclideanDistance(double* X, double* Y, double* D, int n, int m, int d) {
  *
  * \return  The kNN result
  */
-knnresult kNN(double* X, double* Y, int offset, int n, int m, int d, int k) {
+void kNN(knnresult res, double* X, double* Y, int offset, int n, int m, int d, int k) {
 
-    int** nidx     = new int*[m];
-    double** ndist = new double*[m];
-    double* D      = new double[n * m];
-
-    for (int i = 0; i < m; i++) {
-        nidx[i]  = new int[k];
-        ndist[i] = new double[k];
-    }
-
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < k; j++) {
-            ndist[i][j] = D_MAX;
-        }
-    }
+    double* D = new double[n * m];
 
     euclideanDistance(X, Y, D, n, m, d);
 
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < n; j++) {
             double dist = D[j * m + i];
-            if (dist == 0)
-                continue;
-            if (dist < ndist[i][k - 1])
-                addTokNN(dist, j + offset, ndist[i], nidx[i], k);
+            if (dist < res.ndist[i * k + k - 1])
+                addTokNN(dist, j, &res.ndist[i], &res.nidx[i], k);
         }
     }
-
-    struct knnresult res = {nidx, ndist, m, n};
-
-    return res;
 }
 
 #endif // __KNN_H__
