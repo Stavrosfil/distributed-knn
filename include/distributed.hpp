@@ -31,10 +31,10 @@ knnresult distrAllkNN(double* X, int n, int d, int k) {
     int process_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
 
-    int rem = n % world_size;               // elements remaining after division among processes
-    int sum = 0;                            // Sum of counts. Used to calculate displacements
-    int *chunk_size = new int[world_size];  // array describing how many elements to send to each process
-    int *displs = new int[world_size];      // array describing the displacements where each segment begins
+    int rem         = n % world_size;      // elements remaining after division among processes
+    int sum         = 0;                   // Sum of counts. Used to calculate displacements
+    int* chunk_size = new int[world_size]; // array describing how many elements to send to each process
+    int* displs     = new int[world_size]; // array describing the displacements where each segment begins
 
     // calculate chunk sizes and displacements
     for (int i = 0; i < world_size; i++) {
@@ -47,67 +47,90 @@ knnresult distrAllkNN(double* X, int n, int d, int k) {
         sum += chunk_size[i];
     }
 
-    double *X_local = new double[chunk_size[process_rank]];         // chunk_size[process_rank] = n/world_size OR n/world_size+1
-    double *Y_local = new double[n / world_size + 1];               // set maximum length
-    double *Z_local = new double[n / world_size + 1];
-    
-    MPI_Scatterv(X, chunk_size, displs, MPI_DOUBLE, X_local, chunk_size[process_rank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    
-    // print chunks
-    printf("Process %d X_local: ", process_rank);
+    int MAX_CHUNK_S = n / world_size + 1;
+
+    double* _X = new double[chunk_size[process_rank]]; // chunk_size[process_rank] = n/world_size OR n/world_size+1
+    double* _Y = new double[MAX_CHUNK_S];              // set maximum length
+    double* _Z = new double[MAX_CHUNK_S];
+
+    MPI_Scatterv(X, chunk_size, displs, MPI_DOUBLE, _X, chunk_size[process_rank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+    printf("Process %d _X: ", process_rank);
+
     for (int i = 0; i < chunk_size[process_rank]; i++) {
-        printf("%lf\t", X_local[i]);
-    }
-    printf("\n");
-
-    /* ------------------------------ Calculations ------------------------------ */
-
-    // index = i + process_rank * chunk_size
-
-    // for (int i = 0; i < xlen; i++) {
-    //     std::cout << "Rank: " << process_rank << ", cs: " << xlen << " -> " << X_local[i] << std::endl;
-    // }
-
-    Y_local = X_local;
-    struct knnresult distr_ans = knnresult();
-    distr_ans.m = chunk_size[process_rank];
-    distr_ans.k = k;
-
-// TODO : Create mpi data type "smessage" and "rmessage"
-// TODO : Create a struct "smessage" that will consist of: "struct knnresult distr_ans" and  "double * Y_local" 
-// TODO : Create a struct "rmessage" that will consist of: "struct knnresult distr_ans" and  "double * Z_local" 
-// NOTE : "struct knnresult distr_ans" includes the chunk_size 
-// NOTE : The communication will be achived by sending and receiving just one struct
-
-    MPI_Send(Y_local, n / world_size + 1, MPI_DOUBLE, (process_rank + 1) % world_size, 01, MPI_COMM_WORLD);
-    //MPI_Send(distr_ans, 1, mpi_knnresult_type, (process_rank + 1) % world_size, 02, MPI_COMM_WORLD);
-
-    MPI_Recv(Z_local, n / world_size + 1, MPI_DOUBLE, (process_rank + 1) % world_size, 01, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    //MPI_Recv(distr_ans, 1, mpi_knnresult_type, (process_rank + 1) % world_size, 02, MPI_COMM_WORLD);
-
-    Y_local = Z_local;
-
-    std::cout << "Process " << process_rank << " Y_local updated: " << std::endl;
-    for (int i = 0; i < n / world_size + 1; i++) {          // TODO : After the creation of the struct, "n / world_size + 1" will be replaced by "rmessage.distr_ans.m"
-        
-        std::cout << Y_local[i] << " ";
+        printf("%.3lf\t", _X[i]);
     }
     std::cout << std::endl;
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ STAVROS OLD VERSION FOLLOWING ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    /* ------------------------------ Calculations ------------------------------ */
+
+    // for (int i = 0; i < xlen; i++) {
+    //     std::cout << "Rank: " << process_rank << ", cs: " << xlen << " -> " << _X[i] << std::endl;
+    // }
+
+    _Y                    = _X;
+    struct knnresult _res = knnresult();
+    _res.m                = chunk_size[process_rank];
+    _res.k                = k;
+    _res.nidx             = new int[_res.m * _res.k];
+    _res.ndist            = new double[_res.m * _res.k];
+
+    // TODO : Create mpi data type "smessage" and "rmessage"
+    // TODO : Create a struct "smessage" that will consist of: "struct knnresult distr_ans" and  "double * _Y"
+    // TODO : Create a struct "rmessage" that will consist of: "struct knnresult distr_ans" and  "double * _Z"
+    // NOTE : "struct knnresult distr_ans" includes the chunk_size
+    // NOTE : The communication will be achived by sending and receiving just one struct
+
+    for (int i = 0; i < _res.m; i++) {
+        for (int j = 0; j < k; j++) {
+            _res.ndist[i * k + j] = D_MAX;
+        }
+    }
+
+    int offset = 0;
+
+    // For each process we iterate in a circular fashion
+    for (int i = process_rank; i < process_rank + world_size; i++) {
+
+        std::cout << "********** Iteration " << i << " ************" << std::endl;
+
+        kNN(_res, _X, _Y, offset, chunk_size[process_rank], MAX_CHUNK_S, d, k);
+
+        MPI_Send(_Y, MAX_CHUNK_S, MPI_DOUBLE, (i + 1) % world_size, 1, MPI_COMM_WORLD);
+        // MPI_Send(distr_ans, 1, mpi_knnresult_type, (process_rank + 1) % world_size, 02, MPI_COMM_WORLD);
+
+        MPI_Recv(_Z, MAX_CHUNK_S, MPI_DOUBLE, (world_size + i - 1) % world_size, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        // MPI_Recv(distr_ans, 1, mpi_knnresult_type, (process_rank + 1) % world_size, 02, MPI_COMM_WORLD);
+
+        _Y = _Z;
+
+        std::cout << "Process " << process_rank << " _Y updated: " << std::endl;
+
+        for (int i = 0; i < MAX_CHUNK_S; i++) {
+
+            // TODO : After the creation of the struct, "MAX_CHUNK_S" will
+            // be replaced by "rmessage.distr_ans.m"
+
+            std::cout << _Y[i] << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ STAVROS OLD VERSION
+    // FOLLOWING ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // // struct knnresult* ans = new knnresult[world_size];
     // struct knnresult ans = knnresult();
 
     // for (int i = 0; i < world_size; i++) {
-    //     // ans[i] = kNN(X_local, X_local, xlen, xlen, d, k);
-    //     ans = kNN(X_local, X_local, i * chunk_size, xlen, xlen, d, k);
+    //     // ans[i] = kNN(_X, _X, xlen, xlen, d, k);
+    //     ans = kNN(_X, _X, i * chunk_size, xlen, xlen, d, k);
 
-    //     MPI_Send(X_local, 1, MPI_DOUBLE, (process_rank + 1) % world_size, 0, MPI_COMM_WORLD);
+    //     MPI_Send(_X, 1, MPI_DOUBLE, (process_rank + 1) % world_size, 0, MPI_COMM_WORLD);
 
     //     if (process_rank == 0) {
-    //         MPI_Recv(X_local, 1, MPI_DOUBLE, world_size - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    //         MPI_Recv(_X, 1, MPI_DOUBLE, world_size - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     //     } else {
-    //         MPI_Recv(X_local, 1, MPI_DOUBLE, process_rank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    //         MPI_Recv(_X, 1, MPI_DOUBLE, process_rank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     //     }
     // }
 
@@ -117,9 +140,9 @@ knnresult distrAllkNN(double* X, int n, int d, int k) {
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Finalize();
 
-    // delete[] X_local;
-    // delete[] Y_local;
-    // delete[] Z_local;
+    // delete[] _X;
+    // delete[] _Y;
+    // delete[] _Z;
     return knnresult();
 }
 
