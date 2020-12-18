@@ -4,10 +4,13 @@
 #include <iostream>
 #include <stdio.h>
 #include <cmath>
-#include <limits>
 #include <cblas.h>
+#include <algorithm>
+#include <vector>
 
 #define D_MAX std::numeric_limits<double>::max()
+
+#include "utils.hpp"
 
 typedef struct knnresult {
     int* nidx;     //!< Indices (0-based) of nearest neighbors [m-by-k]
@@ -22,25 +25,10 @@ void swap(double* a, double* b) {
     *b          = temp;
 }
 
-/**
- * @brief Add an element to knn arrays and sort ndist[y][:].
- *
- * @param dist  Distance between point x (X[j]) and y (Y[i])
- * @param x     Index j of X[j]
- * @param ndist kNN distances of Y
- * @param nidx  kNN indices of Y
- * @param k     Number of nearest neighbors
- */
-void addTokNN(double dist, int xi, double* ndist, int* nidx, int k) {
-
-    int i    = k - 1;
-    ndist[i] = dist;
-
-    while (i > 0 && ndist[i - 1] > ndist[i]) {
-        swap(&ndist[i - 1], &ndist[i]);
-        i--;
-    }
-    nidx[i] = xi;
+void swap(int* a, int* b) {
+    int temp = *a;
+    *a       = *b;
+    *b       = temp;
 }
 
 void euclideanDistance(double* X, double* Y, double* D, int n, int m, int d) {
@@ -75,6 +63,12 @@ void euclideanDistance(double* X, double* Y, double* D, int n, int m, int d) {
     }
 }
 
+struct less_than_key {
+    inline bool operator()(const std::pair<double, int> a, const std::pair<double, int> b) {
+        return (a.first < b.first);
+    }
+};
+
 /**
  * @brief Compute k nearest neighbors of each point in X [n-by-d]
  *
@@ -89,15 +83,33 @@ void euclideanDistance(double* X, double* Y, double* D, int n, int m, int d) {
  */
 void kNN(knnresult res, double* X, double* Y, int displacement, int n, int m, int d, int k) {
 
-    double* D = new double[n * m];
+    auto D = std::vector<double>(n * m);
 
-    euclideanDistance(X, Y, D, n, m, d);
+    std::vector<std::pair<double, int>> _D;
+    _D.reserve(n * m);
 
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < n; j++) {
-            double dist = D[j * m + i];
-            if (dist < res.ndist[i * k + k - 1])
-                addTokNN(dist, j + displacement, &res.ndist[i], &res.nidx[i], k);
+    euclideanDistance(X, Y, D.data(), n, m, d);
+
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < m; j++) {
+            _D[i * m + j].first  = D[i * m + j];
+            _D[i * m + j].second = j;
+        }
+    }
+
+    for (int i = 0; i < n; i++) {
+
+        int col = i * m;
+
+        std::partial_sort(_D.begin() + (col), _D.begin() + (col + k), _D.begin() + (col + m), less_than_key());
+        // std::nth_element(_D.begin() + (col), _D.begin() + (col + k - 1), _D.begin() + (col + m), less_than_key());
+        double nth_element = _D[i * m + k - 1].first;
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < k; j++) {
+                res.ndist[i * k + j] = _D[i * m + j].first;
+                res.nidx[i * k + j]  = _D[i * m + j].second;
+            }
         }
     }
 }
