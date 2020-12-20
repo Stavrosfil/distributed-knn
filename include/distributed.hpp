@@ -91,7 +91,7 @@ knnresult distrAllkNN(double* X, int n, int d, int k) {
     }
 
     std::cout << "Process " << process_rank << std::endl;
-    prt::twoDim(_res.ndist, _res.m, _res.k);
+    prt::twoDim(_res.nidx, _res.m, _res.k);
 
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Finalize();

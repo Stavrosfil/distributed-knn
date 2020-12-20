@@ -14,11 +14,16 @@ int main() {
 
     // double Y[m * d] = {1, 3, 9};
 
-    const int n = 10;
-    const int d = 1;
-    const int k = 5;
+    const int n = 5;
+    const int d = 2;
+    const int k = 1;
 
-    double X[n * d] = {0, 10, 40, 100, 1000, 1001, 900, -10, 20, 30};
+    double X[n * d] = {0, 3, 4, 10, 0, 7, 15, 14, 100, 2};
+
+    std::cout << "X matrix: \n";
+    prt::rowMajor(X, n, d);
+    std::cout << "\n";
+
     // double X[n * d] = {0, 10, -10, 20, 3};
 
     /* ----------------------------------- MPI ---------------------------------- */
