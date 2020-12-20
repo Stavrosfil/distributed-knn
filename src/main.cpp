@@ -16,13 +16,9 @@ int main() {
 
     const int n = 5;
     const int d = 2;
-    const int k = 1;
+    const int k = 2;
 
-    double X[n * d] = {0, 3, 4, 10, 0, 7, 15, 14, 100, 2};
-
-    std::cout << "X matrix: \n";
-    prt::rowMajor(X, n, d);
-    std::cout << "\n";
+    double X[n * d] = {0, 1, 2, 3, 15, 12, 15, 11, 30, 30};
 
     // double X[n * d] = {0, 10, -10, 20, 3};
 
