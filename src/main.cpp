@@ -12,14 +12,14 @@ int main() {
     // double X[n * d] = {3, 3, 5, 1};
     // double Y[m * d] = {0, 1, 2, 5, 4, 1};
 
-    // double X[n * d] = {0, 10, -10, 20, 30, 40, 100, 1000, 1001, 900};
     // double Y[m * d] = {1, 3, 9};
 
-    const int n = 5;
+    const int n = 10;
     const int d = 1;
     const int k = 2;
 
-    double X[n * d] = {0, 10, -10, 20, 3};
+    double X[n * d] = {0, 10, -10, 20, 30, 40, 100, 1000, 1001, 900};
+    // double X[n * d] = {0, 10, -10, 20, 3};
 
     /* ----------------------------------- MPI ---------------------------------- */
 
@@ -27,8 +27,9 @@ int main() {
 
     /* --------------------------------- PRINTS --------------------------------- */
 
-    std::cout << "kNN distances: " << std::endl;
-    prt::twoDim(res.ndist, res.m, res.k);
+    // std::cout << "kNN distances: " << std::endl;
+    // prt::twoDim(res.ndist, res.m, res.k);
+    // prt::twoDim(res.nidx, res.m, res.k);
 
     // std::cout << std::endl << "kNN indices: " << std::endl;
     // prt::twoDim(res.nidx, m, k);

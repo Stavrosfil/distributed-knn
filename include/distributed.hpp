@@ -58,11 +58,6 @@ knnresult distrAllkNN(double* X, int n, int d, int k) {
 
     MPI_Scatterv(X, chunk_size, displs, MPI_DOUBLE, _X, chunk_size[process_rank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
-    // printf("Process %d _X: ", process_rank);
-    // for (int i = 0; i < chunk_size[process_rank]; i++)
-    //     printf("%.3lf\t", _X[i]);
-    // std::cout << std::endl;
-
     /* ------------------------------ Calculations ------------------------------ */
 
     _Y                    = _X;
@@ -87,32 +82,21 @@ knnresult distrAllkNN(double* X, int n, int d, int k) {
     // For each process we iterate in a circular fashion
     for (int i = process_rank; i < process_rank + world_size; i++) {
 
-        // std::cout << "********** Iteration " << i << " ************" << std::endl;
-
         int prev_rank = (world_size + i - 1) % world_size;
         int next_rank = (i + 1) % world_size;
 
-        kNN(_res, _X, _Y, displs[i], chunk_size[process_rank], chunk_size[(world_size + i - 1) % world_size], d, k);
+        // std::cout << "Process " << process_rank << " -> " << i << " " << next_rank << " " << prev_rank << std::endl;
+
+        kNN(_res, _Y, _X, displs[i], chunk_size[i % world_size], chunk_size[process_rank], d, k);
 
         MPI_Send(_Y, MAX_CHUNK_S, MPI_DOUBLE, next_rank, 1, MPI_COMM_WORLD);
         MPI_Recv(_Z, MAX_CHUNK_S, MPI_DOUBLE, prev_rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
         _Y = _Z;
-
-        // std::cout << "Process " << process_rank << " _Y updated: " << std::endl;
-
-        // for (int i = 0; i < MAX_CHUNK_S; i++) {
-
-        // TODO : After the creation of the struct, "MAX_CHUNK_S" will be replaced by "rmessage.distr_ans.m"
-
-        //     std::cout << _Y[i] << " ";
-        // }
-        // std::cout << std::endl;
     }
 
-    // prt::twoDim(ans.nidx, xlen, k);
     std::cout << "Process " << process_rank << std::endl;
-    // prt::twoDim(_res.ndist, _res.m, _res.k);
+    prt::twoDim(_res.ndist, _res.m, _res.k);
 
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Finalize();

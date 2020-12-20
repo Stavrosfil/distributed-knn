@@ -83,33 +83,31 @@ struct less_than_key {
  */
 void kNN(knnresult res, double* X, double* Y, int displacement, int n, int m, int d, int k) {
 
-    auto D = std::vector<double>(n * m);
+    double* D = new double[n * m];
 
-    std::vector<std::pair<double, int>> _D;
-    _D.reserve(n * m);
+    euclideanDistance(X, Y, D, n, m, d);
 
-    euclideanDistance(X, Y, D.data(), n, m, d);
+    for (int i = 0; i < m; i++) {
 
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < m; j++) {
-            _D[i * m + j].first  = D[i * m + j];
-            _D[i * m + j].second = j;
+        std::vector<std::pair<double, int>> _D;
+        _D.reserve(n + k);
+
+        for (int j = 0; j < n; j++) {
+            _D[j].first  = D[j * m + i];
+            _D[j].second = j + displacement;
         }
-    }
 
-    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < k; j++) {
+            _D[n + j].first  = res.ndist[i * k + j];
+            _D[n + j].second = res.nidx[i * k + j];
+        }
 
-        int col = i * m;
-
-        std::partial_sort(_D.begin() + (col), _D.begin() + (col + k), _D.begin() + (col + m), less_than_key());
+        std::partial_sort(_D.begin(), _D.begin() + k, _D.begin() + n + k, less_than_key());
         // std::nth_element(_D.begin() + (col), _D.begin() + (col + k - 1), _D.begin() + (col + m), less_than_key());
-        double nth_element = _D[i * m + k - 1].first;
 
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < k; j++) {
-                res.ndist[i * k + j] = _D[i * m + j].first;
-                res.nidx[i * k + j]  = _D[i * m + j].second;
-            }
+        for (int j = 0; j < k; j++) {
+            res.ndist[i * k + j] = _D[j].first;
+            res.nidx[i * k + j]  = _D[j].second;
         }
     }
 }

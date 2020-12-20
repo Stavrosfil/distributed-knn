@@ -9,7 +9,15 @@ namespace prt {
 void rowMajor(double* a, int n, int m) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++)
-            std::cout << a[i * m + j] << " ";
+            std::cout << a[i * m + j] << "\t";
+        std::cout << std::endl;
+    }
+}
+
+void rowMajor(std::pair<double, int>* a, int n, int m) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++)
+            std::cout << a[i * m + j].first << "\t";
         std::cout << std::endl;
     }
 }
