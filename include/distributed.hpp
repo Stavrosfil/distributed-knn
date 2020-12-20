@@ -67,15 +67,10 @@ knnresult distrAllkNN(double* X, int n, int d, int k) {
     _res.nidx             = new int[_res.m * _res.k]();
     _res.ndist            = new double[_res.m * _res.k]();
 
-    // TODO : Create mpi data type "smessage" and "rmessage"
-    // TODO : Create a struct "smessage" that will consist of: "struct knnresult distr_ans" and  "double * _Y"
-    // TODO : Create a struct "rmessage" that will consist of: "struct knnresult distr_ans" and  "double * _Z"
-    // NOTE : "struct knnresult distr_ans" includes the chunk_size
-    // NOTE : The communication will be achived by sending and receiving just one struct
-
     for (int i = 0; i < _res.m; i++) {
         for (int j = 0; j < k; j++) {
             _res.ndist[i * k + j] = D_MAX;
+            _res.nidx[i * k + j]  = -1;
         }
     }
 
