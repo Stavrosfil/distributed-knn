@@ -1,5 +1,5 @@
 MPICC=mpic++
-CFLAGS= -O3 -Wall -lopenblas
+CFLAGS= -O3 -lopenblas -std=c++17
 
 BUILD_DIR=./build
 SRC_DIR=./src
@@ -20,7 +20,7 @@ all: mpi test
 
 test:
 	@printf "\n** Testing\n\n"
-	./build/main
+	mpirun -np 2 ./build/main
 
 clean:
 	rm -rf $(BUILD_DIR)
