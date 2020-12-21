@@ -64,7 +64,7 @@ knnresult distrAllkNN(double* X, int n, int d, int k) {
 
     /* ------------------------------ Calculations ------------------------------ */
 
-    _Y                    = _X;
+    memcpy(_Y, _X, MAX_CHUNK_S * sizeof(double));
     struct knnresult _res = knnresult();
     _res.m                = chunk_size[process_rank] / d;
     _res.k                = k;
@@ -99,7 +99,7 @@ knnresult distrAllkNN(double* X, int n, int d, int k) {
             MPI_Recv(_Z, MAX_CHUNK_S, MPI_DOUBLE, prev_rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         }
 
-        _Y = _Z;
+        memcpy(_Y, _Z, MAX_CHUNK_S * sizeof(double));
 
         // std::cout << process_rank << "\t" << displs[util::modulo(cnt, world_size)] / d << " "
         //           << chunk_size[util::modulo(cnt, world_size)] / d << " " << chunk_size[process_rank] / d << " "
