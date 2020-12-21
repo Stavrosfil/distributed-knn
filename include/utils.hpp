@@ -14,6 +14,14 @@ void rowMajor(double* a, int n, int m) {
     }
 }
 
+void rowMajor(int* a, int n, int m) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++)
+            std::cout << a[i * m + j] << "\t";
+        std::cout << std::endl;
+    }
+}
+
 void rowMajor(std::pair<double, int>* a, int n, int m) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++)
@@ -22,21 +30,17 @@ void rowMajor(std::pair<double, int>* a, int n, int m) {
     }
 }
 
-void twoDim(int* a, int n, int m) {
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++)
-            std::cout << a[i * m + j] << " ";
-        std::cout << std::endl;
-    }
-}
-
-void twoDim(double* a, int n, int m) {
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++)
-            std::cout << a[i * m + j] << " ";
-        std::cout << std::endl;
-    }
-}
-
 } // namespace prt
+
+namespace util {
+
+unsigned modulo(int value, unsigned m) {
+    int mod = value % (int)m;
+    if (mod < 0) {
+        mod += m;
+    }
+    return mod;
+}
+} // namespace util
+
 #endif // __UTILS_H__

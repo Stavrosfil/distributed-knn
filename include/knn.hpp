@@ -87,14 +87,18 @@ void kNN(knnresult res, double* X, double* Y, int displacement, int n, int m, in
     // prt::rowMajor(Y, n, d);
     // std::cout << "\n";
 
+    // std::cout << "================================" << std::endl;
+    // prt::rowMajor(X, d, n);
+    // prt::rowMajor(Y, d, m);
+    // std::cout << n << " " << m << " " << d << " " << std::endl;
+
     double* D = new double[n * m];
 
     euclideanDistance(X, Y, D, n, m, d);
 
     for (int i = 0; i < m; i++) {
 
-        std::vector<std::pair<double, int>> _D;
-        _D.reserve(n + k);
+        std::vector<std::pair<double, int>> _D(n + k);
 
         for (int j = 0; j < n; j++) {
             _D[j].first  = D[j * m + i];
@@ -106,7 +110,7 @@ void kNN(knnresult res, double* X, double* Y, int displacement, int n, int m, in
             _D[n + j].second = res.nidx[i * k + j];
         }
 
-        std::partial_sort(_D.begin(), _D.begin() + k, _D.begin() + n + k, less_than_key());
+        std::partial_sort(_D.begin(), _D.begin() + k, _D.end(), less_than_key());
         // std::nth_element(_D.begin() + (col), _D.begin() + (col + k - 1), _D.begin() + (col + m), less_than_key());
 
         for (int j = 0; j < k; j++) {

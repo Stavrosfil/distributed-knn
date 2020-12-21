@@ -33,7 +33,7 @@ knnresult distrAllkNN(double* X, int n, int d, int k) {
         std::cout << "\nX matrix: \n";
         prt::rowMajor(X, n, d);
         std::cout << "\n";
-    } 
+    }
 
     int rem         = n % world_size;      // elements remaining after division among processes
     int sum         = 0;                   // Sum of counts. Used to calculate displacements
@@ -59,21 +59,17 @@ knnresult distrAllkNN(double* X, int n, int d, int k) {
     double* _Z = new double[MAX_CHUNK_S];
 
     /* ------------------------------ Distribute X ------------------------------ */
-    
+
     MPI_Scatterv(X, chunk_size, displs, MPI_DOUBLE, _X, chunk_size[process_rank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
     /* ------------------------------ Calculations ------------------------------ */
-    
+
     _Y                    = _X;
     struct knnresult _res = knnresult();
     _res.m                = chunk_size[process_rank] / d;
     _res.k                = k;
     _res.nidx             = new int[_res.m * _res.k]();
     _res.ndist            = new double[_res.m * _res.k]();
-
-    std::cout << "X" << process_rank << " sub-matrix:\n";
-    prt::rowMajor(_X, _res.m, d);
-    std::cout << std::endl;
 
     for (int i = 0; i < _res.m; i++) {
         for (int j = 0; j < k; j++) {
@@ -82,46 +78,48 @@ knnresult distrAllkNN(double* X, int n, int d, int k) {
         }
     }
 
-    // if (process_rank == 0) {
-    //     std::cout << "Displacement: \n";
-    //     for (int i = 0; i < world_size; i++) {
-    //         std::cout << displs[i] << std::endl;
-    //     }
-    //     std::cout << std::endl;
-    // }
+    int prev_rank = (world_size + process_rank - 1) % world_size;
+    int next_rank = (world_size + process_rank + 1) % world_size;
 
-    // For each process we iterate in a circular fashion
-    for (int i = process_rank; i < process_rank + world_size; i++) {
+    kNN(_res, _Y, _X, displs[process_rank] / d, chunk_size[process_rank] / d, chunk_size[process_rank] / d, d, k);
 
-        int prev_rank = (world_size + i - 1) % world_size;
-        int next_rank = (i + 1) % world_size;
+    int cnt = process_rank;
 
-        // std::cout << "Process " << process_rank << " -> " << i << " " << next_rank << " " << prev_rank << std::endl;
+    for (int i = 0; i < world_size - 1; i++) {
 
-        //kNN(_res, _Y, _X, displs[i] / d, chunk_size[i % world_size] / d, chunk_size[process_rank] / d, d, k);
-        
-        if (process_rank == 0)
-            kNN(_res, _Y, _X, 0, 3, 3, d, k);
+        cnt--;
+        unsigned rolling_prev_rank = util::modulo(cnt, world_size);
+        // std::cout << "Process rank: " << process_rank << " ->\t" << prev_rank << " " << next_rank << std::endl;
 
-        if (process_rank == 1) {
-            kNN(_res, _Y, _X, 3, 2, 2, d, k);
+        if (process_rank == 0) {
+            MPI_Recv(_Z, MAX_CHUNK_S, MPI_DOUBLE, prev_rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Send(_Y, MAX_CHUNK_S, MPI_DOUBLE, next_rank, 1, MPI_COMM_WORLD);
+        } else {
+            MPI_Send(_Y, MAX_CHUNK_S, MPI_DOUBLE, next_rank, 1, MPI_COMM_WORLD);
+            MPI_Recv(_Z, MAX_CHUNK_S, MPI_DOUBLE, prev_rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         }
 
-        // MPI_Send(_Y, MAX_CHUNK_S, MPI_DOUBLE, next_rank, 1, MPI_COMM_WORLD);
-        // MPI_Recv(_Z, MAX_CHUNK_S, MPI_DOUBLE, prev_rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
         _Y = _Z;
+
+        // std::cout << process_rank << "\t" << displs[util::modulo(cnt, world_size)] / d << " "
+        //           << chunk_size[util::modulo(cnt, world_size)] / d << " " << chunk_size[process_rank] / d << " "
+        //           << _X[0] << std::endl;
+
+        kNN(_res, _Y, _X, displs[rolling_prev_rank] / d, chunk_size[rolling_prev_rank] / d,
+            chunk_size[process_rank] / d, d, k);
     }
 
-    // std::cout << "Process " << process_rank << " kNN indices:" << std::endl;
-    // prt::twoDim(_res.nidx, _res.m, _res.k);
-    // std::cout << std::endl;
-
-    // std::cout << "Process " << process_rank << " kNN distances:" << std::endl;
-    // prt::twoDim(_res.ndist, _res.m, _res.k);
-    // std::cout << std::endl;
-
     MPI_Barrier(MPI_COMM_WORLD);
+
+    // std::cout << "Process " << process_rank << " kNN indices:" << std::endl;
+    // prt::rowMajor(_res.ndist, _res.m, _res.k);
+    // // prt::rowMajor(_res.nidx, _res.m, _res.k);
+    // std::cout << std::endl;
+
+    std::cout << "Process " << process_rank << " kNN distances:" << std::endl;
+    prt::rowMajor(_res.ndist, _res.m, _res.k);
+    std::cout << std::endl;
+
     MPI_Finalize();
 
     // delete[] _X;
