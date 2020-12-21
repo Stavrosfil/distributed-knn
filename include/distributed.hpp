@@ -82,6 +82,14 @@ knnresult distrAllkNN(double* X, int n, int d, int k) {
         }
     }
 
+    // if (process_rank == 0) {
+    //     std::cout << "Displacement: \n";
+    //     for (int i = 0; i < world_size; i++) {
+    //         std::cout << displs[i] << std::endl;
+    //     }
+    //     std::cout << std::endl;
+    // }
+
     // For each process we iterate in a circular fashion
     for (int i = process_rank; i < process_rank + world_size; i++) {
 
@@ -90,21 +98,28 @@ knnresult distrAllkNN(double* X, int n, int d, int k) {
 
         // std::cout << "Process " << process_rank << " -> " << i << " " << next_rank << " " << prev_rank << std::endl;
 
-        kNN(_res, _Y, _X, displs[i] / d, chunk_size[i % world_size] / d, chunk_size[process_rank] / d, d, k);
+        //kNN(_res, _Y, _X, displs[i] / d, chunk_size[i % world_size] / d, chunk_size[process_rank] / d, d, k);
+        
+        if (process_rank == 0)
+            kNN(_res, _Y, _X, 0, 3, 3, d, k);
 
-        MPI_Send(_Y, MAX_CHUNK_S, MPI_DOUBLE, next_rank, 1, MPI_COMM_WORLD);
-        MPI_Recv(_Z, MAX_CHUNK_S, MPI_DOUBLE, prev_rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        if (process_rank == 1) {
+            kNN(_res, _Y, _X, 3, 2, 2, d, k);
+        }
+
+        // MPI_Send(_Y, MAX_CHUNK_S, MPI_DOUBLE, next_rank, 1, MPI_COMM_WORLD);
+        // MPI_Recv(_Z, MAX_CHUNK_S, MPI_DOUBLE, prev_rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
         _Y = _Z;
     }
 
-    std::cout << "Process " << process_rank << " kNN indices:" << std::endl;
-    prt::twoDim(_res.nidx, _res.m, _res.k);
-    std::cout << std::endl;
+    // std::cout << "Process " << process_rank << " kNN indices:" << std::endl;
+    // prt::twoDim(_res.nidx, _res.m, _res.k);
+    // std::cout << std::endl;
 
-    std::cout << "Process " << process_rank << " kNN distances:" << std::endl;
-    prt::twoDim(_res.ndist, _res.m, _res.k);
-    std::cout << std::endl;
+    // std::cout << "Process " << process_rank << " kNN distances:" << std::endl;
+    // prt::twoDim(_res.ndist, _res.m, _res.k);
+    // std::cout << std::endl;
 
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Finalize();

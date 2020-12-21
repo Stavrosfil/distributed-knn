@@ -83,6 +83,10 @@ struct less_than_key {
  */
 void kNN(knnresult res, double* X, double* Y, int displacement, int n, int m, int d, int k) {
 
+    // std::cout << "X sub-matrix in kNN:\n";
+    // prt::rowMajor(Y, n, d);
+    // std::cout << "\n";
+
     double* D = new double[n * m];
 
     euclideanDistance(X, Y, D, n, m, d);
