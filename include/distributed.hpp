@@ -76,8 +76,6 @@ knnresult distrAllkNN(double* X, int n, int d, int k) {
             chunk_size[process_rank] / d, d, k);
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
-
     knnresult ans = knnresult();
     ans.m         = n;
     ans.k         = k;
