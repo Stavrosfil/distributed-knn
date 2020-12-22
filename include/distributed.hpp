@@ -38,6 +38,8 @@ knnresult distrAllkNN(double* X, int n, int d, int k) {
 
     /* ------------------------------ Calculations ------------------------------ */
 
+    memcpy(_Y, _X, MAX_CHUNK_S * sizeof(double));
+
     knnresult _ans = knnresult();
     _ans.m         = chunk_size[process_rank] / d;
     _ans.k         = k;
@@ -51,32 +53,38 @@ knnresult distrAllkNN(double* X, int n, int d, int k) {
         }
     }
 
-    memcpy(_Y, _X, MAX_CHUNK_S * sizeof(double));
-    kNN(_ans, _Y, _X, displs[process_rank] / d, chunk_size[process_rank] / d, chunk_size[process_rank] / d, d, k);
-
     int prev_rank              = (world_size + process_rank - 1) % world_size;
     int next_rank              = (world_size + process_rank + 1) % world_size;
-    unsigned rolling_prev_rank = world_size + process_rank;
+    unsigned rolling_prev_rank = world_size + process_rank + 1;
 
-    for (int i = 0; i < world_size - 1; i++) {
+    for (int i = 0; i < world_size; i++) {
 
         rolling_prev_rank = --rolling_prev_rank % world_size;
 
-        if (process_rank == 0) {
-            MPI_Recv(_Z, MAX_CHUNK_S, MPI_DOUBLE, prev_rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            MPI_Send(_Y, MAX_CHUNK_S, MPI_DOUBLE, next_rank, 1, MPI_COMM_WORLD);
-        } else {
-            MPI_Send(_Y, MAX_CHUNK_S, MPI_DOUBLE, next_rank, 1, MPI_COMM_WORLD);
-            MPI_Recv(_Z, MAX_CHUNK_S, MPI_DOUBLE, prev_rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        }
+        MPI_Request* reqs = new MPI_Request[2];
 
-        memcpy(_Y, _Z, MAX_CHUNK_S * sizeof(double));
+        MPI_Irecv(/* recv buffer: */ _Z,
+                  /* count: */ MAX_CHUNK_S,
+                  /* type: */ MPI_DOUBLE,
+                  /* from: */ prev_rank,
+                  /* tag: */ 0,
+                  /* communicator: */ MPI_COMM_WORLD,
+                  /* request: */ &reqs[0]);
+        MPI_Isend(/* send buffer: */ _Y,
+                  /* count: */ MAX_CHUNK_S,
+                  /* type: */ MPI_DOUBLE,
+                  /* to: */ next_rank,
+                  /* tag: */ 0,
+                  /* communicator: */ MPI_COMM_WORLD,
+                  /* request: */ &reqs[1]);
 
         kNN(_ans, _Y, _X, displs[rolling_prev_rank] / d, chunk_size[rolling_prev_rank] / d,
             chunk_size[process_rank] / d, d, k);
-    }
 
-    MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Waitall(2, reqs, MPI_STATUSES_IGNORE);
+
+        memcpy(_Y, _Z, MAX_CHUNK_S * sizeof(double));
+    }
 
     knnresult ans = knnresult();
     ans.m         = n;
