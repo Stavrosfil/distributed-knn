@@ -62,13 +62,8 @@ knnresult distrAllkNN(double* X, int n, int d, int k) {
 
         rolling_prev_rank = --rolling_prev_rank % world_size;
 
-        if (process_rank == 0) {
-            MPI_Recv(_Z, MAX_CHUNK_S, MPI_DOUBLE, prev_rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            MPI_Send(_Y, MAX_CHUNK_S, MPI_DOUBLE, next_rank, 1, MPI_COMM_WORLD);
-        } else {
-            MPI_Send(_Y, MAX_CHUNK_S, MPI_DOUBLE, next_rank, 1, MPI_COMM_WORLD);
-            MPI_Recv(_Z, MAX_CHUNK_S, MPI_DOUBLE, prev_rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        }
+        MPI_Sendrecv(_Y, MAX_CHUNK_S, MPI_DOUBLE, next_rank, 1, _Z, MAX_CHUNK_S, MPI_DOUBLE, prev_rank, 1,
+                     MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
         memcpy(_Y, _Z, MAX_CHUNK_S * sizeof(double));
 
