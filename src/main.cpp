@@ -4,7 +4,7 @@
 #include "knn.hpp"
 #include "utils.hpp"
 #include "distributed.hpp"
-#include "vpt_v2.hpp"
+#include "vpt_v3.hpp"
 
 
 int main() {
@@ -20,27 +20,25 @@ int main() {
 
     // struct knnresult ans = mpi::distrAllkNN(X, n, d, k);
 
-  auto points = std::vector<std::vector<double>> {
-    {0, 0, 1},
-    {1, 1, 1},
-    {2, 0, 0},
-    {-1, -1, 0},
-    {10, 0, 5}
-  };
+  double data[] = {14, 2, 50, 11, 8, 7};
 
-  vpt::VpTree t1(points); // create a tree
+  Node root = Node(0, 6, data, -1);
 
-  std::vector<double> distances;
-  std::vector<int> indices;
-  std::tie(distances, indices) = t1.getNearestNeighbors({ 10, 0, 5 }, 3); // find 3 neighbors closest to the given point
+  // std::cout << "mu = " << root.mu << std::endl;
 
-  std::cout << "\nindices" << "\t"; 
-  std::cout << "distances" << "\n";
-  for (int i = 0; i < 3; i++) {
-    std::cout << indices[i] << "\t"; 
-    std::cout << distances[i] << "\n"; 
-  }
-  std::cout << "\n";
+  VPT t = VPT(root);
+  t.createVPT();
+
+  // for(Node n : t.tree) {
+  //       std::cout << n.index << '\n';
+  // }
+
+  std::cout << "Root:\t\t";
+  prt::node(t.tree[0].data, t.tree[0].len);
+  std::cout << "Left child:\t";
+  prt::node(t.tree[1].data, t.tree[1].len);
+  std::cout << "Right child:\t";
+  prt::node(t.tree[2].data, t.tree[2].len);
 
   return 0;
 }

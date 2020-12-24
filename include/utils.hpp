@@ -30,6 +30,13 @@ void rowMajor(std::pair<double, int>* a, int n, int m) {
     }
 }
 
+void node(double* data, int len) {
+    for (int i = 0; i < len; i++) {
+        std::cout << data[i] << "\t"; 
+    }
+    std::cout << std::endl;
+}
+
 } // namespace prt
 
 namespace util {
@@ -79,6 +86,10 @@ void computeEuclideanDistance(double* X, double* Y, double* D, int n, int m, int
             D[i * m + j] = sqrt(D[i * m + j] + XH[i] + YH[j]);
         }
     }
+}
+
+int compare (const void * a, const void * b) {
+    return ( *(double*)a - *(double*)b );
 }
 
 } // namespace util
