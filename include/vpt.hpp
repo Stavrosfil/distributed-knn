@@ -1,144 +1,130 @@
-#ifndef __VPT_H__
-#define __VPT_H__
-
-#include <stdlib.h>
-#include <algorithm>
-#include <vector>
+#include <iostream>
 #include <stdio.h>
-#include <queue>
-#include <limits>
+#include <cmath>
 
-template <typename T, double (*distance)(const T&, const T&)> class VpTree {
-  public:
-    VpTree() : _root(0) {}
+class Node {
 
-    ~VpTree() { delete _root; }
+    public:
 
-    void create(const std::vector& items) {
-        delete _root;
-        _items = items;
-        _root  = buildFromPoints(0, items.size());
+    int index;
+    int len;
+    double *data;
+    double *vp;
+    double *D;
+    double mu;
+    int parentIndex;
+    int leftIndex;
+    int rightIndex;
+
+
+    Node() {
+
+        index = -1;
+        len = 0;
+        data = NULL;
+        vp = NULL;
+        D = NULL;
+        mu = -1;
+        parentIndex = -1;
+        leftIndex = -1;
+        rightIndex = -1;
     }
 
-    void search(const T& target, int k, std::vector<>* results, std::vector<double>* distances) {
-        std::priority_queue<HeapItem> heap;
+    Node(int index,
+    int len,
+    double *data,
+    int parentIndex) {
 
-        _tau = std::numeric_limits::max();
-        search(_root, target, k, heap);
-
-        results->clear();
-        distances->clear();
-
-        while (!heap.empty()) {
-            results->push_back(_items[heap.top().index]);
-            distances->push_back(heap.top().dist);
-            heap.pop();
-        }
-
-        std::reverse(results->begin(), results->end());
-        std::reverse(distances->begin(), distances->end());
+        this->index = index;
+        this->len = len;
+        this->data = data;
+        this->vp = data;
+        D = new double[len];
+        util::computeEuclideanDistance(data, vp, D, len, 1, 1);
+        this->mu = computeMu();
+        this->parentIndex = parentIndex;
+        this->leftIndex = -1;
+        this->rightIndex = -1;
     }
 
-  private:
-    std::vector<T> _items;
-    double _tau;
-
-    struct Node {
-        int index;
-        double threshold;
-        Node* left;
-        Node* right;
-
-        Node() : index(0), threshold(0.), left(0), right(0) {}
-
-        ~Node() {
-            delete left;
-            delete right;
-        }
-    } * _root;
-
-    struct HeapItem {
-        HeapItem(int index, double dist) : index(index), dist(dist) {}
-        int index;
-        double dist;
-        bool operator<(const HeapItem& o) const { return dist < o.dist; }
-    };
-
-    struct DistanceComparator {
-        const T& item;
-        DistanceComparator(const T& item) : item(item) {}
-        bool operator()(const T& a, const T& b) { return distance(item, a) < distance(item, b); }
-    };
-
-    Node* buildFromPoints(int lower, int upper) {
-        if (upper == lower) {
-            return NULL;
-        }
-
-        Node* node  = new Node();
-        node->index = lower;
-
-        if (upper - lower > 1) {
-
-            // choose an arbitrary point and move it to the start
-            int i = (int)((double)rand() / RAND_MAX * (upper - lower - 1)) + lower;
-            std::swap(_items[lower], _items[i]);
-
-            int median = (upper + lower) / 2;
-
-            // partitian around the median distance
-            std::nth_element(_items.begin() + lower + 1, _items.begin() + median, _items.begin() + upper,
-                             DistanceComparator(_items[lower]));
-
-            // what was the median?
-            node->threshold = distance(_items[lower], _items[median]);
-
-            node->index = lower;
-            node->left  = buildFromPoints(lower + 1, median);
-            node->right = buildFromPoints(median, upper);
-        }
-
-        return node;
-    }
-
-    void search(Node* node, const T& target, int k, std::priority_queue& heap) {
-        if (node == NULL)
-            return;
-
-        double dist = distance(_items[node->index], target);
-        // printf("dist=%g tau=%gn", dist, _tau );
-
-        if (dist < _tau) {
-            if (heap.size() == k)
-                heap.pop();
-            heap.push(HeapItem(node->index, dist));
-            if (heap.size() == k)
-                _tau = heap.top().dist;
-        }
-
-        if (node->left == NULL && node->right == NULL) {
-            return;
-        }
-
-        if (dist < node->threshold) {
-            if (dist - _tau <= node->threshold) {
-                search(node->left, target, k, heap);
-            }
-
-            if (dist + _tau >= node->threshold) {
-                search(node->right, target, k, heap);
-            }
-
-        } else {
-            if (dist + _tau >= node->threshold) {
-                search(node->right, target, k, heap);
-            }
-
-            if (dist - _tau <= node->threshold) {
-                search(node->left, target, k, heap);
-            }
-        }
+    double computeMu() {   // TODO FOR MORE DIMENSIONS
+    
+        double *sortedD = new double[len];
+        memcpy(sortedD, D, len * sizeof(double));
+        qsort(sortedD, len, sizeof(double), util::compare);             // TODO more efficient
+        mu = sortedD[(len - 1) / 2];
+        //prt::rowMajor(sortedD, 1, len);
+        return mu;
     }
 };
 
-#endif // __VPT_H__
+
+double* computeLeftChild(Node *parent) {
+    
+    int _len = (parent->len + 1) / 2;
+    double *_data = new double[_len];
+    int idx = 0;
+    for (int i = 0; i < parent->len; i++) {
+        if (parent->D[i] <= parent->mu)
+            _data[idx++] = parent->data[i];
+    }
+    //std::cout << "Left child:\t"; 
+    //prt::rowMajor(_data, 1, _len);
+    return _data;
+}
+
+double* computeRightChild(Node *parent) {
+    
+    int _len = parent->len - ((parent->len + 1) / 2);
+    double *_data = new double[_len];
+    int idx = 0;
+    for (int i = 0; i < parent->len; i++) {
+        if (parent->D[i] > parent->mu)
+            _data[idx++] = parent->data[i];
+    }
+    //std::cout << "Right child:\t"; 
+    //prt::rowMajor(_data, 1, _len);  
+    return _data;
+}
+
+
+class VPT {
+
+    public:
+
+    Node root;
+    std::vector<Node> tree;
+    
+    VPT() {
+        //std::cout << "VPT constructed\n";
+    }
+
+    VPT(Node root) {
+        this->root = root;
+        tree.push_back(this->root);
+    }
+
+    void createVPT() {
+
+        int len = -1;
+        int maxId = root.len * log2(root.len);
+        for (int i = 0; i < maxId; i++) {
+            len = tree[i].len;
+            if (len > 1) {
+                tree[i].leftIndex = tree.size();
+                tree[i].rightIndex = tree.size() + 1;
+                createChildren(tree[i], tree[i].len);
+            }
+        }
+    }
+
+    void createChildren(Node curNode, int len) {
+
+        int leftLen = (curNode.len + 1) / 2;
+        int rightLen = curNode.len - leftLen;
+        Node _left = Node(tree.size(), leftLen, computeLeftChild(&curNode), curNode.index);
+        tree.push_back(_left);
+        Node _right = Node(tree.size(), rightLen, computeRightChild(&curNode), curNode.index);
+        tree.push_back(_right);
+    }
+};

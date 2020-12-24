@@ -4,7 +4,7 @@
 #include "knn.hpp"
 #include "utils.hpp"
 #include "distributed.hpp"
-#include "vpt_v3.hpp"
+#include "vpt.hpp"
 
 
 int main() {
@@ -20,25 +20,20 @@ int main() {
 
     // struct knnresult ans = mpi::distrAllkNN(X, n, d, k);
 
-  double data[] = {14, 2, 50, 11, 8, 7};
-
-  Node root = Node(0, 6, data, -1);
+  double data[] = {14, 2, 50, 8, 11, 7};
+  int len = 6;
+  Node root = Node(0, len, data, -1);
 
   // std::cout << "mu = " << root.mu << std::endl;
 
   VPT t = VPT(root);
   t.createVPT();
 
-  // for(Node n : t.tree) {
-  //       std::cout << n.index << '\n';
-  // }
-
-  std::cout << "Root:\t\t";
-  prt::node(t.tree[0].data, t.tree[0].len);
-  std::cout << "Left child:\t";
-  prt::node(t.tree[1].data, t.tree[1].len);
-  std::cout << "Right child:\t";
-  prt::node(t.tree[2].data, t.tree[2].len);
+  for(Node n : t.tree) {
+    std::cout << "Node\t" << n.index << ":\t\t";
+    prt::node(n.data, n.len);
+    //std::cout << "parent = " << n.parentIndex << "\tleft = " << n.leftIndex << "\tright = " << n.rightIndex << std::endl;
+  }
 
   return 0;
 }
