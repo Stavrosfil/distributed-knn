@@ -31,9 +31,11 @@ int main() {
 
   for(Node n : t.tree) {
     std::cout << "Node\t" << n.index << ":\t\t";
-    prt::node(n.data, n.len);
-    //std::cout << "parent = " << n.parentIndex << "\tleft = " << n.leftIndex << "\tright = " << n.rightIndex << std::endl;
+    // prt::node(n.data, n.len);
+    std::cout << "parent = " << n.parentIndex << "\tleft = " << n.leftIndex << "\tright = " << n.rightIndex << "\tmu = " << n.mu << std::endl;
   }
+
+  // std::cout << t.searchLeaf(14) << std::endl;
 
   return 0;
 }

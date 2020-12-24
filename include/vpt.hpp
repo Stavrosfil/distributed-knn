@@ -127,4 +127,36 @@ class VPT {
         Node _right = Node(tree.size(), rightLen, computeRightChild(&curNode), curNode.index);
         tree.push_back(_right);
     }
+
+    int searchLeaf(double point) {                      // return the node index of the leaf that contains the point
+
+        int curNodeIdx = 0;
+        int _leftIdx;
+        int _rightIdx;
+        while ( !isLeaf(curNodeIdx) ) {
+            _leftIdx = tree[curNodeIdx].leftIndex;
+            _rightIdx = tree[curNodeIdx].rightIndex; 
+            if ( belongsToNode(point, tree[_leftIdx]) )
+                curNodeIdx = _leftIdx;
+            else
+                curNodeIdx = _rightIdx; 
+        }
+        return tree[curNodeIdx].index;
+    }
+
+    bool belongsToNode(double point, Node curNode) {
+
+        for (int i = 0; i < curNode.len; i++) {
+            if (curNode.data[i] == point)
+                return true;
+        }
+        return false;
+    }
+
+    bool isLeaf(int nodeIdx) {
+        if (tree[nodeIdx].leftIndex == -1)
+            return true;
+        else 
+            return false;
+    }
 };
