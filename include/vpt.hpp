@@ -54,10 +54,10 @@ class Node {
         qsort(sortedD, len, sizeof(double), util::compare);             // TODO more efficient
         mu = sortedD[(len - 1) / 2];
         //prt::rowMajor(sortedD, 1, len);
+        delete[] sortedD;
         return mu;
     }
-};
-
+};  // END OF NODE CLASS
 
 double* computeLeftChild(Node *parent) {
     
@@ -107,8 +107,9 @@ class VPT {
     void createVPT() {
 
         int len = -1;
-        int maxId = root.len * log2(root.len);
-        for (int i = 0; i < maxId; i++) {
+        int maxIdx = pow(2, (log2(root.len) + 1)) - 1;
+        // std::cout << "Max Idx = " << maxIdx << std::endl; 
+        for (int i = 0; i < maxIdx; i++) {
             len = tree[i].len;
             if (len > 1) {
                 tree[i].leftIndex = tree.size();
@@ -159,4 +160,4 @@ class VPT {
         else 
             return false;
     }
-};
+};  // END OF VPT CLASS
