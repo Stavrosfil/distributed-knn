@@ -20,8 +20,8 @@ int main() {
 
     // struct knnresult ans = mpi::distrAllkNN(X, n, d, k);
 
-  double data[] = {14, 2, 50, 8, 11, 7};
-  int len = 6;
+  double data[] = {14, 2, 50, 8, 11, 7, 19, 40};
+  int len = 8;
   Node root = Node(0, len, data, -1);
 
   // std::cout << "mu = " << root.mu << std::endl;
@@ -29,11 +29,18 @@ int main() {
   VPT t = VPT(root);
   t.createVPT();
 
+  // struct knnresult ans;
+
+  // t.vptKnn(ans, data, data[2], 0, 8, 1, 1, 1);
+
   for(Node n : t.tree) {
     std::cout << "Node\t" << n.index << ":\t\t";
     // prt::node(n.data, n.len);
     std::cout << "parent = " << n.parentIndex << "\tleft = " << n.leftIndex << "\tright = " << n.rightIndex << "\tmu = " << n.mu << std::endl;
   }
+
+ 
+  // std::cout <<  t.moveRight(t.tree[0].index) << std::endl;
 
   // std::cout << t.searchLeaf(14) << std::endl;
 

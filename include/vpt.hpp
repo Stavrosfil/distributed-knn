@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <cmath>
+#include "knn.hpp"
 
 class Node {
 
@@ -160,4 +161,22 @@ class VPT {
         else 
             return false;
     }
+
+    int moveUp(int curIndex) {
+        return tree[curIndex].parentIndex;
+    }
+
+    int moveLeft(int curIndex) {
+        return tree[curIndex].leftIndex;
+    }
+
+    int moveRight(int curIndex) {
+        return tree[curIndex].rightIndex;
+    }
+
+    // void vptKnn(knnresult res, double* X, double* y, int displacement, int n, int m, int d, int k) {
+
+    //     int leafIndex = searchLeaf(*y);
+    //     kNN(res, tree[leafIndex].data, y, displacement, tree[leafIndex].len, 1, 1, 1);
+    // }
 };  // END OF VPT CLASS
