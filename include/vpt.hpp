@@ -130,30 +130,30 @@ class VPT {
         tree.push_back(_right);
     }
 
-    int searchLeaf(double point) {                      // return the node index of the leaf that contains the point
+    // int searchLeaf(double point) {                      // return the node index of the leaf that contains the point
 
-        int curNodeIndex = 0;
-        int _leftIdx;
-        int _rightIdx;
-        while ( !isLeaf(curNodeIndex) ) {
-            _leftIdx = tree[curNodeIndex].leftIndex;
-            _rightIdx = tree[curNodeIndex].rightIndex; 
-            if ( belongsToNode(point, tree[_leftIdx]) )
-                curNodeIndex = _leftIdx;
-            else
-                curNodeIndex = _rightIdx; 
-        }
-        return tree[curNodeIndex].index;
-    }
+    //     int curNodeIndex = 0;
+    //     int _leftIdx;
+    //     int _rightIdx;
+    //     while ( !isLeaf(curNodeIndex) ) {
+    //         _leftIdx = tree[curNodeIndex].leftIndex;
+    //         _rightIdx = tree[curNodeIndex].rightIndex; 
+    //         if ( belongsToNode(point, tree[_leftIdx]) )
+    //             curNodeIndex = _leftIdx;
+    //         else
+    //             curNodeIndex = _rightIdx; 
+    //     }
+    //     return tree[curNodeIndex].index;
+    // }
 
-    bool belongsToNode(double point, Node curNode) {
+    // bool belongsToNode(double point, Node curNode) {
 
-        for (int i = 0; i < curNode.len; i++) {
-            if (curNode.data[i] == point)
-                return true;
-        }
-        return false;
-    }
+    //     for (int i = 0; i < curNode.len; i++) {
+    //         if (curNode.data[i] == point)
+    //             return true;
+    //     }
+    //     return false;
+    // }
 
     bool isLeaf(int nodeIdx) {
         if (tree[nodeIdx].leftIndex == -1)
