@@ -9,6 +9,7 @@
 
 int main() {
 
+    std::cout << std::endl;
     // const int n = 5;
     // const int d = 1;
     // const int k = 5;
@@ -22,6 +23,8 @@ int main() {
 
   double data[] = {14, 2, 50, 8, 11, 7, 19, 40};
   int len = 8;
+  int k = 2;
+  int d = 1;
   Node root = Node(0, len, data, -1);
 
   // std::cout << "mu = " << root.mu << std::endl;
@@ -29,20 +32,34 @@ int main() {
   VPT t = VPT(root);
   t.createVPT();
 
-  // struct knnresult ans;
+  knnresult _ans = knnresult();
+  _ans.m         = len;
+  _ans.k         = k;
+  _ans.nidx      = new int[_ans.m * _ans.k]();
+  _ans.ndist     = new double[_ans.m * _ans.k]();
 
-  // t.vptKnn(ans, data, data[2], 0, 8, 1, 1, 1);
+  for (int i = 0; i < _ans.m; i++) {
+      for (int j = 0; j < k; j++) {
+          _ans.ndist[i * k + j] = D_MAX;
+          _ans.nidx[i * k + j]  = -1;
+      }
+  }
+
+  double point = t.tree[0].data[0];
+  int leafIndex = t.searchLeaf(point);
+  
+  t.vptKnn(_ans, &point, leafIndex, 0, 1, d, k);
+
+  std::cout << "\n";
+  prt::rowMajor(_ans.ndist, 1, k);
+  std::cout << "\n";
 
   for(Node n : t.tree) {
     std::cout << "Node\t" << n.index << ":\t\t";
-    // prt::node(n.data, n.len);
-    std::cout << "parent = " << n.parentIndex << "\tleft = " << n.leftIndex << "\tright = " << n.rightIndex << "\tmu = " << n.mu << std::endl;
+    prt::node(n.data, n.len);
+    // std::cout << "parent = " << n.parentIndex << "\tleft = " << n.leftIndex << "\tright = " << n.rightIndex << "\tmu = " << n.mu << std::endl;
   }
-
- 
-  // std::cout <<  t.moveRight(t.tree[0].index) << std::endl;
-
-  // std::cout << t.searchLeaf(14) << std::endl;
-
+  std::cout << std::endl;
+  
   return 0;
 }

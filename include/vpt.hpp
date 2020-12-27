@@ -108,7 +108,7 @@ class VPT {
     void createVPT() {
 
         int len = -1;
-        int maxIdx = pow(2, (log2(root.len) + 1)) - 1;
+        int maxIdx = 2 * root.len - 1;
         // std::cout << "Max Idx = " << maxIdx << std::endl; 
         for (int i = 0; i < maxIdx; i++) {
             len = tree[i].len;
@@ -132,18 +132,18 @@ class VPT {
 
     int searchLeaf(double point) {                      // return the node index of the leaf that contains the point
 
-        int curNodeIdx = 0;
+        int curNodeIndex = 0;
         int _leftIdx;
         int _rightIdx;
-        while ( !isLeaf(curNodeIdx) ) {
-            _leftIdx = tree[curNodeIdx].leftIndex;
-            _rightIdx = tree[curNodeIdx].rightIndex; 
+        while ( !isLeaf(curNodeIndex) ) {
+            _leftIdx = tree[curNodeIndex].leftIndex;
+            _rightIdx = tree[curNodeIndex].rightIndex; 
             if ( belongsToNode(point, tree[_leftIdx]) )
-                curNodeIdx = _leftIdx;
+                curNodeIndex = _leftIdx;
             else
-                curNodeIdx = _rightIdx; 
+                curNodeIndex = _rightIdx; 
         }
-        return tree[curNodeIdx].index;
+        return tree[curNodeIndex].index;
     }
 
     bool belongsToNode(double point, Node curNode) {
@@ -162,21 +162,96 @@ class VPT {
             return false;
     }
 
-    int moveUp(int curIndex) {
-        return tree[curIndex].parentIndex;
+    int moveUp(int curNodeIndex) {
+        return tree[curNodeIndex].parentIndex;
     }
 
-    int moveLeft(int curIndex) {
-        return tree[curIndex].leftIndex;
+    int moveLeft(int curNodeIndex) {
+        return tree[curNodeIndex].leftIndex;
     }
 
-    int moveRight(int curIndex) {
-        return tree[curIndex].rightIndex;
+    int moveRight(int curNodeIndex) {
+        return tree[curNodeIndex].rightIndex;
     }
 
-    // void vptKnn(knnresult res, double* X, double* y, int displacement, int n, int m, int d, int k) {
+    void vptKnn(knnresult res, double* y, int leafIndex, int displacement, int m, int d, int k) {
 
-    //     int leafIndex = searchLeaf(*y);
-    //     kNN(res, tree[leafIndex].data, y, displacement, tree[leafIndex].len, 1, 1, 1);
+        int curNodeIndex = leafIndex;
+        int curNodeLen = tree[curNodeIndex].len;
+        double* tau = &res.ndist[k - 1];
+        // std::cout << *tau << std::endl;
+        kNN(res, tree[curNodeIndex].data, y, displacement, curNodeLen, m, d, k);
+
+        // if ( isLeftChild(curNodeIndex) ) {
+        //     if ( checkOutsideIntersection(*tree[curNodeIndex].vp, *y, tree[curNodeIndex].mu, *tau) ) {
+        //         std::cout << "Outside intersection" << std::endl;
+        //         curNodeIndex = moveRight(curNodeIndex);
+        //         curNodeLen = tree[curNodeIndex].len;
+        //         subtreeKnn(res, *y, displacement, m, d, k, curNodeIndex, *tau);
+        //     }  
+        // }
+        // else if ( isRightChild(curNodeIndex) ) {
+        //     if ( checkInsideIntersection(*tree[curNodeIndex].vp, *y, tree[curNodeIndex].mu, *tau) ) {
+        //         std::cout << "Inside intersection" << std::endl;
+        //         curNodeIndex = moveLeft(curNodeIndex);
+        //         curNodeLen = tree[curNodeIndex].len;
+        //         subtreeKnn(res, *y, displacement, m, d, k, curNodeIndex, *tau);
+        //     }
+        // }
+        // // kNN(res, tree[curNodeIndex].data, y, displacement, curNodeLen, m, d, k);  
+    }
+
+    // void subtreeKnn(knnresult res, double y, int displacement, int m, int d, int k, int curNodeIndex, double tau) {
+
+    //     curNodeIndex = moveRight(curNodeIndex);
+    //     while ( !isLeaf(curNodeIndex) ) {
+    //         if ( checkInsideIntersection(*tree[curNodeIndex].vp, y, tree[curNodeIndex].mu, tau) ) {
+    //             curNodeIndex = moveLeft(curNodeIndex);
+    //         }
+    //         else if ( checkOutsideIntersection(*tree[curNodeIndex].vp, y, tree[curNodeIndex].mu, tau) ) {
+    //             curNodeIndex = moveRight(curNodeIndex);
+    //         }
+    //     }
+    //     vptKnn(res, &y, curNodeIndex, displacement, m, d, k);
     // }
+
+    bool checkInsideIntersection(double vp, double y, double mu, double tau) {
+
+        double dist;
+        util::computeEuclideanDistance(&vp, &y, &dist, 1, 1, 1);
+        if (dist < mu + tau)
+            return true;
+        
+        return false;
+    }
+
+    bool checkOutsideIntersection(double vp, double y, double mu, double tau) {
+
+        double dist;
+        util::computeEuclideanDistance(&vp, &y, &dist, 1, 1, 1);
+        if (dist > mu - tau)
+            return true;
+        
+        return false;
+    }
+
+    bool isLeftChild(int curNodeIndex) {
+
+        if (curNodeIndex == 0)
+            return false;
+        if (tree[tree[curNodeIndex].parentIndex].leftIndex == curNodeIndex)
+            return true;
+        
+        return false;
+    }
+
+    bool isRightChild(int curNodeIndex) {
+        
+        if (curNodeIndex == 0)
+            return false;
+        if (tree[tree[curNodeIndex].parentIndex].rightIndex == curNodeIndex)
+            return true;
+        
+        return false;
+    }
 };  // END OF VPT CLASS
