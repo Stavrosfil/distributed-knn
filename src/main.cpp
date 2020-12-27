@@ -25,6 +25,8 @@ int main() {
   int len = 8;
   int k = 2;
   int d = 1;
+  double queryPoints = 19;
+  int m = 1;
   Node root = Node(0, len, data, -1);
 
   // std::cout << "mu = " << root.mu << std::endl;
@@ -33,7 +35,7 @@ int main() {
   t.createVPT();
 
   knnresult _ans = knnresult();
-  _ans.m         = len;
+  _ans.m         = m;
   _ans.k         = k;
   _ans.nidx      = new int[_ans.m * _ans.k]();
   _ans.ndist     = new double[_ans.m * _ans.k]();
@@ -44,13 +46,10 @@ int main() {
           _ans.nidx[i * k + j]  = -1;
       }
   }
-
-  double point = t.tree[0].data[0];
-  int leafIndex = t.searchLeaf(point);
   
-  t.vptKnn(_ans, &point, leafIndex, 0, 1, d, k);
+  t.vptKnn(_ans, &queryPoints, 0, _ans.m, d, k);
 
-  std::cout << "\n";
+  std::cout << "\nkNN ndist: ";
   prt::rowMajor(_ans.ndist, 1, k);
   std::cout << "\n";
 

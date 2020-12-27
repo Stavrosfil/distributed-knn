@@ -174,48 +174,59 @@ class VPT {
         return tree[curNodeIndex].rightIndex;
     }
 
-    void vptKnn(knnresult res, double* y, int leafIndex, int displacement, int m, int d, int k) {
+    void vptKnn(knnresult res, double* y, int displacement, int m, int d, int k) {
 
-        int curNodeIndex = leafIndex;
-        int curNodeLen = tree[curNodeIndex].len;
+        // for i = 0 -> i < m
+        int curNodeIndex = tree[0].index;
+        int curNodeLen = tree[0].len;
         double* tau = &res.ndist[k - 1];
         // std::cout << *tau << std::endl;
-        kNN(res, tree[curNodeIndex].data, y, displacement, curNodeLen, m, d, k);
 
-        // if ( isLeftChild(curNodeIndex) ) {
-        //     if ( checkOutsideIntersection(*tree[curNodeIndex].vp, *y, tree[curNodeIndex].mu, *tau) ) {
-        //         std::cout << "Outside intersection" << std::endl;
-        //         curNodeIndex = moveRight(curNodeIndex);
-        //         curNodeLen = tree[curNodeIndex].len;
-        //         subtreeKnn(res, *y, displacement, m, d, k, curNodeIndex, *tau);
-        //     }  
-        // }
-        // else if ( isRightChild(curNodeIndex) ) {
-        //     if ( checkInsideIntersection(*tree[curNodeIndex].vp, *y, tree[curNodeIndex].mu, *tau) ) {
-        //         std::cout << "Inside intersection" << std::endl;
-        //         curNodeIndex = moveLeft(curNodeIndex);
-        //         curNodeLen = tree[curNodeIndex].len;
-        //         subtreeKnn(res, *y, displacement, m, d, k, curNodeIndex, *tau);
-        //     }
-        // }
-        // // kNN(res, tree[curNodeIndex].data, y, displacement, curNodeLen, m, d, k);  
+        if ( checkInside(*tree[curNodeIndex].vp, *y, tree[curNodeIndex].mu, *tau) ) {
+            searchLeftSubtree(res, curNodeIndex, *y, *tau, displacement, d, k);
+        }
+        if ( checkOutside(*tree[curNodeIndex].vp, *y, tree[curNodeIndex].mu, *tau) ) {
+            searchRightSubtree(res, curNodeIndex, *y, *tau, displacement, d, k);
+        }
     }
 
-    // void subtreeKnn(knnresult res, double y, int displacement, int m, int d, int k, int curNodeIndex, double tau) {
+    void searchLeftSubtree(knnresult res, int curNodeIndex, double y, double tau, int displacement, int d, int k) {
 
-    //     curNodeIndex = moveRight(curNodeIndex);
-    //     while ( !isLeaf(curNodeIndex) ) {
-    //         if ( checkInsideIntersection(*tree[curNodeIndex].vp, y, tree[curNodeIndex].mu, tau) ) {
-    //             curNodeIndex = moveLeft(curNodeIndex);
-    //         }
-    //         else if ( checkOutsideIntersection(*tree[curNodeIndex].vp, y, tree[curNodeIndex].mu, tau) ) {
-    //             curNodeIndex = moveRight(curNodeIndex);
-    //         }
-    //     }
-    //     vptKnn(res, &y, curNodeIndex, displacement, m, d, k);
-    // }
+        std::cout << "Node " << curNodeIndex << " inside condition = " << checkInside(*tree[curNodeIndex].vp, y, tree[curNodeIndex].mu, tau) << " -> search left subtree\n";
+        curNodeIndex = moveLeft(curNodeIndex);
+        if ( isLeaf(curNodeIndex) ) {
+            std::cout << "Reached node " << curNodeIndex << std::endl << std::endl;
+            kNN(res, tree[curNodeIndex].data, &y, displacement, tree[curNodeIndex].len, 1, d, k);
+        }
+        else {
+            if ( checkInside(*tree[curNodeIndex].vp, y, tree[curNodeIndex].mu, tau) ) {
+                searchLeftSubtree(res, curNodeIndex, y, tau, displacement, d, k);
+            }
+            if ( checkOutside(*tree[curNodeIndex].vp, y, tree[curNodeIndex].mu, tau) ) {
+                searchRightSubtree(res, curNodeIndex, y, tau, displacement, d, k);
+            }
+        }
+    }
 
-    bool checkInsideIntersection(double vp, double y, double mu, double tau) {
+    void searchRightSubtree(knnresult res, int curNodeIndex, double y, double tau, int displacement, int d, int k) {
+
+        std::cout << "Node " << curNodeIndex << " outside condition = " << checkOutside(*tree[curNodeIndex].vp, y, tree[curNodeIndex].mu, tau) << " -> search right subtree\n";
+        curNodeIndex = moveRight(curNodeIndex);
+        if ( isLeaf(curNodeIndex) ) {
+            std::cout << "Reached node " << curNodeIndex << std::endl << std::endl;
+            kNN(res, tree[curNodeIndex].data, &y, displacement, tree[curNodeIndex].len, 1, d, k);
+        }
+        else {
+            if ( checkInside(*tree[curNodeIndex].vp, y, tree[curNodeIndex].mu, tau) ) {
+                searchLeftSubtree(res, curNodeIndex, y, tau, displacement, d, k);
+            }
+            if ( checkOutside(*tree[curNodeIndex].vp, y, tree[curNodeIndex].mu, tau) ) {
+                searchRightSubtree(res, curNodeIndex, y, tau, displacement, d, k);
+            }
+        }
+    }
+
+    bool checkInside(double vp, double y, double mu, double tau) {
 
         double dist;
         util::computeEuclideanDistance(&vp, &y, &dist, 1, 1, 1);
@@ -225,7 +236,7 @@ class VPT {
         return false;
     }
 
-    bool checkOutsideIntersection(double vp, double y, double mu, double tau) {
+    bool checkOutside(double vp, double y, double mu, double tau) {
 
         double dist;
         util::computeEuclideanDistance(&vp, &y, &dist, 1, 1, 1);
@@ -235,23 +246,23 @@ class VPT {
         return false;
     }
 
-    bool isLeftChild(int curNodeIndex) {
+    // bool isLeftChild(int curNodeIndex) {
 
-        if (curNodeIndex == 0)
-            return false;
-        if (tree[tree[curNodeIndex].parentIndex].leftIndex == curNodeIndex)
-            return true;
+    //     if (curNodeIndex == 0)
+    //         return false;
+    //     if (tree[tree[curNodeIndex].parentIndex].leftIndex == curNodeIndex)
+    //         return true;
         
-        return false;
-    }
+    //     return false;
+    // }
 
-    bool isRightChild(int curNodeIndex) {
+    // bool isRightChild(int curNodeIndex) {
         
-        if (curNodeIndex == 0)
-            return false;
-        if (tree[tree[curNodeIndex].parentIndex].rightIndex == curNodeIndex)
-            return true;
+    //     if (curNodeIndex == 0)
+    //         return false;
+    //     if (tree[tree[curNodeIndex].parentIndex].rightIndex == curNodeIndex)
+    //         return true;
         
-        return false;
-    }
+    //     return false;
+    // }
 };  // END OF VPT CLASS
