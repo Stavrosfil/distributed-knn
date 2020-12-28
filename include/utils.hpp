@@ -32,7 +32,7 @@ void rowMajor(std::pair<double, int>* a, int n, int m) {
 
 void node(double* data, int len) {
     for (int i = 0; i < len; i++) {
-        std::cout << data[i] << "\t"; 
+        std::cout << data[i] << "\t";
     }
     std::cout << std::endl;
 }
@@ -88,8 +88,8 @@ void computeEuclideanDistance(double* X, double* Y, double* D, int n, int m, int
     }
 }
 
-int compare (const void * a, const void * b) {
-    return ( *(double*)a - *(double*)b );
+int compare(const void* a, const void* b) {
+    return (*(double*)a - *(double*)b);
 }
 
 } // namespace util
