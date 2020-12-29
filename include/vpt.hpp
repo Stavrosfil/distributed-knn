@@ -1,91 +1,99 @@
 #include <iostream>
 #include <stdio.h>
 #include <cmath>
+#include <array>
+#include <vector>
+
 #include "knn.hpp"
+
+class Point {
+
+  public:
+    int index;
+    double* coords;
+
+    Point(int d) {
+        coords = new double[d];
+    }
+
+    Point(double* d) {
+        coords = d;
+    }
+
+    ~Point() {
+        delete coords;
+    }
+};
 
 class Node {
 
   public:
-    int index       = -1;
-    int len         = 0;
-    double* data    = {};
-    double vp       = -1;
-    double* D       = {};
-    double mu       = -1;
-    int parentIndex = -1;
-    int leftIndex   = -1;
-    int rightIndex  = -1;
+    int vpIndex;
+    double mu;
+    Node* left;
+    Node* right;
 
-    Node() {}
-    Node(int index, int len, double* data, int parentIndex)
-        : index(index), len(len), data(data), parentIndex(parentIndex), vp(*data) {
-        D = new double[len];
-        computeDistances();
+    Node() : vpIndex(0), mu(0.), left(0), right(0) {}
+
+    ~Node() {
+        delete left;
+        delete right;
     }
-
-    void computeDistances() {
-        util::computeEuclideanDistance(data, &vp, D, len, 1, 1);
-        this->mu          = computeMu();
-        this->parentIndex = parentIndex;
-        this->leftIndex   = -1;
-        this->rightIndex  = -1;
-    }
-
-    double computeMu() { // TODO FOR MORE DIMENSIONS
-
-        double* sortedD = new double[len];
-        memcpy(sortedD, D, len * sizeof(double));
-        qsort(sortedD, len, sizeof(double), util::compare); // TODO more efficient
-        mu = sortedD[(len - 1) / 2];
-        // prt::rowMajor(sortedD, 1, len);
-        delete[] sortedD;
-        return mu;
-    }
-
-}; // END OF NODE CLASS
-
-double* computeLeftChild(Node* parent) {
-
-    int _len      = (parent->len + 1) / 2;
-    double* _data = new double[_len];
-    int idx       = 0;
-    for (int i = 0; i < parent->len; i++) {
-        if (parent->D[i] <= parent->mu)
-            _data[idx++] = parent->data[i];
-    }
-    // std::cout << "Left child:\t";
-    // prt::rowMajor(_data, 1, _len);
-    return _data;
-}
-
-double* computeRightChild(Node* parent) {
-
-    int _len      = parent->len - ((parent->len + 1) / 2);
-    double* _data = new double[_len];
-    int idx       = 0;
-    for (int i = 0; i < parent->len; i++) {
-        if (parent->D[i] > parent->mu)
-            _data[idx++] = parent->data[i];
-    }
-    // std::cout << "Right child:\t";
-    // prt::rowMajor(_data, 1, _len);
-    return _data;
-}
+};
 
 class VPT {
 
   public:
-    Node root;
-    std::vector<Node> tree;
+    // double* D                 = {};
+    Node* root;
+    std::vector<double> D     = {};
+    std::vector<Point> points = {};
+    int d                     = 1;
 
-    VPT() {
-        // std::cout << "VPT constructed\n";
+    VPT(int d) : d(d) {}
+
+    void computeDistances() {
+        util::computeEuclideanDistance(data, &vp, D.data(), len, 1, 1);
     }
 
-    VPT(Node root) {
-        this->root = root;
-        tree.push_back(this->root);
+    // Partition and construct tree from X[lo:hi]
+    Node* buildTree(int lo, int hi) {
+
+        if (lo == hi)
+            return NULL;
+
+        Node* node    = new Node();
+        node->vpIndex = lo;
+
+        if (hi - lo > 1) {
+
+            int median = (hi + lo) / 2;
+
+            std::nth_element(points.begin() + lo, points.begin() + median, points.begin() + hi + 1,
+                             distanceFromVP(node->vpIndex));
+        }
     }
+
+    struct distanceFromVP {
+        // Point* p;
+        // distanceFromVP(int index) {
+        //     p = new Point(index);
+        // }
+        bool operator()(Point* p1, Point* p2) {
+            return D[p1->index];
+        }
+    };
+
+    // double computeMu() {
+
+    //     double* sortedD = new double[len];
+    //     memcpy(sortedD, D, len * sizeof(double));
+    //     qsort(sortedD, len, sizeof(double), util::compare); // TODO more efficient
+    //     mu = sortedD[(len - 1) / 2];
+    //     // prt::rowMajor(sortedD, 1, len);
+    //     delete[] sortedD;
+    //     return mu;
+    // }
 
     void createVPT() {
 
@@ -112,31 +120,6 @@ class VPT {
         Node _right = Node(tree.size(), rightLen, computeRightChild(&curNode), curNode.index);
         tree.push_back(_right);
     }
-
-    // int searchLeaf(double point) {                      // return the node index of the leaf that contains the point
-
-    //     int curNodeIndex = 0;
-    //     int _leftIdx;
-    //     int _rightIdx;
-    //     while ( !isLeaf(curNodeIndex) ) {
-    //         _leftIdx = tree[curNodeIndex].leftIndex;
-    //         _rightIdx = tree[curNodeIndex].rightIndex;
-    //         if ( belongsToNode(point, tree[_leftIdx]) )
-    //             curNodeIndex = _leftIdx;
-    //         else
-    //             curNodeIndex = _rightIdx;
-    //     }
-    //     return tree[curNodeIndex].index;
-    // }
-
-    // bool belongsToNode(double point, Node curNode) {
-
-    //     for (int i = 0; i < curNode.len; i++) {
-    //         if (curNode.data[i] == point)
-    //             return true;
-    //     }
-    //     return false;
-    // }
 
     bool isLeaf(int nodeIdx) {
         if (tree[nodeIdx].leftIndex == -1)
@@ -231,6 +214,31 @@ class VPT {
         return false;
     }
 
+    // int searchLeaf(double point) {                      // return the node index of the leaf that contains the point
+
+    //     int curNodeIndex = 0;
+    //     int _leftIdx;
+    //     int _rightIdx;
+    //     while ( !isLeaf(curNodeIndex) ) {
+    //         _leftIdx = tree[curNodeIndex].leftIndex;
+    //         _rightIdx = tree[curNodeIndex].rightIndex;
+    //         if ( belongsToNode(point, tree[_leftIdx]) )
+    //             curNodeIndex = _leftIdx;
+    //         else
+    //             curNodeIndex = _rightIdx;
+    //     }
+    //     return tree[curNodeIndex].index;
+    // }
+
+    // bool belongsToNode(double point, Node curNode) {
+
+    //     for (int i = 0; i < curNode.len; i++) {
+    //         if (curNode.data[i] == point)
+    //             return true;
+    //     }
+    //     return false;
+    // }
+
     // bool isLeftChild(int curNodeIndex) {
 
     //     if (curNodeIndex == 0)
@@ -251,3 +259,31 @@ class VPT {
     //     return false;
     // }
 }; // END OF VPT CLASS
+
+double* computeLeftChild(Node* parent) {
+
+    int _len      = (parent->len + 1) / 2;
+    double* _data = new double[_len];
+    int idx       = 0;
+    for (int i = 0; i < parent->len; i++) {
+        if (parent->D[i] <= parent->mu)
+            _data[idx++] = parent->data[i];
+    }
+    // std::cout << "Left child:\t";
+    // prt::rowMajor(_data, 1, _len);
+    return _data;
+}
+
+double* computeRightChild(Node* parent) {
+
+    int _len      = parent->len - ((parent->len + 1) / 2);
+    double* _data = new double[_len];
+    int idx       = 0;
+    for (int i = 0; i < parent->len; i++) {
+        if (parent->D[i] > parent->mu)
+            _data[idx++] = parent->data[i];
+    }
+    // std::cout << "Right child:\t";
+    // prt::rowMajor(_data, 1, _len);
+    return _data;
+}
