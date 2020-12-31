@@ -40,26 +40,23 @@ double distance(Point& p1, Point& p2) {
 class VPT {
 
   public:
-    std::vector<Point> _points = {};
-    std::vector<Node> _nodes   = {};
-    int b                      = 0;
+    std::vector<Point>& _points;
+    std::vector<Node> _nodes;
+    int b = 0;
 
-    VPT(std::vector<Point> points) : _points(points) {}
+    VPT(std::vector<Point>& points) : _points(points) {}
 
     // Partition and construct tree from _points[lo:hi]
     // lo and hi are indices of corpus array
     int buildTree(int lo, int hi) {
 
-        if (lo == hi)
-            return -1;
-
         Node node;
         node.vpIndex = lo;
 
         int n = hi - (lo + 1);
-        if (n > 2 * b + 1 || b == 0) {
+        if (n >= 2 * b + 2) {
             int median      = (hi + lo) % 2 == 0 ? (hi + lo) / 2 : (hi + lo + 1) / 2;
-            node.mu         = computeMu(lo + 1, median, hi);
+            node.mu         = computeMu(lo, median, hi);
             node.leftIndex  = buildTree(lo + 1, median);
             node.rightIndex = buildTree(median, hi);
         } else {
