@@ -22,30 +22,37 @@ int main() {
 
     // double data[]      = {14, 2, 50, 8, 11, 7, 19, 40};
     double data[]      = {100, 80, 70, 60, 40, 35, 200, 500};
-    int len            = 8;
     int k              = 2;
     int d              = 1;
+    int len            = 8;
     double queryPoints = 19;
     int m              = 1;
     // Node root          = Node(0, len, data, -1);
 
     std::vector<Point> X;
+
     for (int i = 0; i < len; i += d) {
+
         double* coords = new double[d];
-        for (int j = 0; j < d; j++) {
+
+        for (int j = 0; j < d; j++)
             coords[j] = data[i + j];
-        }
+
         X.push_back(Point(i, coords, d));
     }
 
     VPT vpt(X);
     std::cout << vpt.buildTree(0, X.size()) << std::endl;
 
-    std::cout << vpt._nodes.size() << std::endl;
     int cnt = 0;
-    for (auto i : vpt._nodes) {
-        std::cout << cnt++ << ": " << data[i.vpIndex] << "\t"
-                  << "mu: " << i.mu << "\t(" << i.leftIndex << ", " << i.rightIndex << ")" << std::endl;
+    for (auto p : vpt._nodes) {
+        std::cout << cnt++ << ": " << X[p.vpIndex].coords[0] << "\t"
+                  << "mu: " << p.mu << "\t(" << p.leftIndex << ", " << p.rightIndex << ")" << std::endl;
+        if (p.points_len) {
+            for (int j = 0; j < p.points_len; j++) {
+                std::cout << p.points[j].coords[0] << std::endl;
+            }
+        }
         // std::cout << i.vpIndex << std::endl;
     }
 
