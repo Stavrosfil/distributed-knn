@@ -29,6 +29,19 @@ int main() {
     int m              = 1;
     // Node root          = Node(0, len, data, -1);
 
+    knnresult _ans = knnresult();
+    _ans.m         = m;
+    _ans.k         = k;
+    _ans.nidx      = new int[_ans.m * _ans.k]();
+    _ans.ndist     = new double[_ans.m * _ans.k]();
+
+  for (int i = 0; i < _ans.m; i++) {
+      for (int j = 0; j < k; j++) {
+          _ans.ndist[i * k + j] = D_MAX;
+          _ans.nidx[i * k + j]  = -1;
+      }
+  }
+
     std::vector<Point> X;
 
     for (int i = 0; i < len; i += d) {
@@ -48,7 +61,7 @@ int main() {
     int cnt = 0;
     for (auto p : vpt._nodes) {
         std::cout << cnt++ << ": " << X[p.vpIndex].coords[0] << "\t"
-                  << "mu: " << p.mu << "\t(" << p.leftIndex << ", " << p.rightIndex << ")" << std::endl;
+                  << "mu: " << p.mu << "\t(" << p.leftIndex << ", " << p.rightIndex << ", " << p.parentIndex << ")" << std::endl;
         if (p.points_len) {
             for (int j = 0; j < p.points_len; j++) {
                 std::cout << p.points[j].coords[0] << std::endl;
@@ -57,11 +70,22 @@ int main() {
         // std::cout << i.vpIndex << std::endl;
     }
 
+    double* coords = new double[1];
+    coords[0] = 42;
+    Point p = Point(10, coords, 1);
+
+    std::cout << std::endl << vpt.searchLeaf(p, _ans, k) << std::endl;
+
+    std::cout << "\nkNN ndist: ";
+    prt::rowMajor(_ans.ndist, 1, k);
+    std::cout << "\n";
+
     // for (auto i : X) {
     //     std::cout << i.coords[0] << std::endl;
     // }
 
     // std::cout << "mu = " << root.mu << std::endl;
+    std::cout << std::endl;
 
     return 0;
 }

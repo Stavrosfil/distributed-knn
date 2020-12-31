@@ -17,6 +17,7 @@ class Node {
 
   public:
     int vpIndex;
+    int parentIndex;
     int leftIndex;
     int rightIndex;
     Point* points;
@@ -24,5 +25,5 @@ class Node {
 
     double mu;
 
-    Node() : vpIndex(-1), leftIndex(-1), rightIndex(-1), mu(-1.), points(nullptr), points_len(0) {}
+    Node() : vpIndex(-1), parentIndex(-1), leftIndex(-1), rightIndex(-1), mu(-1.), points(nullptr), points_len(0) {}
 };

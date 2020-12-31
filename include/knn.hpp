@@ -25,7 +25,7 @@ struct less_than_key {
     }
 };
 
-void kNN(knnresult res, double* X, double* Y, int displacement, int n, int m, int d, int k) {
+void kNN(knnresult &res, double* X, double* Y, int displacement, int n, int m, int d, int k) {
 
     double* D = new double[n * m];
 
