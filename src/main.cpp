@@ -20,8 +20,8 @@ int main() {
 
     // struct knnresult ans = mpi::distrAllkNN(X, n, d, k);
 
-    // double data[]      = {14, 2, 50, 8, 11, 7, 19, 40};
-    double data[]      = {100, 80, 70, 60, 40, 35, 200, 500};
+    double data[]      = {14, 2, 50, 8, 11, 7, 19, 40};
+    // double data[]      = {100, 80, 70, 60, 40, 35, 200, 500};
     int k              = 2;
     int d              = 1;
     int len            = 8;
@@ -42,7 +42,8 @@ int main() {
     }
 
     VPT vpt(X);
-    std::cout << vpt.buildTree(0, X.size()) << std::endl;
+    vpt.buildTree(0, X.size());
+    // std::cout << vpt.buildTree(0, X.size()) << std::endl;
 
     int cnt = 0;
     for (auto p : vpt._nodes) {

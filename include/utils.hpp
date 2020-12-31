@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <stdlib.h>
+#include "node.hpp"
 
 namespace prt {
 
@@ -29,6 +30,17 @@ void rowMajor(std::pair<double, int>* a, int n, int m) {
         std::cout << std::endl;
     }
 }
+
+void points(std::vector<Point> _points) {
+    for (int i = 0; i < _points.size(); i++) {
+        std::cout << "( ";
+        for (int j = 0; j < _points[0].d; j++)
+            std::cout << _points[i].coords[j] << " ";
+        std::cout << ") ";
+    }
+    std::cout << std::endl << std::endl;
+}
+
 
 } // namespace prt
 
@@ -79,6 +91,12 @@ void computeEuclideanDistance(double* X, double* Y, double* D, int n, int m, int
             D[i * m + j] = sqrt(D[i * m + j] + XH[i] + YH[j]);
         }
     }
+}
+
+double distance(Point& p1, Point& p2) {
+    double* D = new double[1];
+    util::computeEuclideanDistance(p1.coords, p2.coords, D, 1, 1, p1.d);
+    return D[0];
 }
 
 } // namespace util
