@@ -13,21 +13,33 @@
 
 #include "utils.hpp"
 
-struct HeapItem {
-    double dist;
-    const Point& point;
-    HeapItem(const Point& p, double dist) : point(p), dist(dist) {}
-    bool operator<(const HeapItem& o) const
+struct CustomCompare {
+    bool operator()(const std::pair<double, Point>& lhs, const std::pair<double, Point>& rhs)
     {
-        return dist < o.dist;
-    }
-    bool operator=(const HeapItem& o)
-    {
-        // dist  = o.dist;
-        // point = o.point;
-        return this;
+        return lhs.first < rhs.first;
     }
 };
+
+// struct HeapItem {
+//     double dist;
+//     const Point& point;
+//     HeapItem(const Point& p, double dist) : point(p), dist(dist) {}
+//     bool operator<(const HeapItem& o) const
+//     {
+//         return dist < o.dist;
+//     }
+//     // ~HeapItem() {}
+//     // HeapItem* operator=(const HeapItem& o)
+//     // {
+//     // dist  = o.dist;
+//     // point = o.point;
+//     // return this;
+//     // }
+//     HeapItem& operator=(const HeapItem&)
+//     {
+//         return *this;
+//     }
+// };
 
 typedef struct knnresult {
     int* nidx;     //!< Indices (0-based) of nearest neighbors [m-by-k]
@@ -72,17 +84,22 @@ void kNN(knnresult& res, double* X, double* Y, int displacement, int n, int m, i
     }
 }
 
-void updateKNN(std::priority_queue<HeapItem>& heap, Point& p, int k)
+void updateKNN(
+    std::priority_queue<std::pair<double, Point>, std::vector<std::pair<double, Point>>, CustomCompare>& heap,
+    Point& queryPoint,
+    Point& corpusPoint,
+    int k)
 {
-    double dist = util::distance(p, heap.top().point);
+    double dist = util::distance(queryPoint, corpusPoint);
+    std::cout << "Size:\t" << heap.size() << std::endl;
     if (heap.size() == k) {
-        if (dist < heap.top().dist) {
+        if (dist < heap.top().first) {
             heap.pop();
-            heap.push(HeapItem(p, dist));
+            heap.push(std::make_pair(dist, corpusPoint));
         }
     }
     else {
-        heap.push(HeapItem(p, dist));
+        heap.push(std::make_pair(dist, corpusPoint));
     }
 }
 

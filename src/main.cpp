@@ -21,13 +21,12 @@ int main()
 
     // struct knnresult ans = mpi::distrAllkNN(X, n, d, k);
 
-    double data[] = {14, 2, 50, 8, 11, 7, 19, 40};
     // double data[]      = {100, 80, 70, 60, 40, 35, 200, 500};
-    int k              = 3;
-    int d              = 1;
-    int len            = 8;
-    double queryPoints = 19;
-    int m              = 1;
+    double data[] = {14, 2, 50, 8, 11, 7, 19, 40};
+    int k         = 3;
+    int d         = 1;
+    int len       = 8;
+    int m         = 1;
 
     knnresult _ans = knnresult();
     _ans.m         = m;
@@ -75,8 +74,8 @@ int main()
     std::cout << std::endl;
 
     double* coords = new double[1];
-    coords[0]      = 9;
-    Point p        = Point(10, coords, 1);
+    coords[0]      = 42;
+    Point p        = Point(-1, coords, 1);
 
     /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ VPT kNN ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 

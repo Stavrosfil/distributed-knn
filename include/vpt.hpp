@@ -22,9 +22,7 @@ struct distanceFromVP {
 class VPT {
 
   public:
-    std::vector<Point>& _points;
     std::vector<Node> _nodes;
-    int b = 0;
 
     VPT(std::vector<Point>& points) : _points(points) {}
 
@@ -56,29 +54,36 @@ class VPT {
         return _nodes.size() - 1;
     }
 
-    void vptKnn(Point& p, knnresult& _res)
+    void vptKnn(Point& p, knnresult& ans)
     {
-        int leafIndex = searchLeaf(p, _res, _nodes.size() - 1);
-        leafKNN(p, _nodes[leafIndex], _res);
-        climbVPT(p, leafIndex, _res);
+        // heap.push(HeapItem(_points[0], util::distance(p, _points[0])));
+        k             = ans.k;
+        int leafIndex = searchLeaf(p, _nodes.size() - 1);
+        leafKNN(p, _nodes[leafIndex]);
+        climbVPT(p, leafIndex);
+
+        for (int i = 0; i < k; i++) {
+            ans.ndist[k - i - 1] = heap.top().first;
+            ans.nidx[k - i - 1]  = heap.top().second.index;
+            heap.pop();
+        }
     }
 
   private:
+    int k = 3;
+    int b = 0;
     double tau;
+    knnresult& ans();
+    std::vector<Point>& _points;
 
-    int searchLeaf(Point& p, knnresult& res, int rootIndex)
+    std::priority_queue<std::pair<double, Point>, std::vector<std::pair<double, Point>>, CustomCompare> heap;
+
+    int searchLeaf(Point& p, int rootIndex)
     {
         int curNodeIndex = rootIndex;
         while (!isLeaf(_nodes[curNodeIndex])) {
 
-            kNN(res,
-                _points[_nodes[curNodeIndex].vpIndex].coords,
-                p.coords,
-                _points[_nodes[curNodeIndex].vpIndex].index,
-                1,
-                1,
-                p.d,
-                res.k);
+            updateKNN(heap, p, _points[_nodes[curNodeIndex].vpIndex], k);
 
             double dist = util::distance(p, _points[_nodes[curNodeIndex].vpIndex]);
             if (dist < _nodes[curNodeIndex].mu)
@@ -87,14 +92,7 @@ class VPT {
                 curNodeIndex = moveRight(curNodeIndex);
         }
 
-        kNN(res,
-            _points[_nodes[curNodeIndex].vpIndex].coords,
-            p.coords,
-            _points[_nodes[curNodeIndex].vpIndex].index,
-            1,
-            1,
-            p.d,
-            res.k);
+        updateKNN(heap, p, _points[_nodes[curNodeIndex].vpIndex], k);
 
         std::cout << "Leaf vp = " << _points[_nodes[curNodeIndex].vpIndex].coords[0] << std::endl;
         return curNodeIndex;
@@ -109,29 +107,29 @@ class VPT {
         return util::distance(_points[lo], _points[median]);
     }
 
-    void climbVPT(Point& p, int curNodeIndex, knnresult& res)
+    void climbVPT(Point& p, int curNodeIndex)
     { // curNodeIndex = leaf index
         do {
             if (isLeftChild(curNodeIndex)) {
                 curNodeIndex = moveUp(curNodeIndex);
-                if (checkOutside(p, _nodes[curNodeIndex], res.ndist[res.k - 1])) {
-                    searchSubtree(p, moveRight(curNodeIndex), res);
+                if (checkOutside(p, _nodes[curNodeIndex], heap.top().first)) {
+                    searchSubtree(p, moveRight(curNodeIndex));
                 }
             }
             else if (isRightChild(curNodeIndex)) {
                 curNodeIndex = moveUp(curNodeIndex);
-                if (checkInside(p, _nodes[curNodeIndex], res.ndist[res.k - 1])) {
-                    searchSubtree(p, moveLeft(curNodeIndex), res);
+                if (checkInside(p, _nodes[curNodeIndex], heap.top().first)) {
+                    searchSubtree(p, moveLeft(curNodeIndex));
                 }
             }
         } while (curNodeIndex != _nodes.size() - 1);
     }
 
-    void leafKNN(Point& p, Node& curNode, knnresult& res)
+    void leafKNN(Point& p, Node& curNode)
     {
         if (isLeaf(curNode)) { // TODO remove if
             for (int i = 0; i < curNode.points_len; i++) {
-                kNN(res, curNode.points[i].coords, p.coords, curNode.points[i].index, 1, 1, p.d, res.k);
+                updateKNN(heap, p, curNode.points[i], k);
             }
         }
     }
@@ -205,24 +203,18 @@ class VPT {
         return false;
     }
 
-    void searchSubtree(Point& p, int curNodeIndex, knnresult& res)
+    void searchSubtree(Point& p, int curNodeIndex)
     {
-        kNN(res,
-            _points[_nodes[curNodeIndex].vpIndex].coords,
-            p.coords,
-            _points[_nodes[curNodeIndex].vpIndex].index,
-            1,
-            1,
-            p.d,
-            res.k); // with vp
+        updateKNN(heap, p, _points[_nodes[curNodeIndex].vpIndex], k);
+
         if (isLeaf(_nodes[curNodeIndex]))
-            leafKNN(p, _nodes[curNodeIndex], res);
+            leafKNN(p, _nodes[curNodeIndex]);
         else {
-            if (checkInside(p, _nodes[curNodeIndex], res.ndist[res.k - 1])) {
-                searchSubtree(p, moveLeft(curNodeIndex), res);
+            if (checkInside(p, _nodes[curNodeIndex], heap.top().first)) {
+                searchSubtree(p, moveLeft(curNodeIndex));
             }
-            if (checkOutside(p, _nodes[curNodeIndex], res.ndist[res.k - 1])) {
-                searchSubtree(p, moveRight(curNodeIndex), res);
+            if (checkOutside(p, _nodes[curNodeIndex], heap.top().first)) {
+                searchSubtree(p, moveRight(curNodeIndex));
             }
         }
     }
