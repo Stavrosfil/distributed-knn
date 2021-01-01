@@ -6,10 +6,10 @@ class Point {
 
   public:
     uint32_t index;
-    uint8_t d;
     double* coords;
+    int d;
 
-    Point() : index(-1), d(0), coords(nullptr){};
+    Point() : index(-1), coords(nullptr), d(0){};
     Point(int index, double* coords, int d) : index(index), coords(coords), d(d) {}
 };
 

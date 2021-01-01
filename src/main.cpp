@@ -22,7 +22,7 @@ int main() {
 
     double data[]      = {14, 2, 50, 8, 11, 7, 19, 40};
     // double data[]      = {100, 80, 70, 60, 40, 35, 200, 500};
-    int k              = 2;
+    int k              = 3;
     int d              = 1;
     int len            = 8;
     double queryPoints = 19;
@@ -69,16 +69,31 @@ int main() {
         }
         // std::cout << i.vpIndex << std::endl;
     }
+    std::cout << std::endl;
 
     double* coords = new double[1];
-    coords[0] = 42;
+    coords[0] = 41;
     Point p = Point(10, coords, 1);
 
-    std::cout << std::endl << vpt.searchLeaf(p, _ans, k) << std::endl;
+    // std::cout << std::endl << vpt.leafKNN(p, _ans) << std::endl;
 
-    std::cout << "\nkNN ndist: ";
-    prt::rowMajor(_ans.ndist, 1, k);
-    std::cout << "\n";
+    int leafIndex = vpt.searchLeaf(p, _ans);
+    vpt.leafKNN(p, vpt._nodes[leafIndex], _ans);
+
+    int curNodeIndex = vpt.moveUp(leafIndex);
+    // curNodeIndex = vpt.moveLeft(curNodeIndex);
+    
+    vpt.checkInside(p, vpt._nodes[curNodeIndex], _ans.ndist[_ans.k - 1]);
+    vpt.checkOutside(p, vpt._nodes[curNodeIndex], _ans.ndist[_ans.k - 1]);
+    
+    std:: cout << std::endl << "isLeftChild = " << vpt.isLeftChild(curNodeIndex) << std::endl;
+    std:: cout << std::endl << "isRightChild = " << vpt.isRightChild(curNodeIndex) << std::endl;
+
+    std::cout << "\nkNN ndist:\t";
+    prt::rowMajor(_ans.ndist, 1, _ans.k);
+    std::cout << "kNN nidx:\t";
+    prt::rowMajor(_ans.nidx, 1, _ans.k);
+    std::cout << std::endl;
 
     // for (auto i : X) {
     //     std::cout << i.coords[0] << std::endl;

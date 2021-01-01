@@ -45,14 +45,16 @@ class VPT {
 
   // private:
     double computeMu(int lo, int median, int hi) {
-        prt::points(_points);
+
+        // prt::points(_points);
         std::nth_element(_points.begin() + lo + 1, _points.begin() + median, _points.begin() + hi,
                          distanceFromVP(_points[lo]));
-        prt::points(_points);
+        // prt::points(_points);
         return util::distance(_points[lo], _points[median]);
     }
 
     struct distanceFromVP {
+
         Point& p;
         distanceFromVP(Point& p) : p(p) {}
         bool operator()(Point& p1, Point& p2) {
@@ -60,11 +62,11 @@ class VPT {
         }
     };
 
-    int searchLeaf(Point& p, knnresult &res, int k) {
+    int searchLeaf(Point& p, knnresult &res) {
 
         int curNodeIndex = _nodes.size() - 1;                   // start from root
         while ( !isLeaf(_nodes[curNodeIndex]) ) {
-            kNN(res, _points[_nodes[curNodeIndex].vpIndex].coords, p.coords, 0, 1, 1, _points[0].d, k);
+            kNN(res, _points[_nodes[curNodeIndex].vpIndex].coords, p.coords, _points[_nodes[curNodeIndex].vpIndex].index, 1, 1, p.d, res.k);
             double dist = util::distance(p, _points[_nodes[curNodeIndex].vpIndex]);
             if (dist < _nodes[curNodeIndex].mu)
                 curNodeIndex = moveLeft(curNodeIndex);
@@ -72,17 +74,28 @@ class VPT {
                 curNodeIndex = moveRight(curNodeIndex);
         }
 
-        kNN(res, _points[_nodes[curNodeIndex].vpIndex].coords, p.coords, 0, 1, 1, _points[0].d, k);
+        kNN(res, _points[_nodes[curNodeIndex].vpIndex].coords, p.coords, _points[_nodes[curNodeIndex].vpIndex].index, 1, 1, p.d, res.k);
         return curNodeIndex;
     }
 
-    // void vptClimb
+    void leafKNN(Point& p, Node& curNode, knnresult &res) {
+
+        if ( isLeaf(curNode) ) {
+            for (int i = 0; i < curNode.points_len; i++) {
+                kNN(res, curNode.points[i].coords, p.coords, curNode.points[i].index, 1, 1, p.d, res.k);
+            }
+        }
+    }
 
     bool isLeaf(Node& n) {
         if (n.leftIndex == -1)
             return true;
         else 
             return false;
+    }
+
+    int moveUp(int curNodeIndex) {
+        return _nodes[curNodeIndex].parentIndex;
     }
 
     int moveLeft(int curNodeIndex) {
@@ -93,6 +106,39 @@ class VPT {
         return _nodes[curNodeIndex].rightIndex;
     }
 
+    bool checkInside(Point& p, Node& curNode, double tau) {
 
+        if (util::distance(p, _points[curNode.vpIndex]) < curNode.mu + tau) {
+            std::cout << "vp = " << _points[curNode.vpIndex].coords[0] << "\tcheckInside = 1\t\tdistance = " << util::distance(p, _points[curNode.vpIndex]) << "\tmu = " << curNode.mu << "\ttau = " << tau << std::endl;
+            return true;
+        }
+        return false;
+    }
 
+    bool checkOutside(Point& p, Node& curNode, double tau) {
+
+        if (util::distance(p, _points[curNode.vpIndex]) > curNode.mu - tau) {
+            std::cout << "vp = " << _points[curNode.vpIndex].coords[0] << "\tcheckOutside = 1\tdistance = " << util::distance(p, _points[curNode.vpIndex]) << "\tmu = " << curNode.mu << "\ttau = " << tau << std::endl;
+            return true;
+        }
+        return false;
+    }
+
+    bool isLeftChild(int curNodeIndex) {
+
+        if (_nodes[curNodeIndex].parentIndex == -1)
+            return false;
+        if (curNodeIndex == _nodes[_nodes[curNodeIndex].parentIndex].leftIndex)
+            return true;
+        return false;
+    }
+
+    bool isRightChild(int curNodeIndex) {
+
+        if (_nodes[curNodeIndex].parentIndex == -1)
+            return false;
+        if (curNodeIndex == _nodes[_nodes[curNodeIndex].parentIndex].rightIndex)
+            return true;
+        return false;
+    }
 };
