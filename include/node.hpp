@@ -1,7 +1,6 @@
 #include <iostream>
 #include <stdio.h>
 
-
 class Point {
 
   public:

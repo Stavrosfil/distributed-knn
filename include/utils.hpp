@@ -7,7 +7,8 @@
 
 namespace prt {
 
-void rowMajor(double* a, int n, int m) {
+void rowMajor(double* a, int n, int m)
+{
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++)
             std::cout << a[i * m + j] << "\t";
@@ -15,7 +16,8 @@ void rowMajor(double* a, int n, int m) {
     }
 }
 
-void rowMajor(int* a, int n, int m) {
+void rowMajor(int* a, int n, int m)
+{
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++)
             std::cout << a[i * m + j] << "\t";
@@ -23,7 +25,8 @@ void rowMajor(int* a, int n, int m) {
     }
 }
 
-void rowMajor(std::pair<double, int>* a, int n, int m) {
+void rowMajor(std::pair<double, int>* a, int n, int m)
+{
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++)
             std::cout << a[i * m + j].first << "\t";
@@ -31,7 +34,8 @@ void rowMajor(std::pair<double, int>* a, int n, int m) {
     }
 }
 
-void points(std::vector<Point> _points) {
+void points(std::vector<Point> _points)
+{
     for (int i = 0; i < _points.size(); i++) {
         std::cout << "( ";
         for (int j = 0; j < _points[0].d; j++)
@@ -41,12 +45,12 @@ void points(std::vector<Point> _points) {
     std::cout << std::endl << std::endl;
 }
 
-
 } // namespace prt
 
 namespace util {
 
-void computeChunksDisplacements(int* cnt, int* displs, int processes, int row_s, int col_s) {
+void computeChunksDisplacements(int* cnt, int* displs, int processes, int row_s, int col_s)
+{
     int rem = row_s % processes; // elements remaining after division among processes
     int sum = 0;                 // Sum of counts. Used to calculate displacements
 
@@ -61,7 +65,8 @@ void computeChunksDisplacements(int* cnt, int* displs, int processes, int row_s,
     }
 }
 
-void computeEuclideanDistance(double* X, double* Y, double* D, int n, int m, int d) {
+void computeEuclideanDistance(double* X, double* Y, double* D, int n, int m, int d)
+{
 
     double* XH = new double[n];
     double* YH = new double[m];
@@ -93,7 +98,8 @@ void computeEuclideanDistance(double* X, double* Y, double* D, int n, int m, int
     }
 }
 
-double distance(Point& p1, Point& p2) {
+double distance(const Point& p1, const Point& p2)
+{
     double* D = new double[1];
     util::computeEuclideanDistance(p1.coords, p2.coords, D, 1, 1, p1.d);
     return D[0];

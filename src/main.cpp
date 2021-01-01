@@ -6,7 +6,8 @@
 #include "distributed.hpp"
 #include "vpt.hpp"
 
-int main() {
+int main()
+{
 
     std::cout << std::endl;
     // const int n = 5;
@@ -20,24 +21,24 @@ int main() {
 
     // struct knnresult ans = mpi::distrAllkNN(X, n, d, k);
 
-    double data[] = { 14, 2, 50, 8, 11, 7, 19, 40 };
+    double data[] = {14, 2, 50, 8, 11, 7, 19, 40};
     // double data[]      = {100, 80, 70, 60, 40, 35, 200, 500};
-    int k = 3;
-    int d = 1;
-    int len = 8;
+    int k              = 3;
+    int d              = 1;
+    int len            = 8;
     double queryPoints = 19;
-    int m = 1;
+    int m              = 1;
 
     knnresult _ans = knnresult();
-    _ans.m = m;
-    _ans.k = k;
-    _ans.nidx = new int[_ans.m * _ans.k]();
-    _ans.ndist = new double[_ans.m * _ans.k]();
+    _ans.m         = m;
+    _ans.k         = k;
+    _ans.nidx      = new int[_ans.m * _ans.k]();
+    _ans.ndist     = new double[_ans.m * _ans.k]();
 
     for (int i = 0; i < _ans.m; i++) {
         for (int j = 0; j < k; j++) {
             _ans.ndist[i * k + j] = D_MAX;
-            _ans.nidx[i * k + j] = -1;
+            _ans.nidx[i * k + j]  = -1;
         }
     }
 
@@ -62,7 +63,8 @@ int main() {
     int cnt = 0;
     for (auto p : vpt._nodes) {
         std::cout << cnt++ << ": " << X[p.vpIndex].coords[0] << "\t"
-            << "mu: " << p.mu << "\t(" << p.leftIndex << ", " << p.rightIndex << ", " << p.parentIndex << ")" << std::endl;
+                  << "mu: " << p.mu << "\t(" << p.leftIndex << ", " << p.rightIndex << ", " << p.parentIndex << ")"
+                  << std::endl;
         if (p.points_len) {
             for (int j = 0; j < p.points_len; j++) {
                 std::cout << p.points[j].coords[0] << std::endl;
@@ -73,8 +75,8 @@ int main() {
     std::cout << std::endl;
 
     double* coords = new double[1];
-    coords[0] = 9;
-    Point p = Point(10, coords, 1);
+    coords[0]      = 9;
+    Point p        = Point(10, coords, 1);
 
     /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ VPT kNN ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
