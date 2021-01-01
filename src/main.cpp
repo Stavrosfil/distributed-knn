@@ -27,7 +27,6 @@ int main() {
     int len = 8;
     double queryPoints = 19;
     int m = 1;
-    // Node root          = Node(0, len, data, -1);
 
     knnresult _ans = knnresult();
     _ans.m = m;
@@ -54,6 +53,8 @@ int main() {
         X.push_back(Point(i, coords, d));
     }
 
+    /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Construct VPT ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
     VPT vpt(X);
     vpt.buildTree(0, X.size());
     // std::cout << vpt.buildTree(0, X.size()) << std::endl;
@@ -72,24 +73,12 @@ int main() {
     std::cout << std::endl;
 
     double* coords = new double[1];
-    coords[0] = 41;
+    coords[0] = 9;
     Point p = Point(10, coords, 1);
 
-    // std::cout << std::endl << vpt.leafKNN(p, _ans) << std::endl;
+    /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ VPT kNN ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-    vpt.searchSubtree(p, 6, _ans);
-
-    // int leafIndex = vpt.searchLeaf(p, _ans);
-    // vpt.leafKNN(p, vpt._nodes[leafIndex], _ans);
-
-    // int curNodeIndex = vpt.moveUp(leafIndex);
-    // // curNodeIndex = vpt.moveLeft(curNodeIndex);
-
-    // vpt.checkInside(p, vpt._nodes[curNodeIndex], _ans.ndist[_ans.k - 1]);
-    // vpt.checkOutside(p, vpt._nodes[curNodeIndex], _ans.ndist[_ans.k - 1]);
-
-    // std::cout << std::endl << "isLeftChild = " << vpt.isLeftChild(curNodeIndex) << std::endl;
-    // std::cout << std::endl << "isRightChild = " << vpt.isRightChild(curNodeIndex) << std::endl;
+    vpt.vptKnn(p, _ans);
 
     std::cout << "\nkNN ndist:\t";
     prt::rowMajor(_ans.ndist, 1, _ans.k);

@@ -63,21 +63,30 @@ public:
         }
     };
 
-    // void climbVPT(Point& p, int curNodeIndex, knnresult& res) {                           // curNodeIndex = leaf index
+    void vptKnn(Point& p, knnresult& _res) {
 
-    //     if (isLeftChild(curNodeIndex)) {
-    //         curNodeIndex = moveUp(curNodeIndex);
-    //         if (checkOutside(p, _nodes[curNodeIndex], res.nidx[res.k - 1])) {
+        int leafIndex = searchLeaf(p, _res);
+        leafKNN(p, _nodes[leafIndex], _res);
+        climbVPT(p, leafIndex, _res);
+    }
 
-    //         }
-    //     }
-    //     else if (isRightChild(curNodeIndex)) {
-    //         curNodeIndex = moveUp(curNodeIndex);
-    //         if (checkInside(p, _nodes[curNodeIndex], res.nidx[res.k - 1])) {
+    void climbVPT(Point& p, int curNodeIndex, knnresult& res) {                           // curNodeIndex = leaf index
 
-    //         }
-    //     }
-    // }
+        do {
+            if (isLeftChild(curNodeIndex)) {
+                curNodeIndex = moveUp(curNodeIndex);
+                if (checkOutside(p, _nodes[curNodeIndex], res.ndist[res.k - 1])) {
+                    searchSubtree(p, moveRight(curNodeIndex), res);
+                }
+            }
+            else if (isRightChild(curNodeIndex)) {
+                curNodeIndex = moveUp(curNodeIndex);
+                if (checkInside(p, _nodes[curNodeIndex], res.ndist[res.k - 1])) {
+                    searchSubtree(p, moveLeft(curNodeIndex), res);
+                }
+            }
+        } while (curNodeIndex != _nodes.size() - 1);
+    }
 
     int searchLeaf(Point& p, knnresult& res) {
 
@@ -92,6 +101,7 @@ public:
         }
 
         kNN(res, _points[_nodes[curNodeIndex].vpIndex].coords, p.coords, _points[_nodes[curNodeIndex].vpIndex].index, 1, 1, p.d, res.k);
+        std::cout << "Leaf vp = " << _points[_nodes[curNodeIndex].vpIndex].coords[0] << std::endl;
         return curNodeIndex;
     }
 
@@ -129,6 +139,7 @@ public:
             std::cout << "vp = " << _points[curNode.vpIndex].coords[0] << "\tcheckInside = 1\t\tdistance = " << util::distance(p, _points[curNode.vpIndex]) << "\tmu = " << curNode.mu << "\ttau = " << tau << std::endl;
             return true;
         }
+        std::cout << "vp = " << _points[curNode.vpIndex].coords[0] << "\tcheckInside = 0\t\tdistance = " << util::distance(p, _points[curNode.vpIndex]) << "\tmu = " << curNode.mu << "\ttau = " << tau << std::endl;
         return false;
     }
 
@@ -138,6 +149,7 @@ public:
             std::cout << "vp = " << _points[curNode.vpIndex].coords[0] << "\tcheckOutside = 1\tdistance = " << util::distance(p, _points[curNode.vpIndex]) << "\tmu = " << curNode.mu << "\ttau = " << tau << std::endl;
             return true;
         }
+        std::cout << "vp = " << _points[curNode.vpIndex].coords[0] << "\tcheckOutside = 0\tdistance = " << util::distance(p, _points[curNode.vpIndex]) << "\tmu = " << curNode.mu << "\ttau = " << tau << std::endl;
         return false;
     }
 
