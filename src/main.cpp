@@ -20,27 +20,27 @@ int main() {
 
     // struct knnresult ans = mpi::distrAllkNN(X, n, d, k);
 
-    double data[]      = {14, 2, 50, 8, 11, 7, 19, 40};
+    double data[] = { 14, 2, 50, 8, 11, 7, 19, 40 };
     // double data[]      = {100, 80, 70, 60, 40, 35, 200, 500};
-    int k              = 3;
-    int d              = 1;
-    int len            = 8;
+    int k = 3;
+    int d = 1;
+    int len = 8;
     double queryPoints = 19;
-    int m              = 1;
+    int m = 1;
     // Node root          = Node(0, len, data, -1);
 
     knnresult _ans = knnresult();
-    _ans.m         = m;
-    _ans.k         = k;
-    _ans.nidx      = new int[_ans.m * _ans.k]();
-    _ans.ndist     = new double[_ans.m * _ans.k]();
+    _ans.m = m;
+    _ans.k = k;
+    _ans.nidx = new int[_ans.m * _ans.k]();
+    _ans.ndist = new double[_ans.m * _ans.k]();
 
-  for (int i = 0; i < _ans.m; i++) {
-      for (int j = 0; j < k; j++) {
-          _ans.ndist[i * k + j] = D_MAX;
-          _ans.nidx[i * k + j]  = -1;
-      }
-  }
+    for (int i = 0; i < _ans.m; i++) {
+        for (int j = 0; j < k; j++) {
+            _ans.ndist[i * k + j] = D_MAX;
+            _ans.nidx[i * k + j] = -1;
+        }
+    }
 
     std::vector<Point> X;
 
@@ -61,7 +61,7 @@ int main() {
     int cnt = 0;
     for (auto p : vpt._nodes) {
         std::cout << cnt++ << ": " << X[p.vpIndex].coords[0] << "\t"
-                  << "mu: " << p.mu << "\t(" << p.leftIndex << ", " << p.rightIndex << ", " << p.parentIndex << ")" << std::endl;
+            << "mu: " << p.mu << "\t(" << p.leftIndex << ", " << p.rightIndex << ", " << p.parentIndex << ")" << std::endl;
         if (p.points_len) {
             for (int j = 0; j < p.points_len; j++) {
                 std::cout << p.points[j].coords[0] << std::endl;
@@ -77,17 +77,19 @@ int main() {
 
     // std::cout << std::endl << vpt.leafKNN(p, _ans) << std::endl;
 
-    int leafIndex = vpt.searchLeaf(p, _ans);
-    vpt.leafKNN(p, vpt._nodes[leafIndex], _ans);
+    vpt.searchSubtree(p, 6, _ans);
 
-    int curNodeIndex = vpt.moveUp(leafIndex);
-    // curNodeIndex = vpt.moveLeft(curNodeIndex);
-    
-    vpt.checkInside(p, vpt._nodes[curNodeIndex], _ans.ndist[_ans.k - 1]);
-    vpt.checkOutside(p, vpt._nodes[curNodeIndex], _ans.ndist[_ans.k - 1]);
-    
-    std:: cout << std::endl << "isLeftChild = " << vpt.isLeftChild(curNodeIndex) << std::endl;
-    std:: cout << std::endl << "isRightChild = " << vpt.isRightChild(curNodeIndex) << std::endl;
+    // int leafIndex = vpt.searchLeaf(p, _ans);
+    // vpt.leafKNN(p, vpt._nodes[leafIndex], _ans);
+
+    // int curNodeIndex = vpt.moveUp(leafIndex);
+    // // curNodeIndex = vpt.moveLeft(curNodeIndex);
+
+    // vpt.checkInside(p, vpt._nodes[curNodeIndex], _ans.ndist[_ans.k - 1]);
+    // vpt.checkOutside(p, vpt._nodes[curNodeIndex], _ans.ndist[_ans.k - 1]);
+
+    // std::cout << std::endl << "isLeftChild = " << vpt.isLeftChild(curNodeIndex) << std::endl;
+    // std::cout << std::endl << "isRightChild = " << vpt.isRightChild(curNodeIndex) << std::endl;
 
     std::cout << "\nkNN ndist:\t";
     prt::rowMajor(_ans.ndist, 1, _ans.k);

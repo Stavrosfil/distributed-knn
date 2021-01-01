@@ -25,7 +25,7 @@ struct less_than_key {
     }
 };
 
-void kNN(knnresult &res, double* X, double* Y, int displacement, int n, int m, int d, int k) {
+void kNN(knnresult& res, double* X, double* Y, int displacement, int n, int m, int d, int k) {
 
     double* D = new double[n * m];
 
@@ -36,12 +36,12 @@ void kNN(knnresult &res, double* X, double* Y, int displacement, int n, int m, i
         std::vector<std::pair<double, int>> _D(n + k);
 
         for (int j = 0; j < n; j++) {
-            _D[j].first  = D[j * m + i];
+            _D[j].first = D[j * m + i];
             _D[j].second = j + displacement;
         }
 
         for (int j = 0; j < k; j++) {
-            _D[n + j].first  = res.ndist[i * k + j];
+            _D[n + j].first = res.ndist[i * k + j];
             _D[n + j].second = res.nidx[i * k + j];
         }
 
@@ -49,7 +49,7 @@ void kNN(knnresult &res, double* X, double* Y, int displacement, int n, int m, i
 
         for (int j = 0; j < k; j++) {
             res.ndist[i * k + j] = _D[j].first;
-            res.nidx[i * k + j]  = _D[j].second;
+            res.nidx[i * k + j] = _D[j].second;
         }
     }
 }
