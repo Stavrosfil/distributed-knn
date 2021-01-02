@@ -24,12 +24,12 @@ int main()
     // struct knnresult ans = mpi::distrAllkNN(X, n, d, k);
 
     // double corpusData[]      = {100, 80, 70, 60, 40, 35, 200, 500};
-    double corpusData[] = { 14, 2, 50, 8, 11, 7, 19, 40 };
-    double queryData[] = { 8, 11, 8, 11, 8, 11 };
-    int k = 4;
-    int d = 2;
-    int corpusLen = 8;                      // length of corpusData[]
-    int queryLen = 6;                       // length of queryData[]
+    double corpusData[] = {14, 2, 50, 8, 11, 7, 19, 40};
+    double queryData[]  = {8, 100, 10, 52};
+    int k               = 4;
+    int d               = 1;
+    int corpusLen       = 8; // length of corpusData[]
+    int queryLen        = 4; // length of queryData[]
 
     std::vector<Point> corpus;
     for (int i = 0; i < corpusLen; i += d) {
@@ -53,10 +53,10 @@ int main()
     prt::points(query);
 
     knnresult ans = knnresult();
-    ans.m = query.size();
-    ans.k = k;
-    ans.nidx = new int[ans.m * ans.k];
-    ans.ndist = new double[ans.m * ans.k];
+    ans.m         = query.size();
+    ans.k         = k;
+    ans.nidx      = new int[ans.m * ans.k];
+    ans.ndist     = new double[ans.m * ans.k];
 
     std::fill_n(ans.nidx, ans.m * ans.k, D_MAX);
     std::fill_n(ans.ndist, ans.m * ans.k, -1);
@@ -72,8 +72,8 @@ int main()
         std::cout << "nodes[" << cnt++ << "]:\tvp = ";
         prt::point(corpus[p.vpIndex]);
         std::cout << "\t\t"
-            << "mu = " << p.mu << "\t\t(" << p.leftIndex << ", " << p.rightIndex << ", " << p.parentIndex << ")"
-            << std::endl;
+                  << "mu = " << p.mu << "\t\t(" << p.leftIndex << ", " << p.rightIndex << ", " << p.parentIndex << ")"
+                  << std::endl;
         if (p.leafPointsLen) {
             for (int j = 0; j < p.leafPointsLen; j++) {
                 std::cout << p.leafPoints[j].coords[0] << std::endl;

@@ -12,7 +12,7 @@
 
 class VPT {
 
-public:
+  public:
     std::vector<Node> _nodes;
 
     VPT(std::vector<Point>& points) : _points(points) {}
@@ -26,15 +26,15 @@ public:
 
         int n = hi - (lo + 1);
         if (n >= 2 * b + 2) {
-            int median = (hi + lo) % 2 == 0 ? (hi + lo) / 2 : (hi + lo + 1) / 2;
-            node.mu = computeMu(lo, median, hi);
-            node.leftIndex = buildTree(lo + 1, median);
-            node.rightIndex = buildTree(median, hi);
-            _nodes[node.leftIndex].parentIndex = _nodes.size();
+            int median                          = (hi + lo) % 2 == 0 ? (hi + lo) / 2 : (hi + lo + 1) / 2;
+            node.mu                             = computeMu(lo, median, hi);
+            node.leftIndex                      = buildTree(lo + 1, median);
+            node.rightIndex                     = buildTree(median, hi);
+            _nodes[node.leftIndex].parentIndex  = _nodes.size();
             _nodes[node.rightIndex].parentIndex = _nodes.size();
         }
         else {
-            node.leafPoints = new Point[n];
+            node.leafPoints    = new Point[n];
             node.leafPointsLen = n;
             for (int i = 0; i < n; i++) {
                 node.leafPoints[i] = _points[lo + 1 + i];
@@ -48,19 +48,20 @@ public:
     void kNN(Point& p, knnresult& ans, int queryIndex)
     {
         _heap = pointHeap();
-        k = ans.k;
+        _heap.push(std::make_pair(D_MAX, Point()));
+        k             = ans.k;
         int leafIndex = searchLeaf(p, _nodes.size() - 1);
         leafKNN(p, _nodes[leafIndex]);
         climbVPT(p, leafIndex);
 
         for (int i = 0; i < k; i++) {
             ans.ndist[k * (queryIndex + 1) - i - 1] = _heap.top().first;
-            ans.nidx[k * (queryIndex + 1) - i - 1] = _heap.top().second.index;
+            ans.nidx[k * (queryIndex + 1) - i - 1]  = _heap.top().second.index;
             _heap.pop();
         }
     }
 
-private:
+  private:
     int k = 3;
     int b = 0;
 
@@ -89,9 +90,9 @@ private:
     {
         // prt::leafPoints(_points);
         std::nth_element(_points.begin() + lo + 1,
-            _points.begin() + median,
-            _points.begin() + hi,
-            comp::distanceFromVP(_points[lo]));
+                         _points.begin() + median,
+                         _points.begin() + hi,
+                         comp::distanceFromVP(_points[lo]));
         // prt::leafPoints(_points);
         return util::distance(_points[lo], _points[median]);
     }
@@ -178,15 +179,15 @@ private:
     bool isLeftChild(int curNodeIndex)
     {
         return _nodes[curNodeIndex].parentIndex != -1
-            ? curNodeIndex == _nodes[_nodes[curNodeIndex].parentIndex].leftIndex
-            : false;
+                   ? curNodeIndex == _nodes[_nodes[curNodeIndex].parentIndex].leftIndex
+                   : false;
     }
 
     bool isRightChild(int curNodeIndex)
     {
         return _nodes[curNodeIndex].parentIndex != -1
-            ? curNodeIndex == _nodes[_nodes[curNodeIndex].parentIndex].rightIndex
-            : false;
+                   ? curNodeIndex == _nodes[_nodes[curNodeIndex].parentIndex].rightIndex
+                   : false;
     }
 };
 
