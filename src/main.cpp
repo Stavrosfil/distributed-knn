@@ -23,44 +23,55 @@ int main()
 
     // struct knnresult ans = mpi::distrAllkNN(X, n, d, k);
 
-    // double data[]      = {100, 80, 70, 60, 40, 35, 200, 500};
-    double data[] = {14, 2, 50, 8, 11, 7, 19, 40};
-    int k         = 3;
-    int d         = 1;
-    int len       = 8;
-    int m         = 1;
+    // double corpusData[]      = {100, 80, 70, 60, 40, 35, 200, 500};
+    double corpusData[] = { 14, 2, 50, 8, 11, 7, 19, 40 };
+    double queryData[] = { 8 };
+    int k = 3;
+    int d = 1;
+    int corpusLen = 8;                      // length of corpusData[]
+    int queryLen = 1;                       // length of queryData[]
+
+    std::vector<Point> corpus;
+    for (int i = 0; i < corpusLen; i += d) {
+        double* coords = new double[d];
+        for (int j = 0; j < d; j++)
+            coords[j] = corpusData[i + j];
+        corpus.push_back(Point(i, coords, d));
+    }
+
+    std::vector<Point> query;
+    for (int i = 0; i < queryLen; i += d) {
+        double* coords = new double[d];
+        for (int j = 0; j < d; j++)
+            coords[j] = queryData[i + j];
+        query.push_back(Point(i, coords, d));
+    }
+
+    std::cout << "Corpus points:\t";
+    prt::points(corpus);
+    std::cout << "Query points:\t";
+    prt::points(query);;
 
     knnresult ans = knnresult();
-    ans.m         = m;
-    ans.k         = k;
-    ans.nidx      = new int[ans.m * ans.k];
-    ans.ndist     = new double[ans.m * ans.k];
+    ans.m = query.size();
+    ans.k = k;
+    ans.nidx = new int[ans.m * ans.k];
+    ans.ndist = new double[ans.m * ans.k];
 
     std::fill_n(ans.nidx, ans.m * ans.k, D_MAX);
     std::fill_n(ans.ndist, ans.m * ans.k, -1);
 
-    std::vector<Point> X;
-
-    for (int i = 0; i < len; i += d) {
-
-        double* coords = new double[d];
-
-        for (int j = 0; j < d; j++)
-            coords[j] = data[i + j];
-
-        X.push_back(Point(i, coords, d));
-    }
-
     /* ------------------------------ Construct VPT ----------------------------- */
 
-    VPT vpt(X);
-    vpt.buildTree(0, X.size());
+    VPT vpt(corpus);
+    vpt.buildTree(0, corpus.size());
 
     int cnt = 0;
+    std::cout << "Vantage point tree:\n";
     for (auto p : vpt._nodes) {
-        std::cout << cnt++ << ": " << X[p.vpIndex].coords[0] << "\t"
-                  << "mu: " << p.mu << "\t(" << p.leftIndex << ", " << p.rightIndex << ", " << p.parentIndex << ")"
-                  << std::endl;
+        std::cout << cnt++ << ": " << corpus[p.vpIndex].coords[0] << "\t"
+            << "mu: " << p.mu << "\t(" << p.leftIndex << ", " << p.rightIndex << ", " << p.parentIndex << ")"
+            << std::endl;
         if (p.leafPointsLen) {
             for (int j = 0; j < p.leafPointsLen; j++) {
                 std::cout << p.leafPoints[j].coords[0] << std::endl;
@@ -69,16 +80,17 @@ int main()
     }
     std::cout << std::endl;
 
-    Point p = Point(-1, new double[1]{8}, 1);
-
     /* --------------------------------- VPT kNN -------------------------------- */
 
-    vpt.kNN(p, ans);
+    for (auto p : query)
+        vpt.kNN(p, ans);
 
-    std::cout << "\nkNN ndist:\t";
+    std::cout << "kNN ndist:\t";
     prt::rowMajor(ans.ndist, 1, ans.k);
     std::cout << "kNN nidx:\t";
     prt::rowMajor(ans.nidx, 1, ans.k);
+
+    std::cout << std::endl;
 
     return 0;
 }
