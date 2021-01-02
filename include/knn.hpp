@@ -7,26 +7,22 @@
 #include <cblas.h>
 #include <algorithm>
 #include <vector>
-
-#define D_MAX std::numeric_limits<double>::max()
+#include <queue>
 
 #include "utils.hpp"
 
-typedef struct knnresult {
+#define D_MAX std::numeric_limits<double>::max()
+typedef std::priority_queue<std::pair<double, Point>, std::vector<std::pair<double, Point>>, comp::heapDist> pointHeap;
+
+struct knnresult {
     int* nidx;     //!< Indices (0-based) of nearest neighbors [m-by-k]
     double* ndist; //!< Distance of nearest neighbors          [m-by-k]
     int m;         //!< Number of query points                 [scalar]
     int k;         //!< Number of nearest neighbors            [scalar]
-} knnresult;
-
-struct less_than_key {
-    inline bool operator()(const std::pair<double, int> a, const std::pair<double, int> b) {
-        return (a.first < b.first);
-    }
 };
 
-void kNN(knnresult res, double* X, double* Y, int displacement, int n, int m, int d, int k) {
-
+void kNN(knnresult& res, double* X, double* Y, int displacement, int n, int m, int d, int k)
+{
     double* D = new double[n * m];
 
     util::computeEuclideanDistance(X, Y, D, n, m, d);
@@ -45,12 +41,26 @@ void kNN(knnresult res, double* X, double* Y, int displacement, int n, int m, in
             _D[n + j].second = res.nidx[i * k + j];
         }
 
-        std::partial_sort(_D.begin(), _D.begin() + k, _D.end(), less_than_key());
+        std::partial_sort(_D.begin(), _D.begin() + k, _D.end(), comp::lessThanKey());
 
         for (int j = 0; j < k; j++) {
             res.ndist[i * k + j] = _D[j].first;
             res.nidx[i * k + j]  = _D[j].second;
         }
+    }
+}
+
+void updateKNN(pointHeap& heap, Point& queryPoint, Point& corpusPoint, int k)
+{
+    double dist = util::distance(queryPoint, corpusPoint);
+    if (heap.size() == k) {
+        if (dist < heap.top().first) {
+            heap.pop();
+            heap.push(std::make_pair(dist, corpusPoint));
+        }
+    }
+    else {
+        heap.push(std::make_pair(dist, corpusPoint));
     }
 }
 

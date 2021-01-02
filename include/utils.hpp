@@ -3,38 +3,12 @@
 
 #include <iostream>
 #include <stdlib.h>
-
-namespace prt {
-
-void rowMajor(double* a, int n, int m) {
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++)
-            std::cout << a[i * m + j] << "\t";
-        std::cout << std::endl;
-    }
-}
-
-void rowMajor(int* a, int n, int m) {
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++)
-            std::cout << a[i * m + j] << "\t";
-        std::cout << std::endl;
-    }
-}
-
-void rowMajor(std::pair<double, int>* a, int n, int m) {
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++)
-            std::cout << a[i * m + j].first << "\t";
-        std::cout << std::endl;
-    }
-}
-
-} // namespace prt
+#include "node.hpp"
 
 namespace util {
 
-void computeChunksDisplacements(int* cnt, int* displs, int processes, int row_s, int col_s) {
+void computeChunksDisplacements(int* cnt, int* displs, int processes, int row_s, int col_s)
+{
     int rem = row_s % processes; // elements remaining after division among processes
     int sum = 0;                 // Sum of counts. Used to calculate displacements
 
@@ -49,7 +23,8 @@ void computeChunksDisplacements(int* cnt, int* displs, int processes, int row_s,
     }
 }
 
-void computeEuclideanDistance(double* X, double* Y, double* D, int n, int m, int d) {
+void computeEuclideanDistance(double* X, double* Y, double* D, int n, int m, int d)
+{
 
     double* XH = new double[n];
     double* YH = new double[m];
@@ -81,6 +56,82 @@ void computeEuclideanDistance(double* X, double* Y, double* D, int n, int m, int
     }
 }
 
+double distance(const Point& p1, const Point& p2)
+{
+    double* D = new double[1];
+    util::computeEuclideanDistance(p1.coords, p2.coords, D, 1, 1, p1.d);
+    return D[0];
+}
+
 } // namespace util
+
+namespace comp {
+
+struct heapDist {
+    bool operator()(const std::pair<double, Point>& lhs, const std::pair<double, Point>& rhs)
+    {
+        return lhs.first < rhs.first;
+    }
+};
+
+struct lessThanKey {
+    inline bool operator()(const std::pair<double, int> a, const std::pair<double, int> b)
+    {
+        return (a.first < b.first);
+    }
+};
+
+struct distanceFromVP {
+    Point& p;
+    distanceFromVP(Point& p) : p(p) {}
+    bool operator()(Point& p1, Point& p2)
+    {
+        return util::distance(p, p1) < util::distance(p, p2);
+    }
+};
+
+} // namespace comp
+
+namespace prt {
+
+void rowMajor(double* a, int n, int m)
+{
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++)
+            std::cout << a[i * m + j] << "\t";
+        std::cout << std::endl;
+    }
+}
+
+void rowMajor(int* a, int n, int m)
+{
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++)
+            std::cout << a[i * m + j] << "\t";
+        std::cout << std::endl;
+    }
+}
+
+void rowMajor(std::pair<double, int>* a, int n, int m)
+{
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++)
+            std::cout << a[i * m + j].first << "\t";
+        std::cout << std::endl;
+    }
+}
+
+void points(std::vector<Point> _points)
+{
+    for (int i = 0; i < _points.size(); i++) {
+        std::cout << "( ";
+        for (int j = 0; j < _points[0].d; j++)
+            std::cout << _points[i].coords[j] << " ";
+        std::cout << ") ";
+    }
+    std::cout << std::endl << std::endl;
+}
+
+} // namespace prt
 
 #endif // __UTILS_H__

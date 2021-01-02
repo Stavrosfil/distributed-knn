@@ -9,7 +9,8 @@
 
 namespace mpi {
 
-knnresult distrAllkNN(double* X, int n, int d, int k) {
+knnresult distrAllkNN(double* X, int n, int d, int k)
+{
 
     MPI_Init(NULL, NULL);
 
@@ -78,8 +79,14 @@ knnresult distrAllkNN(double* X, int n, int d, int k) {
                   /* communicator: */ MPI_COMM_WORLD,
                   /* request: */ &reqs[1]);
 
-        kNN(_ans, _Y, _X, displs[rolling_prev_rank] / d, chunk_size[rolling_prev_rank] / d,
-            chunk_size[process_rank] / d, d, k);
+        kNN(_ans,
+            _Y,
+            _X,
+            displs[rolling_prev_rank] / d,
+            chunk_size[rolling_prev_rank] / d,
+            chunk_size[process_rank] / d,
+            d,
+            k);
 
         MPI_Waitall(2, reqs, MPI_STATUSES_IGNORE);
 
@@ -98,8 +105,8 @@ knnresult distrAllkNN(double* X, int n, int d, int k) {
     util::computeChunksDisplacements(recv_chunks, recv_displs, world_size, n, k);
 
     MPI_Gatherv(_ans.nidx, _ans.m * _ans.k, MPI_INT, ans.nidx, recv_chunks, recv_displs, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Gatherv(_ans.ndist, _ans.m * _ans.k, MPI_DOUBLE, ans.ndist, recv_chunks, recv_displs, MPI_DOUBLE, 0,
-                MPI_COMM_WORLD);
+    MPI_Gatherv(
+        _ans.ndist, _ans.m * _ans.k, MPI_DOUBLE, ans.ndist, recv_chunks, recv_displs, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
     MPI_Finalize();
 
