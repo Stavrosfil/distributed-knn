@@ -110,8 +110,8 @@ knnresult distrAllkNN(double* X, int n, int d, int k)
 
     MPI_Finalize();
 
-    if (process_rank == 0)
-        prt::rowMajor(ans.ndist, ans.m, k);
+    // if (process_rank == 0)
+    //     prt::rowMajor(ans.ndist, ans.m, k);
 
     return ans;
 }
