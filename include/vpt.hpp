@@ -45,7 +45,7 @@ public:
         return _nodes.size() - 1;
     }
 
-    void kNN(Point& p, knnresult& ans)
+    void kNN(Point& p, knnresult& ans, int queryIndex)
     {
         k = ans.k;
         int leafIndex = searchLeaf(p, _nodes.size() - 1);
@@ -53,8 +53,8 @@ public:
         climbVPT(p, leafIndex);
 
         for (int i = 0; i < k; i++) {
-            ans.ndist[k - i - 1] = _heap.top().first;
-            ans.nidx[k - i - 1] = _heap.top().second.index;
+            ans.ndist[k * (queryIndex + 1) - i - 1] = _heap.top().first;
+            ans.nidx[k * (queryIndex + 1) - i - 1] = _heap.top().second.index;
             _heap.pop();
         }
     }

@@ -25,18 +25,18 @@ int main()
 
     // double corpusData[]      = {100, 80, 70, 60, 40, 35, 200, 500};
     double corpusData[] = { 14, 2, 50, 8, 11, 7, 19, 40 };
-    double queryData[] = { 8 };
-    int k = 3;
-    int d = 1;
+    double queryData[] = { 8, 42, 4, 12 };
+    int k = 4;
+    int d = 2;
     int corpusLen = 8;                      // length of corpusData[]
-    int queryLen = 1;                       // length of queryData[]
+    int queryLen = 4;                       // length of queryData[]
 
     std::vector<Point> corpus;
     for (int i = 0; i < corpusLen; i += d) {
         double* coords = new double[d];
         for (int j = 0; j < d; j++)
             coords[j] = corpusData[i + j];
-        corpus.push_back(Point(i, coords, d));
+        corpus.push_back(Point(corpus.size(), coords, d));
     }
 
     std::vector<Point> query;
@@ -44,13 +44,13 @@ int main()
         double* coords = new double[d];
         for (int j = 0; j < d; j++)
             coords[j] = queryData[i + j];
-        query.push_back(Point(i, coords, d));
+        query.push_back(Point(query.size(), coords, d));
     }
 
     std::cout << "Corpus points:\t";
     prt::points(corpus);
     std::cout << "Query points:\t";
-    prt::points(query);;
+    prt::points(query);
 
     knnresult ans = knnresult();
     ans.m = query.size();
@@ -67,10 +67,10 @@ int main()
     vpt.buildTree(0, corpus.size());
 
     int cnt = 0;
-    std::cout << "Vantage point tree:\n";
+    std::cout << "\nVantage point tree:\n\n";
     for (auto p : vpt._nodes) {
-        std::cout << cnt++ << ": " << corpus[p.vpIndex].coords[0] << "\t"
-            << "mu: " << p.mu << "\t(" << p.leftIndex << ", " << p.rightIndex << ", " << p.parentIndex << ")"
+        std::cout << "nodes[" << cnt++ << "]:\tvp = " << corpus[p.vpIndex].coords[0] << "\t\t"
+            << "mu = " << p.mu << "\t\t(" << p.leftIndex << ", " << p.rightIndex << ", " << p.parentIndex << ")"
             << std::endl;
         if (p.leafPointsLen) {
             for (int j = 0; j < p.leafPointsLen; j++) {
@@ -82,15 +82,11 @@ int main()
 
     /* --------------------------------- VPT kNN -------------------------------- */
 
-    for (auto p : query)
-        vpt.kNN(p, ans);
+    for (auto p : query) {
+        vpt.kNN(p, ans, p.index);
+    }
 
-    std::cout << "kNN ndist:\t";
-    prt::rowMajor(ans.ndist, 1, ans.k);
-    std::cout << "kNN nidx:\t";
-    prt::rowMajor(ans.nidx, 1, ans.k);
-
-    std::cout << std::endl;
+    prt::kNN(ans);
 
     return 0;
 }

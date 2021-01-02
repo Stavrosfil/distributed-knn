@@ -4,7 +4,7 @@
 class Point {
 
 public:
-  uint32_t index;
+  int index;
   double* coords;
   int d;
 
