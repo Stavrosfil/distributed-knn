@@ -9,50 +9,16 @@
 #include <vector>
 #include <queue>
 
-#define D_MAX std::numeric_limits<double>::max()
-
 #include "utils.hpp"
 
-struct CustomCompare {
-    bool operator()(const std::pair<double, Point>& lhs, const std::pair<double, Point>& rhs)
-    {
-        return lhs.first < rhs.first;
-    }
-};
+#define D_MAX std::numeric_limits<double>::max()
+typedef std::priority_queue<std::pair<double, Point>, std::vector<std::pair<double, Point>>, comp::heapDist> pointHeap;
 
-// struct HeapItem {
-//     double dist;
-//     const Point& point;
-//     HeapItem(const Point& p, double dist) : point(p), dist(dist) {}
-//     bool operator<(const HeapItem& o) const
-//     {
-//         return dist < o.dist;
-//     }
-//     // ~HeapItem() {}
-//     // HeapItem* operator=(const HeapItem& o)
-//     // {
-//     // dist  = o.dist;
-//     // point = o.point;
-//     // return this;
-//     // }
-//     HeapItem& operator=(const HeapItem&)
-//     {
-//         return *this;
-//     }
-// };
-
-typedef struct knnresult {
+struct knnresult {
     int* nidx;     //!< Indices (0-based) of nearest neighbors [m-by-k]
     double* ndist; //!< Distance of nearest neighbors          [m-by-k]
     int m;         //!< Number of query points                 [scalar]
     int k;         //!< Number of nearest neighbors            [scalar]
-} knnresult;
-
-struct less_than_key {
-    inline bool operator()(const std::pair<double, int> a, const std::pair<double, int> b)
-    {
-        return (a.first < b.first);
-    }
 };
 
 void kNN(knnresult& res, double* X, double* Y, int displacement, int n, int m, int d, int k)
@@ -75,7 +41,7 @@ void kNN(knnresult& res, double* X, double* Y, int displacement, int n, int m, i
             _D[n + j].second = res.nidx[i * k + j];
         }
 
-        std::partial_sort(_D.begin(), _D.begin() + k, _D.end(), less_than_key());
+        std::partial_sort(_D.begin(), _D.begin() + k, _D.end(), comp::lessThanKey());
 
         for (int j = 0; j < k; j++) {
             res.ndist[i * k + j] = _D[j].first;
@@ -84,14 +50,9 @@ void kNN(knnresult& res, double* X, double* Y, int displacement, int n, int m, i
     }
 }
 
-void updateKNN(
-    std::priority_queue<std::pair<double, Point>, std::vector<std::pair<double, Point>>, CustomCompare>& heap,
-    Point& queryPoint,
-    Point& corpusPoint,
-    int k)
+void updateKNN(pointHeap& heap, Point& queryPoint, Point& corpusPoint, int k)
 {
     double dist = util::distance(queryPoint, corpusPoint);
-    std::cout << "Size:\t" << heap.size() << std::endl;
     if (heap.size() == k) {
         if (dist < heap.top().first) {
             heap.pop();

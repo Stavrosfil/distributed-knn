@@ -5,48 +5,6 @@
 #include <stdlib.h>
 #include "node.hpp"
 
-namespace prt {
-
-void rowMajor(double* a, int n, int m)
-{
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++)
-            std::cout << a[i * m + j] << "\t";
-        std::cout << std::endl;
-    }
-}
-
-void rowMajor(int* a, int n, int m)
-{
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++)
-            std::cout << a[i * m + j] << "\t";
-        std::cout << std::endl;
-    }
-}
-
-void rowMajor(std::pair<double, int>* a, int n, int m)
-{
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++)
-            std::cout << a[i * m + j].first << "\t";
-        std::cout << std::endl;
-    }
-}
-
-void points(std::vector<Point> _points)
-{
-    for (int i = 0; i < _points.size(); i++) {
-        std::cout << "( ";
-        for (int j = 0; j < _points[0].d; j++)
-            std::cout << _points[i].coords[j] << " ";
-        std::cout << ") ";
-    }
-    std::cout << std::endl << std::endl;
-}
-
-} // namespace prt
-
 namespace util {
 
 void computeChunksDisplacements(int* cnt, int* displs, int processes, int row_s, int col_s)
@@ -106,5 +64,74 @@ double distance(const Point& p1, const Point& p2)
 }
 
 } // namespace util
+
+namespace comp {
+
+struct heapDist {
+    bool operator()(const std::pair<double, Point>& lhs, const std::pair<double, Point>& rhs)
+    {
+        return lhs.first < rhs.first;
+    }
+};
+
+struct lessThanKey {
+    inline bool operator()(const std::pair<double, int> a, const std::pair<double, int> b)
+    {
+        return (a.first < b.first);
+    }
+};
+
+struct distanceFromVP {
+    Point& p;
+    distanceFromVP(Point& p) : p(p) {}
+    bool operator()(Point& p1, Point& p2)
+    {
+        return util::distance(p, p1) < util::distance(p, p2);
+    }
+};
+
+} // namespace comp
+
+namespace prt {
+
+void rowMajor(double* a, int n, int m)
+{
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++)
+            std::cout << a[i * m + j] << "\t";
+        std::cout << std::endl;
+    }
+}
+
+void rowMajor(int* a, int n, int m)
+{
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++)
+            std::cout << a[i * m + j] << "\t";
+        std::cout << std::endl;
+    }
+}
+
+void rowMajor(std::pair<double, int>* a, int n, int m)
+{
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++)
+            std::cout << a[i * m + j].first << "\t";
+        std::cout << std::endl;
+    }
+}
+
+void points(std::vector<Point> _points)
+{
+    for (int i = 0; i < _points.size(); i++) {
+        std::cout << "( ";
+        for (int j = 0; j < _points[0].d; j++)
+            std::cout << _points[i].coords[j] << " ";
+        std::cout << ") ";
+    }
+    std::cout << std::endl << std::endl;
+}
+
+} // namespace prt
 
 #endif // __UTILS_H__

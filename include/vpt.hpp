@@ -10,15 +10,6 @@
 
 #include "knn.hpp"
 
-struct distanceFromVP {
-    Point& p;
-    distanceFromVP(Point& p) : p(p) {}
-    bool operator()(Point& p1, Point& p2)
-    {
-        return util::distance(p, p1) < util::distance(p, p2);
-    }
-};
-
 class VPT {
 
   public:
@@ -43,10 +34,10 @@ class VPT {
             _nodes[node.rightIndex].parentIndex = _nodes.size();
         }
         else {
-            node.points     = new Point[n];
-            node.points_len = n;
+            node.leafPoints    = new Point[n];
+            node.leafPointsLen = n;
             for (int i = 0; i < n; i++) {
-                node.points[i] = _points[lo + 1 + i];
+                node.leafPoints[i] = _points[lo + 1 + i];
             }
         }
 
@@ -54,36 +45,33 @@ class VPT {
         return _nodes.size() - 1;
     }
 
-    void vptKnn(Point& p, knnresult& ans)
+    void kNN(Point& p, knnresult& ans)
     {
-        // heap.push(HeapItem(_points[0], util::distance(p, _points[0])));
         k             = ans.k;
         int leafIndex = searchLeaf(p, _nodes.size() - 1);
         leafKNN(p, _nodes[leafIndex]);
         climbVPT(p, leafIndex);
 
         for (int i = 0; i < k; i++) {
-            ans.ndist[k - i - 1] = heap.top().first;
-            ans.nidx[k - i - 1]  = heap.top().second.index;
-            heap.pop();
+            ans.ndist[k - i - 1] = _heap.top().first;
+            ans.nidx[k - i - 1]  = _heap.top().second.index;
+            _heap.pop();
         }
     }
 
   private:
     int k = 3;
     int b = 0;
-    double tau;
-    knnresult& ans();
-    std::vector<Point>& _points;
 
-    std::priority_queue<std::pair<double, Point>, std::vector<std::pair<double, Point>>, CustomCompare> heap;
+    pointHeap _heap;
+    std::vector<Point>& _points;
 
     int searchLeaf(Point& p, int rootIndex)
     {
         int curNodeIndex = rootIndex;
         while (!isLeaf(_nodes[curNodeIndex])) {
 
-            updateKNN(heap, p, _points[_nodes[curNodeIndex].vpIndex], k);
+            updateKNN(_heap, p, _points[_nodes[curNodeIndex].vpIndex], k);
 
             double dist = util::distance(p, _points[_nodes[curNodeIndex].vpIndex]);
             if (dist < _nodes[curNodeIndex].mu)
@@ -92,33 +80,33 @@ class VPT {
                 curNodeIndex = moveRight(curNodeIndex);
         }
 
-        updateKNN(heap, p, _points[_nodes[curNodeIndex].vpIndex], k);
-
-        std::cout << "Leaf vp = " << _points[_nodes[curNodeIndex].vpIndex].coords[0] << std::endl;
+        updateKNN(_heap, p, _points[_nodes[curNodeIndex].vpIndex], k);
         return curNodeIndex;
     }
 
     double computeMu(int lo, int median, int hi)
     {
-        // prt::points(_points);
-        std::nth_element(
-            _points.begin() + lo + 1, _points.begin() + median, _points.begin() + hi, distanceFromVP(_points[lo]));
-        // prt::points(_points);
+        // prt::leafPoints(_points);
+        std::nth_element(_points.begin() + lo + 1,
+                         _points.begin() + median,
+                         _points.begin() + hi,
+                         comp::distanceFromVP(_points[lo]));
+        // prt::leafPoints(_points);
         return util::distance(_points[lo], _points[median]);
     }
 
     void climbVPT(Point& p, int curNodeIndex)
-    { // curNodeIndex = leaf index
+    {
         do {
             if (isLeftChild(curNodeIndex)) {
                 curNodeIndex = moveUp(curNodeIndex);
-                if (checkOutside(p, _nodes[curNodeIndex], heap.top().first)) {
+                if (checkOutside(p, _nodes[curNodeIndex], _heap.top().first)) {
                     searchSubtree(p, moveRight(curNodeIndex));
                 }
             }
             else if (isRightChild(curNodeIndex)) {
                 curNodeIndex = moveUp(curNodeIndex);
-                if (checkInside(p, _nodes[curNodeIndex], heap.top().first)) {
+                if (checkInside(p, _nodes[curNodeIndex], _heap.top().first)) {
                     searchSubtree(p, moveLeft(curNodeIndex));
                 }
             }
@@ -127,19 +115,32 @@ class VPT {
 
     void leafKNN(Point& p, Node& curNode)
     {
-        if (isLeaf(curNode)) { // TODO remove if
-            for (int i = 0; i < curNode.points_len; i++) {
-                updateKNN(heap, p, curNode.points[i], k);
+        for (int i = 0; i < curNode.leafPointsLen; i++) {
+            updateKNN(_heap, p, curNode.leafPoints[i], k);
+        }
+    }
+
+    void searchSubtree(Point& p, int curNodeIndex)
+    {
+        updateKNN(_heap, p, _points[_nodes[curNodeIndex].vpIndex], k);
+
+        if (isLeaf(_nodes[curNodeIndex]))
+            leafKNN(p, _nodes[curNodeIndex]);
+        else {
+            if (checkInside(p, _nodes[curNodeIndex], _heap.top().first)) {
+                searchSubtree(p, moveLeft(curNodeIndex));
+            }
+            if (checkOutside(p, _nodes[curNodeIndex], _heap.top().first)) {
+                searchSubtree(p, moveRight(curNodeIndex));
             }
         }
     }
 
+    /* -------------------------------- Checkers -------------------------------- */
+
     bool isLeaf(Node& n)
     {
-        if (n.leftIndex == -1)
-            return true;
-        else
-            return false;
+        return n.leftIndex == -1 && n.rightIndex == -1;
     }
 
     int moveUp(int curNodeIndex)
@@ -159,64 +160,32 @@ class VPT {
 
     bool checkInside(Point& p, Node& curNode, double tau)
     {
-        if (util::distance(p, _points[curNode.vpIndex]) < curNode.mu + tau) {
-            std::cout << "vp = " << _points[curNode.vpIndex].coords[0]
-                      << "\tcheckInside = 1\t\tdistance = " << util::distance(p, _points[curNode.vpIndex])
-                      << "\tmu = " << curNode.mu << "\ttau = " << tau << std::endl;
-            return true;
-        }
-        std::cout << "vp = " << _points[curNode.vpIndex].coords[0]
-                  << "\tcheckInside = 0\t\tdistance = " << util::distance(p, _points[curNode.vpIndex])
-                  << "\tmu = " << curNode.mu << "\ttau = " << tau << std::endl;
-        return false;
+        // std::cout << "vp = " << _points[curNode.vpIndex].coords[0]
+        //   << "\tcheckInside = 1\t\tdistance = " << util::distance(p, _points[curNode.vpIndex])
+        //   << "\tmu = " << curNode.mu << "\ttau = " << tau << std::endl;
+        return util::distance(p, _points[curNode.vpIndex]) < curNode.mu + tau;
     }
 
     bool checkOutside(Point& p, Node& curNode, double tau)
     {
-        if (util::distance(p, _points[curNode.vpIndex]) > curNode.mu - tau) {
-            std::cout << "vp = " << _points[curNode.vpIndex].coords[0]
-                      << "\tcheckOutside = 1\tdistance = " << util::distance(p, _points[curNode.vpIndex])
-                      << "\tmu = " << curNode.mu << "\ttau = " << tau << std::endl;
-            return true;
-        }
-        std::cout << "vp = " << _points[curNode.vpIndex].coords[0]
-                  << "\tcheckOutside = 0\tdistance = " << util::distance(p, _points[curNode.vpIndex])
-                  << "\tmu = " << curNode.mu << "\ttau = " << tau << std::endl;
-        return false;
+        // std::cout << "vp = " << _points[curNode.vpIndex].coords[0]
+        //   << "\tcheckOutside = 0\tdistance = " << util::distance(p, _points[curNode.vpIndex])
+        //   << "\tmu = " << curNode.mu << "\ttau = " << tau << std::endl;
+        return util::distance(p, _points[curNode.vpIndex]) > curNode.mu - tau;
     }
 
     bool isLeftChild(int curNodeIndex)
     {
-        if (_nodes[curNodeIndex].parentIndex == -1)
-            return false;
-        if (curNodeIndex == _nodes[_nodes[curNodeIndex].parentIndex].leftIndex)
-            return true;
-        return false;
+        return _nodes[curNodeIndex].parentIndex != -1
+                   ? curNodeIndex == _nodes[_nodes[curNodeIndex].parentIndex].leftIndex
+                   : false;
     }
 
     bool isRightChild(int curNodeIndex)
     {
-        if (_nodes[curNodeIndex].parentIndex == -1)
-            return false;
-        if (curNodeIndex == _nodes[_nodes[curNodeIndex].parentIndex].rightIndex)
-            return true;
-        return false;
-    }
-
-    void searchSubtree(Point& p, int curNodeIndex)
-    {
-        updateKNN(heap, p, _points[_nodes[curNodeIndex].vpIndex], k);
-
-        if (isLeaf(_nodes[curNodeIndex]))
-            leafKNN(p, _nodes[curNodeIndex]);
-        else {
-            if (checkInside(p, _nodes[curNodeIndex], heap.top().first)) {
-                searchSubtree(p, moveLeft(curNodeIndex));
-            }
-            if (checkOutside(p, _nodes[curNodeIndex], heap.top().first)) {
-                searchSubtree(p, moveRight(curNodeIndex));
-            }
-        }
+        return _nodes[curNodeIndex].parentIndex != -1
+                   ? curNodeIndex == _nodes[_nodes[curNodeIndex].parentIndex].rightIndex
+                   : false;
     }
 };
 

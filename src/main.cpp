@@ -1,5 +1,7 @@
 #include <iostream>
 #include <stdlib.h>
+#include <iterator>
+#include <algorithm>
 
 #include "knn.hpp"
 #include "utils.hpp"
@@ -28,18 +30,14 @@ int main()
     int len       = 8;
     int m         = 1;
 
-    knnresult _ans = knnresult();
-    _ans.m         = m;
-    _ans.k         = k;
-    _ans.nidx      = new int[_ans.m * _ans.k]();
-    _ans.ndist     = new double[_ans.m * _ans.k]();
+    knnresult ans = knnresult();
+    ans.m         = m;
+    ans.k         = k;
+    ans.nidx      = new int[ans.m * ans.k];
+    ans.ndist     = new double[ans.m * ans.k];
 
-    for (int i = 0; i < _ans.m; i++) {
-        for (int j = 0; j < k; j++) {
-            _ans.ndist[i * k + j] = D_MAX;
-            _ans.nidx[i * k + j]  = -1;
-        }
-    }
+    std::fill_n(ans.nidx, ans.m * ans.k, D_MAX);
+    std::fill_n(ans.ndist, ans.m * ans.k, -1);
 
     std::vector<Point> X;
 
@@ -53,46 +51,34 @@ int main()
         X.push_back(Point(i, coords, d));
     }
 
-    /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Construct VPT ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+    /* ------------------------------ Construct VPT ----------------------------- */
 
     VPT vpt(X);
     vpt.buildTree(0, X.size());
-    // std::cout << vpt.buildTree(0, X.size()) << std::endl;
 
     int cnt = 0;
     for (auto p : vpt._nodes) {
         std::cout << cnt++ << ": " << X[p.vpIndex].coords[0] << "\t"
                   << "mu: " << p.mu << "\t(" << p.leftIndex << ", " << p.rightIndex << ", " << p.parentIndex << ")"
                   << std::endl;
-        if (p.points_len) {
-            for (int j = 0; j < p.points_len; j++) {
-                std::cout << p.points[j].coords[0] << std::endl;
+        if (p.leafPointsLen) {
+            for (int j = 0; j < p.leafPointsLen; j++) {
+                std::cout << p.leafPoints[j].coords[0] << std::endl;
             }
         }
-        // std::cout << i.vpIndex << std::endl;
     }
     std::cout << std::endl;
 
-    double* coords = new double[1];
-    coords[0]      = 42;
-    Point p        = Point(-1, coords, 1);
+    Point p = Point(-1, new double[1]{8}, 1);
 
-    /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ VPT kNN ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+    /* --------------------------------- VPT kNN -------------------------------- */
 
-    vpt.vptKnn(p, _ans);
+    vpt.kNN(p, ans);
 
     std::cout << "\nkNN ndist:\t";
-    prt::rowMajor(_ans.ndist, 1, _ans.k);
+    prt::rowMajor(ans.ndist, 1, ans.k);
     std::cout << "kNN nidx:\t";
-    prt::rowMajor(_ans.nidx, 1, _ans.k);
-    std::cout << std::endl;
-
-    // for (auto i : X) {
-    //     std::cout << i.coords[0] << std::endl;
-    // }
-
-    // std::cout << "mu = " << root.mu << std::endl;
-    std::cout << std::endl;
+    prt::rowMajor(ans.nidx, 1, ans.k);
 
     return 0;
 }

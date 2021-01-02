@@ -19,10 +19,12 @@ class Node {
     int parentIndex;
     int leftIndex;
     int rightIndex;
-    Point* points;
-    int points_len;
+    Point* leafPoints;
+    int leafPointsLen;
 
     double mu;
 
-    Node() : vpIndex(-1), parentIndex(-1), leftIndex(-1), rightIndex(-1), mu(-1.), points(nullptr), points_len(0) {}
+    Node() : vpIndex(-1), parentIndex(-1), leftIndex(-1), rightIndex(-1), mu(-1.), leafPoints(nullptr), leafPointsLen(0)
+    {
+    }
 };
