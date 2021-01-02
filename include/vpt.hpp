@@ -47,6 +47,7 @@ public:
 
     void kNN(Point& p, knnresult& ans, int queryIndex)
     {
+        _heap = pointHeap();
         k = ans.k;
         int leafIndex = searchLeaf(p, _nodes.size() - 1);
         leafKNN(p, _nodes[leafIndex]);

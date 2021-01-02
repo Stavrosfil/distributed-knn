@@ -132,6 +132,15 @@ namespace prt {
         std::cout << std::endl << std::endl;
     }
 
+    void point(Point& p)
+    {
+        std::cout << "( ";
+        for (int i = 0; i < p.d; i++)
+            std::cout << p.coords[i] << " ";
+        std::cout << ")\t";
+        // std::cout << std::endl << std::endl;
+    }
+
 } // namespace prt
 
 #endif // __UTILS_H__

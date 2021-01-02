@@ -26,7 +26,7 @@ int main()
     // double corpusData[]      = {100, 80, 70, 60, 40, 35, 200, 500};
     double corpusData[] = { 14, 2, 50, 8, 11, 7, 19, 40 };
     double queryData[] = { 8, 11, 8, 11, 8, 11 };
-    int k = 2;
+    int k = 4;
     int d = 2;
     int corpusLen = 8;                      // length of corpusData[]
     int queryLen = 6;                       // length of queryData[]
@@ -69,7 +69,9 @@ int main()
     int cnt = 0;
     std::cout << "\nVantage point tree:\n\n";
     for (auto p : vpt._nodes) {
-        std::cout << "nodes[" << cnt++ << "]:\tvp = " << corpus[p.vpIndex].coords[0] << "\t\t"
+        std::cout << "nodes[" << cnt++ << "]:\tvp = ";
+        prt::point(corpus[p.vpIndex]);
+        std::cout << "\t\t"
             << "mu = " << p.mu << "\t\t(" << p.leftIndex << ", " << p.rightIndex << ", " << p.parentIndex << ")"
             << std::endl;
         if (p.leafPointsLen) {
