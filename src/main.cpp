@@ -25,11 +25,11 @@ int main()
 
     // double corpusData[]      = {100, 80, 70, 60, 40, 35, 200, 500};
     double corpusData[] = { 14, 2, 50, 8, 11, 7, 19, 40 };
-    double queryData[] = { 8, 42, 4, 12 };
-    int k = 4;
+    double queryData[] = { 8, 11, 8, 11, 8, 11 };
+    int k = 2;
     int d = 2;
     int corpusLen = 8;                      // length of corpusData[]
-    int queryLen = 4;                       // length of queryData[]
+    int queryLen = 6;                       // length of queryData[]
 
     std::vector<Point> corpus;
     for (int i = 0; i < corpusLen; i += d) {
