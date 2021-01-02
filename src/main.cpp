@@ -24,28 +24,20 @@ int main()
     // struct knnresult ans = mpi::distrAllkNN(X, n, d, k);
 
     // double corpusData[]      = {100, 80, 70, 60, 40, 35, 200, 500};
-    double corpusData[] = {14, 2, 50, 8, 11, 7, 19, 40};
-    double queryData[]  = {8, 100, 10, 52};
-    int k               = 4;
-    int d               = 1;
-    int corpusLen       = 8; // length of corpusData[]
-    int queryLen        = 4; // length of queryData[]
+    std::vector<double> corpusData = {14, 2, 50, 8, 11, 7, 19, 40};
+    std::vector<double> queryData  = {8, 100, 10, 52};
 
-    std::vector<Point> corpus;
-    for (int i = 0; i < corpusLen; i += d) {
-        double* coords = new double[d];
-        for (int j = 0; j < d; j++)
-            coords[j] = corpusData[i + j];
-        corpus.push_back(Point(corpus.size(), coords, d));
-    }
+    int d = 2;
+    int k = 4;
 
-    std::vector<Point> query;
-    for (int i = 0; i < queryLen; i += d) {
-        double* coords = new double[d];
-        for (int j = 0; j < d; j++)
-            coords[j] = queryData[i + j];
-        query.push_back(Point(query.size(), coords, d));
-    }
+    std::vector<Point> corpus(corpusData.size() / d);
+    std::vector<Point> query(queryData.size() / d);
+
+    for (int i = 0; i < corpusData.size() / d; i++)
+        corpus[i] = Point(i, &corpusData[i * d], d);
+
+    for (int i = 0; i < queryData.size() / d; i++)
+        query[i] = Point(i, &queryData[i * d], d);
 
     std::cout << "Corpus points:\t";
     prt::points(corpus);

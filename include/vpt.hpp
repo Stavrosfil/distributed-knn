@@ -25,7 +25,7 @@ class VPT {
         node.vpIndex = lo;
 
         int n = hi - (lo + 1);
-        if (n >= 2 * b + 2) {
+        if (n >= 2 * _b + 2) {
             int median                          = (hi + lo) % 2 == 0 ? (hi + lo) / 2 : (hi + lo + 1) / 2;
             node.mu                             = computeMu(lo, median, hi);
             node.leftIndex                      = buildTree(lo + 1, median);
@@ -45,44 +45,44 @@ class VPT {
         return _nodes.size() - 1;
     }
 
-    void kNN(Point& p, knnresult& ans, int queryIndex)
+    void kNN(Point& qp, knnresult& ans, int queryIndex)
     {
         _heap = pointHeap();
         _heap.push(std::make_pair(D_MAX, Point()));
-        k             = ans.k;
-        int leafIndex = searchLeaf(p, _nodes.size() - 1);
-        leafKNN(p, _nodes[leafIndex]);
-        climbVPT(p, leafIndex);
+        _k            = ans.k;
+        int leafIndex = searchLeaf(qp, _nodes.size() - 1);
+        leafKNN(qp, _nodes[leafIndex]);
+        climbVPT(qp, leafIndex);
 
-        for (int i = 0; i < k; i++) {
-            ans.ndist[k * (queryIndex + 1) - i - 1] = _heap.top().first;
-            ans.nidx[k * (queryIndex + 1) - i - 1]  = _heap.top().second.index;
+        for (int i = 0; i < _k; i++) {
+            ans.ndist[_k * (queryIndex + 1) - i - 1] = _heap.top().first;
+            ans.nidx[_k * (queryIndex + 1) - i - 1]  = _heap.top().second.index;
             _heap.pop();
         }
     }
 
   private:
-    int k = 3;
-    int b = 0;
+    int _k = 3;
+    int _b = 0;
 
     pointHeap _heap;
     std::vector<Point>& _points;
 
-    int searchLeaf(Point& p, int rootIndex)
+    int searchLeaf(Point& qp, int rootIndex)
     {
         int curNodeIndex = rootIndex;
         while (!isLeaf(_nodes[curNodeIndex])) {
 
-            updateKNN(_heap, p, _points[_nodes[curNodeIndex].vpIndex], k);
+            updateKNN(_heap, qp, _points[_nodes[curNodeIndex].vpIndex], _k);
 
-            double dist = util::distance(p, _points[_nodes[curNodeIndex].vpIndex]);
+            double dist = util::distance(qp, _points[_nodes[curNodeIndex].vpIndex]);
             if (dist < _nodes[curNodeIndex].mu)
                 curNodeIndex = moveLeft(curNodeIndex);
             else
                 curNodeIndex = moveRight(curNodeIndex);
         }
 
-        updateKNN(_heap, p, _points[_nodes[curNodeIndex].vpIndex], k);
+        updateKNN(_heap, qp, _points[_nodes[curNodeIndex].vpIndex], _k);
         return curNodeIndex;
     }
 
@@ -97,43 +97,43 @@ class VPT {
         return util::distance(_points[lo], _points[median]);
     }
 
-    void climbVPT(Point& p, int curNodeIndex)
+    void climbVPT(Point& qp, int curNodeIndex)
     {
         do {
             if (isLeftChild(curNodeIndex)) {
                 curNodeIndex = moveUp(curNodeIndex);
-                if (checkOutside(p, _nodes[curNodeIndex], _heap.top().first)) {
-                    searchSubtree(p, moveRight(curNodeIndex));
+                if (checkOutside(qp, _nodes[curNodeIndex], _heap.top().first)) {
+                    searchSubtree(qp, moveRight(curNodeIndex));
                 }
             }
             else if (isRightChild(curNodeIndex)) {
                 curNodeIndex = moveUp(curNodeIndex);
-                if (checkInside(p, _nodes[curNodeIndex], _heap.top().first)) {
-                    searchSubtree(p, moveLeft(curNodeIndex));
+                if (checkInside(qp, _nodes[curNodeIndex], _heap.top().first)) {
+                    searchSubtree(qp, moveLeft(curNodeIndex));
                 }
             }
         } while (curNodeIndex != _nodes.size() - 1);
     }
 
-    void leafKNN(Point& p, Node& curNode)
+    void leafKNN(Point& qp, Node& curNode)
     {
         for (int i = 0; i < curNode.leafPointsLen; i++) {
-            updateKNN(_heap, p, curNode.leafPoints[i], k);
+            updateKNN(_heap, qp, curNode.leafPoints[i], _k);
         }
     }
 
-    void searchSubtree(Point& p, int curNodeIndex)
+    void searchSubtree(Point& qp, int curNodeIndex)
     {
-        updateKNN(_heap, p, _points[_nodes[curNodeIndex].vpIndex], k);
+        updateKNN(_heap, qp, _points[_nodes[curNodeIndex].vpIndex], _k);
 
         if (isLeaf(_nodes[curNodeIndex]))
-            leafKNN(p, _nodes[curNodeIndex]);
+            leafKNN(qp, _nodes[curNodeIndex]);
         else {
-            if (checkInside(p, _nodes[curNodeIndex], _heap.top().first)) {
-                searchSubtree(p, moveLeft(curNodeIndex));
+            if (checkInside(qp, _nodes[curNodeIndex], _heap.top().first)) {
+                searchSubtree(qp, moveLeft(curNodeIndex));
             }
-            if (checkOutside(p, _nodes[curNodeIndex], _heap.top().first)) {
-                searchSubtree(p, moveRight(curNodeIndex));
+            if (checkOutside(qp, _nodes[curNodeIndex], _heap.top().first)) {
+                searchSubtree(qp, moveRight(curNodeIndex));
             }
         }
     }
@@ -160,20 +160,20 @@ class VPT {
         return _nodes[curNodeIndex].rightIndex;
     }
 
-    bool checkInside(Point& p, Node& curNode, double tau)
+    bool checkInside(Point& qp, Node& curNode, double tau)
     {
         // std::cout << "vp = " << _points[curNode.vpIndex].coords[0]
         //   << "\tcheckInside = 1\t\tdistance = " << util::distance(p, _points[curNode.vpIndex])
         //   << "\tmu = " << curNode.mu << "\ttau = " << tau << std::endl;
-        return util::distance(p, _points[curNode.vpIndex]) < curNode.mu + tau;
+        return util::distance(qp, _points[curNode.vpIndex]) < curNode.mu + tau;
     }
 
-    bool checkOutside(Point& p, Node& curNode, double tau)
+    bool checkOutside(Point& qp, Node& curNode, double tau)
     {
         // std::cout << "vp = " << _points[curNode.vpIndex].coords[0]
         //   << "\tcheckOutside = 0\tdistance = " << util::distance(p, _points[curNode.vpIndex])
         //   << "\tmu = " << curNode.mu << "\ttau = " << tau << std::endl;
-        return util::distance(p, _points[curNode.vpIndex]) > curNode.mu - tau;
+        return util::distance(qp, _points[curNode.vpIndex]) > curNode.mu - tau;
     }
 
     bool isLeftChild(int curNodeIndex)
