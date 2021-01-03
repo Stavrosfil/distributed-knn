@@ -9,7 +9,7 @@
 #include "knn.hpp"
 #include "utils.hpp"
 #include "distributed.hpp"
-#include "vpt.hpp"
+#include "vptree.hpp"
 
 std::vector<Point> getNDVector(int n, int d, std::string filename)
 {
@@ -133,13 +133,12 @@ int main(int argc, char** argv)
     std::fill_n(ans.ndist, ans.m * ans.k, -1);
 
     VPT vpt(corpus, b, k);
-    vpt.buildTree(0, corpus.size());
+    Node* root = vpt.buildTree(0, corpus.size());
 
     t1 = std::chrono::high_resolution_clock::now();
 
     for (auto p : query) {
-        // auto p = query[0];
-        vpt.kNN(p, ans, p.index);
+        vpt.kNN(p, ans, p.index, *root);
     }
 
     t2       = std::chrono::high_resolution_clock::now();

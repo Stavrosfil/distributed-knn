@@ -23,15 +23,13 @@ class Node {
 
   public:
     int vpIndex;
-    int parentIndex;
-    int leftIndex;
-    int rightIndex;
+    double mu;
+
+    Node* left;
+    Node* right;
+
     Point* leafPoints;
     int leafPointsLen;
 
-    double mu;
-
-    Node() : vpIndex(-1), parentIndex(-1), leftIndex(-1), rightIndex(-1), mu(-1.), leafPoints(nullptr), leafPointsLen(0)
-    {
-    }
+    Node() : vpIndex(-1), left(nullptr), right(nullptr), mu(-1.), leafPoints(nullptr), leafPointsLen(0) {}
 };
