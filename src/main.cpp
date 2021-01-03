@@ -72,10 +72,15 @@ int main(int argc, char** argv)
 
     std::cout << std::endl;
 
-    int d = 20;
+    int d = 10;
     int k = 100;
-    int b = 1000;
+    int b = 0;
     int n = 10000;
+
+    // int d = 1;
+    // int k = 4;
+    // int b = 0;
+    // int n = 8;
 
     std::string line;
     std::string fileName = "data.csv";
@@ -99,19 +104,19 @@ int main(int argc, char** argv)
 
     /* ----------------------------------- v1 ----------------------------------- */
 
-    std::vector<double> v1c = getRowMajorVector(n, d, fileName);
-    // prt::rowMajor(v1c.data(), n, d);
+    // std::vector<double> v1c = getRowMajorVector(n, d, fileName);
+    // // prt::rowMajor(v1c.data(), n, d);
 
-    t1 = std::chrono::high_resolution_clock::now();
+    // t1 = std::chrono::high_resolution_clock::now();
 
-    struct knnresult result = mpi::distrAllkNN(v1c.data(), n, d, k);
+    // struct knnresult result = mpi::distrAllkNN(v1c.data(), n, d, k);
 
-    t2       = std::chrono::high_resolution_clock::now();
-    duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+    // t2       = std::chrono::high_resolution_clock::now();
+    // duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
-    // prt::kNN(result);
+    // // prt::kNN(result);
 
-    std::cout << duration / 1e3 << "ms" << std::endl;
+    // std::cout << duration / 1e3 << "ms" << std::endl;
 
     /* ----------------------------------- v2 ----------------------------------- */
 
@@ -133,9 +138,9 @@ int main(int argc, char** argv)
     t1 = std::chrono::high_resolution_clock::now();
 
     for (auto p : query) {
+        // auto p = query[0];
         vpt.kNN(p, ans, p.index);
     }
-    // auto p = query[0];
 
     t2       = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();

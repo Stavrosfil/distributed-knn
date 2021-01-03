@@ -56,15 +56,16 @@ void computeEuclideanDistance(double* X, double* Y, double* D, int n, int m, int
     }
 }
 
-double computeEucledianNorm(double* d1, double* d2, int d)
+double computeEucledianNorm(const double* d1, const double* d2, int d)
 {
-    double* dist = new double[d];
+    // double* dist = new double[d];
+    double dist = 0;
     for (int i = 0; i < d; i++) {
-        dist[i] = d1[i] - d2[i];
+        dist += (d1[i] - d2[i]) * (d1[i] - d2[i]);
     }
-    double ans = cblas_dnrm2(d, dist, 1);
-    delete dist;
-    return ans;
+    // double ans = cblas_dnrm2(d, dist, 1);
+    // delete dist;
+    return sqrt(dist);
 }
 
 double distance(const Point& p1, const Point& p2)
