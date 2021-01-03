@@ -15,7 +15,7 @@ class VPT {
   public:
     std::vector<Node> _nodes;
 
-    VPT(std::vector<Point>& points) : _points(points) {}
+    VPT(std::vector<Point>& points, int b, int k) : _points(points), _b(b), _k(k) {}
 
     // Partition and construct tree from _points[lo:hi]
     // lo and hi are indices of corpus array
@@ -47,23 +47,22 @@ class VPT {
 
     void kNN(Point& qp, knnresult& ans, int queryIndex)
     {
-        _heap = pointHeap();
-        _heap.push(std::make_pair(D_MAX, Point()));
-        _k            = ans.k;
+        _heap.push(heapItem(D_MAX, nullptr));
+
         int leafIndex = searchLeaf(qp, _nodes.size() - 1);
         leafKNN(qp, _nodes[leafIndex]);
         climbVPT(qp, leafIndex);
 
         for (int i = 0; i < _k; i++) {
-            ans.ndist[_k * (queryIndex + 1) - i - 1] = _heap.top().first;
-            ans.nidx[_k * (queryIndex + 1) - i - 1]  = _heap.top().second.index;
+            ans.ndist[_k * (queryIndex + 1) - i - 1] = _heap.top().dist;
+            ans.nidx[_k * (queryIndex + 1) - i - 1]  = _heap.top().p->index;
             _heap.pop();
         }
     }
 
   private:
-    int _k = 3;
-    int _b = 0;
+    int _k;
+    int _b;
 
     pointHeap _heap;
     std::vector<Point>& _points;
@@ -102,13 +101,13 @@ class VPT {
         do {
             if (isLeftChild(curNodeIndex)) {
                 curNodeIndex = moveUp(curNodeIndex);
-                if (checkOutside(qp, _nodes[curNodeIndex], _heap.top().first)) {
+                if (checkOutside(qp, _nodes[curNodeIndex], _heap.top().dist)) {
                     searchSubtree(qp, moveRight(curNodeIndex));
                 }
             }
             else if (isRightChild(curNodeIndex)) {
                 curNodeIndex = moveUp(curNodeIndex);
-                if (checkInside(qp, _nodes[curNodeIndex], _heap.top().first)) {
+                if (checkInside(qp, _nodes[curNodeIndex], _heap.top().dist)) {
                     searchSubtree(qp, moveLeft(curNodeIndex));
                 }
             }
@@ -129,10 +128,10 @@ class VPT {
         if (isLeaf(_nodes[curNodeIndex]))
             leafKNN(qp, _nodes[curNodeIndex]);
         else {
-            if (checkInside(qp, _nodes[curNodeIndex], _heap.top().first)) {
+            if (checkInside(qp, _nodes[curNodeIndex], _heap.top().dist)) {
                 searchSubtree(qp, moveLeft(curNodeIndex));
             }
-            if (checkOutside(qp, _nodes[curNodeIndex], _heap.top().first)) {
+            if (checkOutside(qp, _nodes[curNodeIndex], _heap.top().dist)) {
                 searchSubtree(qp, moveRight(curNodeIndex));
             }
         }

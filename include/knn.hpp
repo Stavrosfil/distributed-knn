@@ -12,7 +12,7 @@
 #include "utils.hpp"
 
 #define D_MAX std::numeric_limits<double>::max()
-typedef std::priority_queue<std::pair<double, Point>, std::vector<std::pair<double, Point>>, comp::heapDist> pointHeap;
+typedef std::priority_queue<heapItem, std::vector<heapItem>, comp::heapDist> pointHeap;
 
 struct knnresult {
     int* nidx;     //!< Indices (0-based) of nearest neighbors [m-by-k]
@@ -75,13 +75,13 @@ void updateKNN(pointHeap& heap, Point& queryPoint, Point& corpusPoint, int k)
 {
     double dist = util::distance(queryPoint, corpusPoint);
     if (heap.size() == k) {
-        if (dist < heap.top().first) {
+        if (dist < heap.top().dist) {
             heap.pop();
-            heap.push(std::make_pair(dist, corpusPoint));
+            heap.push(heapItem(dist, &corpusPoint));
         }
     }
     else {
-        heap.push(std::make_pair(dist, corpusPoint));
+        heap.push(heapItem(dist, &corpusPoint));
     }
 }
 

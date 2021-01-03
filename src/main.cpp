@@ -72,8 +72,9 @@ int main(int argc, char** argv)
 
     std::cout << std::endl;
 
-    int d = 5;
-    int k = 50;
+    int d = 20;
+    int k = 100;
+    int b = 1000;
     int n = 10000;
 
     std::string line;
@@ -98,19 +99,19 @@ int main(int argc, char** argv)
 
     /* ----------------------------------- v1 ----------------------------------- */
 
-    // std::vector<double> v1c = getRowMajorVector(n, d, fileName);
-    // // prt::rowMajor(v1c.data(), n, d);
+    std::vector<double> v1c = getRowMajorVector(n, d, fileName);
+    // prt::rowMajor(v1c.data(), n, d);
 
-    // t1 = std::chrono::high_resolution_clock::now();
+    t1 = std::chrono::high_resolution_clock::now();
 
-    // struct knnresult result = mpi::distrAllkNN(v1c.data(), n, d, k);
+    struct knnresult result = mpi::distrAllkNN(v1c.data(), n, d, k);
 
-    // t2       = std::chrono::high_resolution_clock::now();
-    // duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+    t2       = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
-    // // prt::kNN(result);
+    // prt::kNN(result);
 
-    // std::cout << duration / 1e3 << "ms" << std::endl;
+    std::cout << duration / 1e3 << "ms" << std::endl;
 
     /* ----------------------------------- v2 ----------------------------------- */
 
@@ -126,13 +127,15 @@ int main(int argc, char** argv)
     std::fill_n(ans.nidx, ans.m * ans.k, D_MAX);
     std::fill_n(ans.ndist, ans.m * ans.k, -1);
 
-    VPT vpt(corpus);
+    VPT vpt(corpus, b, k);
     vpt.buildTree(0, corpus.size());
+
     t1 = std::chrono::high_resolution_clock::now();
 
-    // for (auto p : query)
-    auto p = query[0];
-    vpt.kNN(p, ans, p.index);
+    for (auto p : query) {
+        vpt.kNN(p, ans, p.index);
+    }
+    // auto p = query[0];
 
     t2       = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
@@ -167,6 +170,7 @@ int main(int argc, char** argv)
     // }
 
     // prt::kNN(ans);
+    std::cout << std::endl;
 
     return 0;
 }

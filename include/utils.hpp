@@ -62,7 +62,9 @@ double computeEucledianNorm(double* d1, double* d2, int d)
     for (int i = 0; i < d; i++) {
         dist[i] = d1[i] - d2[i];
     }
-    return cblas_dnrm2(d, dist, 1);
+    double ans = cblas_dnrm2(d, dist, 1);
+    delete dist;
+    return ans;
 }
 
 double distance(const Point& p1, const Point& p2)
@@ -75,22 +77,22 @@ double distance(const Point& p1, const Point& p2)
 namespace comp {
 
 struct heapDist {
-    bool operator()(const std::pair<double, Point>& lhs, const std::pair<double, Point>& rhs)
+    bool operator()(const heapItem& lhs, const heapItem& rhs)
     {
-        return lhs.first < rhs.first;
+        return lhs.dist < rhs.dist;
     }
 };
 
 struct lessThanKey {
-    inline bool operator()(const std::pair<double, int> a, const std::pair<double, int> b)
+    inline bool operator()(const std::pair<double, int>& a, const std::pair<double, int>& b)
     {
         return (a.first < b.first);
     }
 };
 
 struct distanceFromVP {
-    Point& p;
-    distanceFromVP(Point& p) : p(p) {}
+    const Point& p;
+    distanceFromVP(const Point& p) : p(p) {}
     bool operator()(Point& p1, Point& p2)
     {
         return util::distance(p, p1) < util::distance(p, p2);
