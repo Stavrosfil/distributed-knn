@@ -151,6 +151,40 @@ void point(Point& p)
     // std::cout << std::endl << std::endl;
 }
 
+void tree(Node* root, std::vector<Point>& points)
+{
+    std::vector<std::vector<int>> levels;
+    if (root == NULL) {
+        return;
+    }
+    std::vector<int> level;
+    std::queue<Node*> q;
+    q.push(root);
+
+    while (!q.empty()) {
+        int curr_size = q.size();
+        for (int i = 0; i < curr_size; ++i) {
+            Node* front = q.front();
+            q.pop();
+            prt::point(points[front->vpIndex]);
+            std::cout << " -> ";
+            level.push_back(front->vpIndex);
+            if (front->left) {
+                q.push(front->left);
+                prt::point(points[front->left->vpIndex]);
+            }
+            if (front->right) {
+                q.push(front->right);
+                prt::point(points[front->right->vpIndex]);
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+        levels.push_back(level);
+        level.clear();
+    }
+}
+
 } // namespace prt
 
 #endif // __UTILS_H__
