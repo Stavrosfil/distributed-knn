@@ -28,8 +28,8 @@ class Node {
     Node* left;
     Node* right;
 
-    Point* leafPoints;
+    int leafPointsIndex;
     int leafPointsLen;
 
-    Node() : vpIndex(-1), left(nullptr), right(nullptr), mu(-1.), leafPoints(nullptr), leafPointsLen(0) {}
+    Node() : vpIndex(-1), left(nullptr), right(nullptr), mu(-1.), leafPointsIndex(-1), leafPointsLen(0) {}
 };

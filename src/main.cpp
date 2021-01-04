@@ -9,7 +9,7 @@
 #include "knn.hpp"
 #include "utils.hpp"
 #include "distributed.hpp"
-#include "vptree.hpp"
+#include "vpt.hpp"
 
 int main(int argc, char** argv)
 {
@@ -20,7 +20,7 @@ int main(int argc, char** argv)
 
     int d = 10;
     int k = 100;
-    int b = 0;
+    int b = 50;
     int n = 10000;
 
     std::string line;
@@ -28,7 +28,7 @@ int main(int argc, char** argv)
     std::ifstream myfile(fileName);
 
     // int d = 1;
-    // int k = 4;
+    // int k = 8;
     // int b = 0;
     // int n = 8;
 
@@ -58,20 +58,20 @@ int main(int argc, char** argv)
 
     /* ----------------------------------- v1 ----------------------------------- */
 
-    std::vector<double> v1c(n * d);
-    util::readToRowMajorVector(v1c, n, d, fileName);
-    // prt::rowMajor(v1c.data(), n, d);
+    // std::vector<double> v1c(n * d);
+    // util::readToRowMajorVector(v1c, n, d, fileName);
+    // // prt::rowMajor(v1c.data(), n, d);
 
-    t1 = std::chrono::high_resolution_clock::now();
+    // t1 = std::chrono::high_resolution_clock::now();
 
-    struct knnresult result = mpi::distrAllkNN(v1c.data(), n, d, k);
+    // struct knnresult result = mpi::distrAllkNN(v1c.data(), n, d, k);
 
-    t2       = std::chrono::high_resolution_clock::now();
-    duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+    // t2       = std::chrono::high_resolution_clock::now();
+    // duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
-    // prt::kNN(result);
+    // // prt::kNN(result);
 
-    std::cout << duration / 1e3 << "ms" << std::endl;
+    // std::cout << "\nv1 time: " << duration / 1e3 << "ms\n" << std::endl;
 
     /* -------------------------------- Build VPT ------------------------------- */
 
@@ -79,7 +79,7 @@ int main(int argc, char** argv)
     util::readNDimVector(corpus, n, d, fileName);
     std::vector<Point> query(corpus);
 
-    VPT vpt(corpus, b, k); // TODO pass corpus by reference and make _points private
+    VPT vpt(corpus, b, k);
 
     t1 = std::chrono::high_resolution_clock::now();
 
@@ -87,10 +87,18 @@ int main(int argc, char** argv)
 
     t2       = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+    
+    // std::cout << "\nCorpus points:\n";
+    // prt::points(corpus);
 
     std::cout << "\nVantage point tree building time: " << duration / 1e3 << "ms" << std::endl;
+    
+    // std::cout << "\nVantage point tree:\n\n";
+    // prt::tree(root, corpus);
+    // prt::point(root->right->right->leafPoints[0]);
+    // prt::point(root->right->leafPoints[0]);
 
-    // prt::points(corpus);
+    std::cout << std::endl;
 
     /* ----------------------------------- v2 ----------------------------------- */
 
@@ -112,19 +120,9 @@ int main(int argc, char** argv)
     // t2 = std::chrono::high_resolution_clock::now();
     // duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
-    // prt::kNN(ans);
+    // // prt::kNN(ans);
 
-    // std::cout << duration / 1e3 << "ms" << std::endl;
-
-    /* --------------------------------- Prints --------------------------------- */
-
-    // std::cout << "\nVantage point tree:\n\n";
-
-    // prt::tree(root, vpt._points);
-
-    // // prt::point(root->right->right->leafPoints[0]);
-
-    // std::cout << std::endl;
+    // std::cout << "v2 time: " << duration / 1e3 << "ms" << std::endl;
 
     /* ----------------------------- Reconstruct VPT ---------------------------- */
 
@@ -137,13 +135,11 @@ int main(int argc, char** argv)
     t2       = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
-    std::cout << "\nVantage point tree reconstruction time: " << duration / 1e3 << "ms" << std::endl;
+    std::cout << "Vantage point tree reconstruction time: " << duration / 1e3 << "ms" << std::endl;
 
     // std::cout << "\nReconstructed vantage point tree:\n\n";
 
     // prt::tree(root2, corpus);
-
-    // prt::point(root2->right->right->leafPoints[0]);
 
     /* ---------------------------- Serialize Vector ---------------------------- */
 
@@ -178,6 +174,13 @@ int main(int argc, char** argv)
 
     // std::cout << "\nVector reconstruction: \n";
     // prt::points(rV);
+
+    /* ----------------------------- Distributed VPT ---------------------------- */
+
+
+
+
+    /* -------------------------------------------------------------------------- */
 
     std::cout << std::endl;
 

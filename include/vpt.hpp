@@ -12,181 +12,142 @@
 
 class VPT {
 
-  public:
-    std::vector<Node> _nodes;
-
+public:
     VPT(std::vector<Point>& points, int b, int k) : _points(points), _b(b), _k(k) {}
 
     // Partition and construct tree from _points[lo:hi]
     // lo and hi are indices of corpus array
-    int buildTree(int lo, int hi)
+    Node* buildTree(int lo, int hi)
     {
-        Node node;
-        node.vpIndex = lo;
+        Node* node = new Node();
+        node->vpIndex = lo;
 
         int n = hi - (lo + 1);
         if (n >= 2 * _b + 2) {
-            int median                          = (hi + lo) % 2 == 0 ? (hi + lo) / 2 : (hi + lo + 1) / 2;
-            node.mu                             = computeMu(lo, median, hi);
-            node.leftIndex                      = buildTree(lo + 1, median);
-            node.rightIndex                     = buildTree(median, hi);
-            _nodes[node.leftIndex].parentIndex  = _nodes.size();
-            _nodes[node.rightIndex].parentIndex = _nodes.size();
+            int median = (hi + lo) % 2 == 0 ? (hi + lo) / 2 : (hi + lo + 1) / 2;
+            node->mu = computeMu(lo, median, hi);
+            node->left = buildTree(lo + 1, median);
+            node->right = buildTree(median, hi);
         }
         else {
-            node.leafPoints    = new Point[n];
-            node.leafPointsLen = n;
-            for (int i = 0; i < n; i++) {
-                node.leafPoints[i] = _points[lo + 1 + i];
-            }
+            // int i = (int)((double)rand() / RAND_MAX * (hi - lo - 1)) + lo;
+            // std::swap(_points[lo], _points[i]);
+            // std::cout << "leafPointsLen = " << n << std::endl;
+            node->leafPointsIndex = lo + 1;
+            node->leafPointsLen = n;
+ 
+            // for (int i = 0; i < node->leafPointsLen; i++) {
+            //     prt::point(_points[node->leafPointsIndex + i]);
+            // }
         }
 
-        _nodes.push_back(node);
-        return _nodes.size() - 1;
+        return node;
     }
 
-    void kNN(Point& qp, knnresult& ans, int queryIndex)
+    void kNN(Point& qp, knnresult& ans, int queryIndex, Node& root)
     {
         _heap.push(heapItem(D_MAX, nullptr));
 
-        int leafIndex = searchLeaf(qp, _nodes.size() - 1);
-        leafKNN(qp, _nodes[leafIndex]);
-        climbVPT(qp, leafIndex);
+        _tau = D_MAX;
+
+        search(qp, root);
 
         for (int i = 0; i < _k; i++) {
             ans.ndist[_k * (queryIndex + 1) - i - 1] = _heap.top().dist;
-            ans.nidx[_k * (queryIndex + 1) - i - 1]  = _heap.top().p->index;
+            ans.nidx[_k * (queryIndex + 1) - i - 1] = _heap.top().p->index;
             _heap.pop();
         }
     }
 
-  private:
-    int _k;
-    int _b;
-
-    pointHeap _heap;
-    std::vector<Point>& _points;
-
-    int searchLeaf(Point& qp, int rootIndex)
+    Node* reconstructTree(int lo, int hi) 
     {
-        int curNodeIndex = rootIndex;
-        while (!isLeaf(_nodes[curNodeIndex])) {
+        Node* node = new Node();
+        node->vpIndex = lo;
 
-            updateKNN(_heap, qp, _points[_nodes[curNodeIndex].vpIndex], _k);
+        int n = hi - (lo + 1);
+        if (n >= 2 * _b + 2) {
+            int median = (hi + lo) % 2 == 0 ? (hi + lo) / 2 : (hi + lo + 1) / 2;
+            node->mu = util::distance(_points[lo], _points[median]);
+            node->left = reconstructTree(lo + 1, median);
+            node->right = reconstructTree(median, hi);
+        }
+        else {
+            // int i = (int)((double)rand() / RAND_MAX * (hi - lo - 1)) + lo;
+            // std::swap(_points[lo], _points[i]);
 
-            double dist = util::distance(qp, _points[_nodes[curNodeIndex].vpIndex]);
-            if (dist < _nodes[curNodeIndex].mu)
-                curNodeIndex = moveLeft(curNodeIndex);
-            else
-                curNodeIndex = moveRight(curNodeIndex);
+            node->leafPointsIndex = lo + 1;
+            node->leafPointsLen = n;
+ 
+            // for (int i = 0; i < node->leafPointsLen; i++) {
+            //     prt::point(_points[node->leafPointsIndex + i]);
+            // }
         }
 
-        updateKNN(_heap, qp, _points[_nodes[curNodeIndex].vpIndex], _k);
-        return curNodeIndex;
+        return node;
     }
 
-    double computeMu(int lo, int median, int hi)
-    {
-        // prt::leafPoints(_points);
-        std::nth_element(_points.begin() + lo + 1,
-                         _points.begin() + median,
-                         _points.begin() + hi,
-                         comp::distanceFromVP(_points[lo]));
-        // prt::leafPoints(_points);
-        return util::distance(_points[lo], _points[median]);
-    }
+private:
+    int _k;
+    int _b;
+    double _tau = D_MAX;
+    std::vector<Point>& _points;
 
-    void climbVPT(Point& qp, int curNodeIndex)
+    pointHeap _heap;
+
+    void search(Point& qp, Node& node)
     {
-        do {
-            if (isLeftChild(curNodeIndex)) {
-                curNodeIndex = moveUp(curNodeIndex);
-                if (checkOutside(qp, _nodes[curNodeIndex], _heap.top().dist)) {
-                    searchSubtree(qp, moveRight(curNodeIndex));
-                }
-            }
-            else if (isRightChild(curNodeIndex)) {
-                curNodeIndex = moveUp(curNodeIndex);
-                if (checkInside(qp, _nodes[curNodeIndex], _heap.top().dist)) {
-                    searchSubtree(qp, moveLeft(curNodeIndex));
-                }
-            }
-        } while (curNodeIndex != _nodes.size() - 1);
+        if (node.vpIndex == -1)
+            return;
+
+        double dist = util::distance(qp, _points[node.vpIndex]);
+
+        if (dist < _tau) {
+            if (_heap.size() == _k)
+                _heap.pop();
+            _heap.push(heapItem(dist, &_points[node.vpIndex]));
+            if (_heap.size() == _k)
+                _tau = _heap.top().dist;
+        }
+
+        if (isLeaf(node)) {
+            leafKNN(qp, node);
+            return;
+        }
+
+        if (dist < node.mu) {
+            if (dist - _tau <= node.mu)
+                search(qp, *node.left);
+            if (dist + _tau >= node.mu)
+                search(qp, *node.right);
+        }
+        else {
+            if (dist + _tau >= node.mu)
+                search(qp, *node.right);
+            if (dist - _tau <= node.mu)
+                search(qp, *node.left);
+        }
     }
 
     void leafKNN(Point& qp, Node& curNode)
     {
         for (int i = 0; i < curNode.leafPointsLen; i++) {
-            updateKNN(_heap, qp, curNode.leafPoints[i], _k);
+            // std::cout << "LeafKNN\n" << curNode.leafPointsLen;
+            updateKNN(_heap, qp, _points[curNode.leafPointsIndex + i], _k);
         }
     }
 
-    void searchSubtree(Point& qp, int curNodeIndex)
+    double computeMu(int lo, int median, int hi)
     {
-        updateKNN(_heap, qp, _points[_nodes[curNodeIndex].vpIndex], _k);
-
-        if (isLeaf(_nodes[curNodeIndex]))
-            leafKNN(qp, _nodes[curNodeIndex]);
-        else {
-            if (checkInside(qp, _nodes[curNodeIndex], _heap.top().dist)) {
-                searchSubtree(qp, moveLeft(curNodeIndex));
-            }
-            if (checkOutside(qp, _nodes[curNodeIndex], _heap.top().dist)) {
-                searchSubtree(qp, moveRight(curNodeIndex));
-            }
-        }
+        std::nth_element(_points.begin() + lo + 1,
+            _points.begin() + median,
+            _points.begin() + hi,
+            comp::distanceFromVP(_points[lo]));
+        return util::distance(_points[lo], _points[median]);
     }
-
-    /* -------------------------------- Checkers -------------------------------- */
 
     bool isLeaf(Node& n)
     {
-        return n.leftIndex == -1 && n.rightIndex == -1;
-    }
-
-    int moveUp(int curNodeIndex)
-    {
-        return _nodes[curNodeIndex].parentIndex;
-    }
-
-    int moveLeft(int curNodeIndex)
-    {
-        return _nodes[curNodeIndex].leftIndex;
-    }
-
-    int moveRight(int curNodeIndex)
-    {
-        return _nodes[curNodeIndex].rightIndex;
-    }
-
-    bool checkInside(Point& qp, Node& curNode, double tau)
-    {
-        // std::cout << "vp = " << _points[curNode.vpIndex].coords[0]
-        //   << "\tcheckInside = 1\t\tdistance = " << util::distance(p, _points[curNode.vpIndex])
-        //   << "\tmu = " << curNode.mu << "\ttau = " << tau << std::endl;
-        return util::distance(qp, _points[curNode.vpIndex]) < curNode.mu + tau;
-    }
-
-    bool checkOutside(Point& qp, Node& curNode, double tau)
-    {
-        // std::cout << "vp = " << _points[curNode.vpIndex].coords[0]
-        //   << "\tcheckOutside = 0\tdistance = " << util::distance(p, _points[curNode.vpIndex])
-        //   << "\tmu = " << curNode.mu << "\ttau = " << tau << std::endl;
-        return util::distance(qp, _points[curNode.vpIndex]) > curNode.mu - tau;
-    }
-
-    bool isLeftChild(int curNodeIndex)
-    {
-        return _nodes[curNodeIndex].parentIndex != -1
-                   ? curNodeIndex == _nodes[_nodes[curNodeIndex].parentIndex].leftIndex
-                   : false;
-    }
-
-    bool isRightChild(int curNodeIndex)
-    {
-        return _nodes[curNodeIndex].parentIndex != -1
-                   ? curNodeIndex == _nodes[_nodes[curNodeIndex].parentIndex].rightIndex
-                   : false;
+        return !n.left && !n.right;
     }
 };
 
