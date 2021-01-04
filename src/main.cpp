@@ -11,60 +11,6 @@
 #include "distributed.hpp"
 #include "vptree.hpp"
 
-std::vector<Point> getNDVector(int n, int d, std::string filename)
-{
-    std::vector<Point> result(n);
-
-    std::ifstream input(filename);
-
-    std::string s;
-
-    std::getline(input, s);
-    std::istringstream iss(s);
-    std::cout << s << std::endl;
-
-    for (int i = 0; i < n; i++) {
-        std::getline(input, s);
-        std::istringstream iss(s);
-
-        std::string num;
-        Point p(i, new double[d], d);
-        int j = 0;
-        while (std::getline(iss, num, ',')) {
-            p.coords[j++] = std::stof(num);
-        }
-        result[i] = p;
-    }
-
-    return result;
-}
-
-std::vector<double> getRowMajorVector(int n, int d, std::string filename)
-{
-    std::vector<double> result(n * d);
-
-    std::ifstream input(filename);
-
-    std::string s;
-
-    std::getline(input, s);
-    std::istringstream iss(s);
-    std::cout << s << std::endl;
-
-    for (int i = 0; i < n; i++) {
-        std::getline(input, s);
-        std::istringstream iss(s);
-
-        std::string num;
-        int j = 0;
-        while (std::getline(iss, num, ',')) {
-            result[i * d + j++] = std::stof(num);
-        }
-    }
-
-    return result;
-}
-
 int main(int argc, char** argv)
 {
 
@@ -106,38 +52,40 @@ int main(int argc, char** argv)
 
     /* ------------------------------- Init clock ------------------------------- */
 
-    auto t1 = std::chrono::high_resolution_clock::now();
-    auto t2 = std::chrono::high_resolution_clock::now();
+    auto t1       = std::chrono::high_resolution_clock::now();
+    auto t2       = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
     /* ----------------------------------- v1 ----------------------------------- */
 
-    // std::vector<double> v1c = getRowMajorVector(n, d, fileName);
-    // // prt::rowMajor(v1c.data(), n, d);
+    std::vector<double> v1c(n * d);
+    util::readToRowMajorVector(v1c, n, d, fileName);
+    // prt::rowMajor(v1c.data(), n, d);
 
-    // t1 = std::chrono::high_resolution_clock::now();
+    t1 = std::chrono::high_resolution_clock::now();
 
-    // struct knnresult result = mpi::distrAllkNN(v1c.data(), n, d, k);
+    struct knnresult result = mpi::distrAllkNN(v1c.data(), n, d, k);
 
-    // t2       = std::chrono::high_resolution_clock::now();
-    // duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+    t2       = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
-    // // prt::kNN(result);
+    // prt::kNN(result);
 
-    // std::cout << duration / 1e3 << "ms" << std::endl;
+    std::cout << duration / 1e3 << "ms" << std::endl;
 
     /* -------------------------------- Build VPT ------------------------------- */
 
-    std::vector<Point> corpus = getNDVector(n, d, fileName);
+    std::vector<Point> corpus(n);
+    util::readNDimVector(corpus, n, d, fileName);
     std::vector<Point> query(corpus);
 
-    VPT vpt(corpus, b, k);             // TODO pass corpus by reference and make _points private
+    VPT vpt(corpus, b, k); // TODO pass corpus by reference and make _points private
 
     t1 = std::chrono::high_resolution_clock::now();
 
     Node* root = vpt.buildTree(0, corpus.size());
 
-    t2 = std::chrono::high_resolution_clock::now();
+    t2       = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
     std::cout << "\nVantage point tree building time: " << duration / 1e3 << "ms" << std::endl;
@@ -147,10 +95,10 @@ int main(int argc, char** argv)
     /* ----------------------------------- v2 ----------------------------------- */
 
     knnresult ans = knnresult();
-    ans.m = query.size();
-    ans.k = k;
-    ans.nidx = new int[ans.m * ans.k];
-    ans.ndist = new double[ans.m * ans.k];
+    ans.m         = query.size();
+    ans.k         = k;
+    ans.nidx      = new int[ans.m * ans.k];
+    ans.ndist     = new double[ans.m * ans.k];
 
     std::fill_n(ans.nidx, ans.m * ans.k, D_MAX);
     std::fill_n(ans.ndist, ans.m * ans.k, -1);
@@ -181,12 +129,12 @@ int main(int argc, char** argv)
     /* ----------------------------- Reconstruct VPT ---------------------------- */
 
     VPT vpt2(corpus, b, k);
-    
+
     t1 = std::chrono::high_resolution_clock::now();
 
     Node* root2 = vpt2.reconstructTree(0, corpus.size());
-    
-    t2 = std::chrono::high_resolution_clock::now();
+
+    t2       = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
     std::cout << "\nVantage point tree reconstruction time: " << duration / 1e3 << "ms" << std::endl;
@@ -201,16 +149,16 @@ int main(int argc, char** argv)
 
     t1 = std::chrono::high_resolution_clock::now();
 
-    int *indices = new int[corpus.size()];
+    int* indices   = new int[corpus.size()];
     double* coords = new double[corpus[0].d * corpus.size()];
 
     conv::serVector(corpus, indices, coords);
-    
-    t2 = std::chrono::high_resolution_clock::now();
+
+    t2       = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
     std::cout << "\nVector serialization time: " << duration / 1e3 << "ms" << std::endl;
-    
+
     // std::cout << "\nVector serialization: \n" << "Coords:\t\t";
     // prt::rowMajor(coords, 1, corpus[0].d * corpus.size());
     // std::cout << "Indices:\t";
@@ -219,11 +167,11 @@ int main(int argc, char** argv)
     /* --------------------------- Reconstruct Vector --------------------------- */
 
     t1 = std::chrono::high_resolution_clock::now();
-    
+
     std::vector<Point> rV(n);
     conv::recVector(rV, indices, coords, n, d);
-    
-    t2 = std::chrono::high_resolution_clock::now();
+
+    t2       = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
     std::cout << "\nVector reconstruction time: " << duration / 1e3 << "ms" << std::endl;

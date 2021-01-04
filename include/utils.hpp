@@ -73,6 +73,52 @@ double distance(const Point& p1, const Point& p2)
     return util::computeEucledianNorm(p1.coords, p2.coords, p1.d);
 }
 
+void readNDimVector(std::vector<Point>& result, int n, int d, std::string filename)
+{
+    std::ifstream input(filename);
+
+    std::string s;
+
+    std::getline(input, s);
+    std::istringstream iss(s);
+    std::cout << s << std::endl;
+
+    for (int i = 0; i < n; i++) {
+        std::getline(input, s);
+        std::istringstream iss(s);
+
+        std::string num;
+        Point p(i, new double[d], d);
+        int j = 0;
+        while (std::getline(iss, num, ',')) {
+            p.coords[j++] = std::stof(num);
+        }
+        result[i] = p;
+    }
+}
+
+void readToRowMajorVector(std::vector<double>& result, int n, int d, std::string filename)
+{
+    std::ifstream input(filename);
+
+    std::string s;
+
+    std::getline(input, s);
+    std::istringstream iss(s);
+    std::cout << s << std::endl;
+
+    for (int i = 0; i < n; i++) {
+        std::getline(input, s);
+        std::istringstream iss(s);
+
+        std::string num;
+        int j = 0;
+        while (std::getline(iss, num, ',')) {
+            result[i * d + j++] = std::stof(num);
+        }
+    }
+}
+
 } // namespace util
 
 namespace comp {
@@ -192,10 +238,10 @@ namespace conv {
 void serVector(std::vector<Point>& points, int* _indices, double* _coords)
 {
     int _len = points.size();
-    int _d = points[0].d;
+    int _d   = points[0].d;
 
-    for(int i = 0; i < _len; i++) {
-        for(int j = 0; j < _d; j++) {
+    for (int i = 0; i < _len; i++) {
+        for (int j = 0; j < _d; j++) {
             _coords[i * _d + j] = points[i].coords[j];
         }
         _indices[i] = points[i].index;
@@ -206,7 +252,7 @@ void recVector(std::vector<Point>& points, int* _indices, double* _coords, int l
 {
     for (int i = 0; i < len; i++) {
         points[i].coords = new double[d];
-        points[i].d = d;
+        points[i].d      = d;
         for (int j = 0; j < d; j++) {
             points[i].coords[j] = _coords[i * d + j];
         }
@@ -214,6 +260,6 @@ void recVector(std::vector<Point>& points, int* _indices, double* _coords, int l
     }
 }
 
-}
+} // namespace conv
 
 #endif // __UTILS_H__
