@@ -126,19 +126,10 @@ int main(int argc, char** argv)
 
     // std::cout << duration / 1e3 << "ms" << std::endl;
 
-    /* ----------------------------------- v2 ----------------------------------- */
+    /* -------------------------------- Build VPT ------------------------------- */
 
     std::vector<Point> corpus = getNDVector(n, d, fileName);
     std::vector<Point> query(corpus);
-
-    knnresult ans = knnresult();
-    ans.m = query.size();
-    ans.k = k;
-    ans.nidx = new int[ans.m * ans.k];
-    ans.ndist = new double[ans.m * ans.k];
-
-    std::fill_n(ans.nidx, ans.m * ans.k, D_MAX);
-    std::fill_n(ans.ndist, ans.m * ans.k, -1);
 
     VPT vpt(corpus, b, k);             // TODO pass corpus by reference and make _points private
 
@@ -153,6 +144,17 @@ int main(int argc, char** argv)
 
     // prt::points(corpus);
     // prt::points(vpt._points);
+
+    /* ----------------------------------- v2 ----------------------------------- */
+
+    knnresult ans = knnresult();
+    ans.m = query.size();
+    ans.k = k;
+    ans.nidx = new int[ans.m * ans.k];
+    ans.ndist = new double[ans.m * ans.k];
+
+    std::fill_n(ans.nidx, ans.m * ans.k, D_MAX);
+    std::fill_n(ans.ndist, ans.m * ans.k, -1);
 
     // t1 = std::chrono::high_resolution_clock::now();
 
@@ -176,14 +178,6 @@ int main(int argc, char** argv)
     // // prt::point(root->right->right->leafPoints[0]);
 
     // std::cout << std::endl;
-
-    /* --------------------------------- VPT kNN -------------------------------- */
-
-    // for (auto p : query) {
-    //     vpt.kNN(p, ans, p.index);
-    // }
-
-    // prt::kNN(ans);
 
     /* ----------------------------- Reconstruct VPT ---------------------------- */
 
