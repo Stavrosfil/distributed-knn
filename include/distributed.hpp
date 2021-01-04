@@ -9,7 +9,7 @@
 
 namespace mpi {
 
-knnresult distrAllkNN(double* X, int n, int d, int k)
+knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, std::string fileName)
 {
 
     MPI_Init(NULL, NULL);
@@ -19,6 +19,12 @@ knnresult distrAllkNN(double* X, int n, int d, int k)
 
     int process_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
+
+    if (process_rank == 0) {
+        X.resize(n * d);
+        util::readToRowMajorVector(X, n, d, fileName);
+        // prt::rowMajor(X.data(), n, d);
+    }
 
     // Number of elements to distribute to each process
     int* chunk_size = new int[world_size];
@@ -35,10 +41,10 @@ knnresult distrAllkNN(double* X, int n, int d, int k)
 
     /* ------------------------------ Distribute X ------------------------------ */
 
-    MPI_Scatterv(X, chunk_size, displs, MPI_DOUBLE, _X, chunk_size[process_rank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Scatterv(X.data(), chunk_size, displs, MPI_DOUBLE, _X, chunk_size[process_rank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
     /* ------------------------------ Calculations ------------------------------ */
-
+    
     memcpy(_Y, _X, MAX_CHUNK_S * sizeof(double));
 
     knnresult _ans = knnresult();
@@ -110,8 +116,11 @@ knnresult distrAllkNN(double* X, int n, int d, int k)
 
     MPI_Finalize();
 
+    if (process_rank == 0)
+        prt::kNN(ans);
+        
     // if (process_rank == 0)
-    //     prt::rowMajor(ans.ndist, ans.m, k);
+    //     prt::kNN(_ans);
 
     return ans;
 }
