@@ -206,10 +206,17 @@ int main(int argc, char** argv)
 
     /* ---------------------------- Serialize Vector ---------------------------- */
 
-    // int *indices = new int[vpt._points.size()];
-    // double* coords = new double[vpt._points[0].d * vpt._points.size()];
+    t1 = std::chrono::high_resolution_clock::now();
 
-    // conv::serVector(vpt._points, indices, coords);
+    int *indices = new int[vpt._points.size()];
+    double* coords = new double[vpt._points[0].d * vpt._points.size()];
+
+    conv::serVector(vpt._points, indices, coords);
+    
+    t2 = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+
+    std::cout << "\nVector serialization time: " << duration / 1e3 << "ms" << std::endl;
     
     // std::cout << "\nVector serialization: \n" << "Coords:\t\t";
     // prt::rowMajor(coords, 1, vpt._points[0].d * vpt._points.size());
@@ -218,9 +225,15 @@ int main(int argc, char** argv)
 
     /* --------------------------- Reconstruct Vector --------------------------- */
 
-    // std::vector<Point> rV(4);
+    t1 = std::chrono::high_resolution_clock::now();
+    
+    std::vector<Point> rV(n);
+    conv::recVector(rV, indices, coords, n, d);
+    
+    t2 = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
-    // conv::recVector(rV, indices, coords, 4, 2);
+    std::cout << "\nVector reconstruction time: " << duration / 1e3 << "ms" << std::endl;
 
     // std::cout << "\nVector reconstruction: \n";
     // prt::points(rV);
