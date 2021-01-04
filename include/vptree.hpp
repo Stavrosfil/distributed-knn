@@ -12,28 +12,32 @@
 
 class VPT {
 
-  public:
+public:
+    std::vector<Point> _points;
+
+    VPT(int b) : _b(b), _k(0) {}
+
     VPT(std::vector<Point>& points, int b, int k) : _points(points), _b(b), _k(k) {}
 
     // Partition and construct tree from _points[lo:hi]
     // lo and hi are indices of corpus array
     Node* buildTree(int lo, int hi)
     {
-        Node* node    = new Node();
+        Node* node = new Node();
         node->vpIndex = lo;
 
         int n = hi - (lo + 1);
         if (n >= 2 * _b + 2) {
-            int median  = (hi + lo) % 2 == 0 ? (hi + lo) / 2 : (hi + lo + 1) / 2;
-            node->mu    = computeMu(lo, median, hi);
-            node->left  = buildTree(lo + 1, median);
+            int median = (hi + lo) % 2 == 0 ? (hi + lo) / 2 : (hi + lo + 1) / 2;
+            node->mu = computeMu(lo, median, hi);
+            node->left = buildTree(lo + 1, median);
             node->right = buildTree(median, hi);
         }
         else {
-            int i = (int)((double)rand() / RAND_MAX * (hi - lo - 1)) + lo;
-            std::swap(_points[lo], _points[i]);
+            // int i = (int)((double)rand() / RAND_MAX * (hi - lo - 1)) + lo;
+            // std::swap(_points[lo], _points[i]);
 
-            node->leafPoints    = new Point[n];
+            node->leafPoints = new Point[n];
             node->leafPointsLen = n;
             for (int i = 0; i < n; i++) {
                 node->leafPoints[i] = _points[lo + 1 + i];
@@ -53,18 +57,42 @@ class VPT {
 
         for (int i = 0; i < _k; i++) {
             ans.ndist[_k * (queryIndex + 1) - i - 1] = _heap.top().dist;
-            ans.nidx[_k * (queryIndex + 1) - i - 1]  = _heap.top().p->index;
+            ans.nidx[_k * (queryIndex + 1) - i - 1] = _heap.top().p->index;
             _heap.pop();
         }
     }
 
-  private:
+    Node* reconstructTree(std::vector<Point>& corpus, int lo, int hi) {
+
+        Node* node = new Node();
+        node->vpIndex = lo;
+
+        int n = hi - (lo + 1);
+        if (n >= 2 * _b + 2) {
+            int median = (hi + lo) % 2 == 0 ? (hi + lo) / 2 : (hi + lo + 1) / 2;
+            node->mu = util::distance(corpus[lo], corpus[median]);
+            node->left = reconstructTree(corpus, lo + 1, median);
+            node->right = reconstructTree(corpus, median, hi);
+        }
+        else {
+            // int i = (int)((double)rand() / RAND_MAX * (hi - lo - 1)) + lo;
+            // std::swap(_points[lo], _points[i]);
+            node->leafPoints = new Point[n];
+            node->leafPointsLen = n;
+            for (int i = 0; i < n; i++) {
+                node->leafPoints[i] = corpus[lo + 1 + i];
+            }
+        }
+
+        return node;
+    }
+
+private:
     int _k;
     int _b;
     double _tau = D_MAX;
 
     pointHeap _heap;
-    std::vector<Point>& _points;
 
     void search(Point& qp, Node& node)
     {
@@ -110,9 +138,9 @@ class VPT {
     double computeMu(int lo, int median, int hi)
     {
         std::nth_element(_points.begin() + lo + 1,
-                         _points.begin() + median,
-                         _points.begin() + hi,
-                         comp::distanceFromVP(_points[lo]));
+            _points.begin() + median,
+            _points.begin() + hi,
+            comp::distanceFromVP(_points[lo]));
         return util::distance(_points[lo], _points[median]);
     }
 

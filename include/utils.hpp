@@ -167,7 +167,7 @@ void tree(Node* root, std::vector<Point>& points)
             Node* front = q.front();
             q.pop();
             prt::point(points[front->vpIndex]);
-            std::cout << " -> ";
+            std::cout << " (mu = " << front->mu << ") ->\t";
             level.push_back(front->vpIndex);
             if (front->left) {
                 q.push(front->left);
