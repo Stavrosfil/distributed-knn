@@ -189,7 +189,7 @@ void tree(Node* root, std::vector<Point>& points)
 
 namespace conv {
 
-void serVector(std::vector<Point>& points, int* _indices, double* _coords) 
+void serVector(std::vector<Point>& points, int* _indices, double* _coords)
 {
     int _len = points.size();
     int _d = points[0].d;
@@ -199,6 +199,18 @@ void serVector(std::vector<Point>& points, int* _indices, double* _coords)
             _coords[i * _d + j] = points[i].coords[j];
         }
         _indices[i] = points[i].index;
+    }
+}
+
+void recVector(std::vector<Point>& points, int* _indices, double* _coords, int len, int d)
+{
+    for (int i = 0; i < len; i++) {
+        points[i].coords = new double[d];
+        points[i].d = d;
+        for (int j = 0; j < d; j++) {
+            points[i].coords[j] = _coords[i * d + j];
+        }
+        points[i].index = _indices[i];
     }
 }
 

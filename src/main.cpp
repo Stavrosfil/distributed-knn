@@ -204,7 +204,7 @@ int main(int argc, char** argv)
 
     // prt::point(root2->right->right->leafPoints[0]);
 
-    /* ------------------------------- Serialize -------------------------------- */
+    /* ---------------------------- Serialize Vector ---------------------------- */
 
     // int *indices = new int[vpt._points.size()];
     // double* coords = new double[vpt._points[0].d * vpt._points.size()];
@@ -216,6 +216,14 @@ int main(int argc, char** argv)
     // std::cout << "Indices:\t";
     // prt::rowMajor(indices, 1, vpt._points.size());
 
+    /* --------------------------- Reconstruct Vector --------------------------- */
+
+    // std::vector<Point> rV(4);
+
+    // conv::recVector(rV, indices, coords, 4, 2);
+
+    // std::cout << "\nVector reconstruction: \n";
+    // prt::points(rV);
 
     std::cout << std::endl;
 
