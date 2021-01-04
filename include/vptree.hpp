@@ -62,8 +62,8 @@ public:
         }
     }
 
-    Node* reconstructTree(std::vector<Point>& corpus, int lo, int hi) {
-
+    Node* reconstructTree(std::vector<Point>& corpus, int lo, int hi) 
+    {
         Node* node = new Node();
         node->vpIndex = lo;
 

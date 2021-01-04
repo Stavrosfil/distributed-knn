@@ -187,4 +187,21 @@ void tree(Node* root, std::vector<Point>& points)
 
 } // namespace prt
 
+namespace conv {
+
+void serVector(std::vector<Point>& points, int* _indices, double* _coords) 
+{
+    int _len = points.size();
+    int _d = points[0].d;
+
+    for(int i = 0; i < _len; i++) {
+        for(int j = 0; j < _d; j++) {
+            _coords[i * _d + j] = points[i].coords[j];
+        }
+        _indices[i] = points[i].index;
+    }
+}
+
+}
+
 #endif // __UTILS_H__

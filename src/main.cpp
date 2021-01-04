@@ -77,26 +77,34 @@ int main(int argc, char** argv)
     int b = 0;
     int n = 10000;
 
+    std::string line;
+    std::string fileName = "data.csv";
+    std::ifstream myfile(fileName);
+
     // int d = 1;
     // int k = 4;
     // int b = 0;
     // int n = 8;
 
-    std::string line;
-    std::string fileName = "data.csv";
-    std::ifstream myfile(fileName);
+    // std::string line;
+    // std::string fileName = "data2.csv";
+    // std::ifstream myfile(fileName);
+
+    // int d = 2;
+    // int k = 4;
+    // int b = 0;
+    // int n = 4;
+
+    // std::string line;
+    // std::string fileName = "data3.csv";
+    // std::ifstream myfile(fileName);
 
     if (argc == 2)
         fileName = argv[1];
 
     std::cout << fileName << std::endl;
 
-    // /* ------------------------------ Construct VPT ----------------------------- */
-
-    // for (auto i : corpus) {
-    //     prt::point(i);
-    //     std::cout << std::endl;
-    // }
+    /* ------------------------------- Init clock ------------------------------- */
 
     auto t1 = std::chrono::high_resolution_clock::now();
     auto t2 = std::chrono::high_resolution_clock::now();
@@ -132,7 +140,7 @@ int main(int argc, char** argv)
     std::fill_n(ans.nidx, ans.m * ans.k, D_MAX);
     std::fill_n(ans.ndist, ans.m * ans.k, -1);
 
-    VPT vpt(corpus, b, k);
+    VPT vpt(corpus, b, k);             // TODO pass corpus by reference and make _points private
 
     t1 = std::chrono::high_resolution_clock::now();
 
@@ -141,7 +149,10 @@ int main(int argc, char** argv)
     t2 = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
-    std::cout << "\nVantage point tree build time: " << duration / 1e3 << "ms" << std::endl;
+    std::cout << "\nVantage point tree building time: " << duration / 1e3 << "ms" << std::endl;
+
+    // prt::points(corpus);
+    // prt::points(vpt._points);
 
     // t1 = std::chrono::high_resolution_clock::now();
 
@@ -158,28 +169,11 @@ int main(int argc, char** argv)
 
     /* --------------------------------- Prints --------------------------------- */
 
-    // int cnt = 0;
-    // std::cout << "\nVantage point tree:\n\n";
-    // for (auto p : vpt._nodes) {
-    //     std::cout << "nodes[" << cnt++ << "]:\tvp = ";
-    //     prt::point(corpus[p.vpIndex]);
-    //     std::cout << "\t\t"
-    //               << "mu = " << p.mu << "\t\t(" << p.leftIndex << ", " << p.rightIndex << ", " << p.parentIndex <<
-    //               ")"
-    //               << std::endl;
-    //     if (p.leafPointsLen) {
-    //         for (int j = 0; j < p.leafPointsLen; j++) {
-    //             std::cout << p.leafPoints[j].coords[0] << std::endl;
-    //         }
-    //     }
-    // }
-    // std::cout << std::endl;
-
     // std::cout << "\nVantage point tree:\n\n";
 
     // prt::tree(root, vpt._points);
 
-    // prt::point(root->right->right->leafPoints[0]);
+    // // prt::point(root->right->right->leafPoints[0]);
 
     // std::cout << std::endl;
 
@@ -202,13 +196,26 @@ int main(int argc, char** argv)
     t2 = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
-    std::cout << "\nVantage point tree reconstruct time: " << duration / 1e3 << "ms" << std::endl;
+    std::cout << "\nVantage point tree reconstruction time: " << duration / 1e3 << "ms" << std::endl;
 
     // std::cout << "\nReconstructed vantage point tree:\n\n";
 
     // prt::tree(root2, vpt._points);
 
     // prt::point(root2->right->right->leafPoints[0]);
+
+    /* ------------------------------- Serialize -------------------------------- */
+
+    // int *indices = new int[vpt._points.size()];
+    // double* coords = new double[vpt._points[0].d * vpt._points.size()];
+
+    // conv::serVector(vpt._points, indices, coords);
+    
+    // std::cout << "\nVector serialization: \n" << "Coords:\t\t";
+    // prt::rowMajor(coords, 1, vpt._points[0].d * vpt._points.size());
+    // std::cout << "Indices:\t";
+    // prt::rowMajor(indices, 1, vpt._points.size());
+
 
     std::cout << std::endl;
 
