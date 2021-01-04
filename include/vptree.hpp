@@ -13,10 +13,6 @@
 class VPT {
 
 public:
-    std::vector<Point> _points;
-
-    VPT(int b) : _b(b), _k(0) {}
-
     VPT(std::vector<Point>& points, int b, int k) : _points(points), _b(b), _k(k) {}
 
     // Partition and construct tree from _points[lo:hi]
@@ -62,7 +58,7 @@ public:
         }
     }
 
-    Node* reconstructTree(std::vector<Point>& corpus, int lo, int hi) 
+    Node* reconstructTree(int lo, int hi) 
     {
         Node* node = new Node();
         node->vpIndex = lo;
@@ -70,9 +66,9 @@ public:
         int n = hi - (lo + 1);
         if (n >= 2 * _b + 2) {
             int median = (hi + lo) % 2 == 0 ? (hi + lo) / 2 : (hi + lo + 1) / 2;
-            node->mu = util::distance(corpus[lo], corpus[median]);
-            node->left = reconstructTree(corpus, lo + 1, median);
-            node->right = reconstructTree(corpus, median, hi);
+            node->mu = util::distance(_points[lo], _points[median]);
+            node->left = reconstructTree(lo + 1, median);
+            node->right = reconstructTree(median, hi);
         }
         else {
             // int i = (int)((double)rand() / RAND_MAX * (hi - lo - 1)) + lo;
@@ -80,7 +76,7 @@ public:
             node->leafPoints = new Point[n];
             node->leafPointsLen = n;
             for (int i = 0; i < n; i++) {
-                node->leafPoints[i] = corpus[lo + 1 + i];
+                node->leafPoints[i] = _points[lo + 1 + i];
             }
         }
 
@@ -91,6 +87,7 @@ private:
     int _k;
     int _b;
     double _tau = D_MAX;
+    std::vector<Point>& _points;
 
     pointHeap _heap;
 

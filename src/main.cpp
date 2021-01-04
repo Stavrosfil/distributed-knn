@@ -143,7 +143,6 @@ int main(int argc, char** argv)
     std::cout << "\nVantage point tree building time: " << duration / 1e3 << "ms" << std::endl;
 
     // prt::points(corpus);
-    // prt::points(vpt._points);
 
     /* ----------------------------------- v2 ----------------------------------- */
 
@@ -181,11 +180,11 @@ int main(int argc, char** argv)
 
     /* ----------------------------- Reconstruct VPT ---------------------------- */
 
-    VPT vpt2(0);
+    VPT vpt2(corpus, b, k);
     
     t1 = std::chrono::high_resolution_clock::now();
 
-    Node* root2 = vpt2.reconstructTree(vpt._points, 0, vpt._points.size());
+    Node* root2 = vpt2.reconstructTree(0, corpus.size());
     
     t2 = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
@@ -194,7 +193,7 @@ int main(int argc, char** argv)
 
     // std::cout << "\nReconstructed vantage point tree:\n\n";
 
-    // prt::tree(root2, vpt._points);
+    // prt::tree(root2, corpus);
 
     // prt::point(root2->right->right->leafPoints[0]);
 
@@ -202,10 +201,10 @@ int main(int argc, char** argv)
 
     t1 = std::chrono::high_resolution_clock::now();
 
-    int *indices = new int[vpt._points.size()];
-    double* coords = new double[vpt._points[0].d * vpt._points.size()];
+    int *indices = new int[corpus.size()];
+    double* coords = new double[corpus[0].d * corpus.size()];
 
-    conv::serVector(vpt._points, indices, coords);
+    conv::serVector(corpus, indices, coords);
     
     t2 = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
@@ -213,9 +212,9 @@ int main(int argc, char** argv)
     std::cout << "\nVector serialization time: " << duration / 1e3 << "ms" << std::endl;
     
     // std::cout << "\nVector serialization: \n" << "Coords:\t\t";
-    // prt::rowMajor(coords, 1, vpt._points[0].d * vpt._points.size());
+    // prt::rowMajor(coords, 1, corpus[0].d * corpus.size());
     // std::cout << "Indices:\t";
-    // prt::rowMajor(indices, 1, vpt._points.size());
+    // prt::rowMajor(indices, 1, corpus.size());
 
     /* --------------------------- Reconstruct Vector --------------------------- */
 
