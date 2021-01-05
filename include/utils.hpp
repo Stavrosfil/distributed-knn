@@ -5,6 +5,13 @@
 #include <stdlib.h>
 #include "node.hpp"
 
+struct knnresult {
+    int* nidx;     //!< Indices (0-based) of nearest neighbors [m-by-k]
+    double* ndist; //!< Distance of nearest neighbors          [m-by-k]
+    int m;         //!< Number of query points                 [scalar]
+    int k;         //!< Number of nearest neighbors            [scalar]
+};
+
 namespace util {
 
 void computeChunksDisplacements(int* cnt, int* displs, int processes, int row_s, int col_s)
@@ -26,12 +33,11 @@ void computeChunksDisplacements(int* cnt, int* displs, int processes, int row_s,
 void computeEuclideanDistance(double* X, double* Y, double* D, int n, int m, int d)
 {
 
-    double* XH = new double[n];
-    double* YH = new double[m];
+    std::vector<double> XH(n, 0);
+    std::vector<double> YH(m, 0);
 
     // XH = sum(X.^2,2)
     for (int i = 0; i < n; i++) {
-        XH[i] = 0;
         for (int j = 0; j < d; j++) {
             XH[i] += X[i * d + j] * X[i * d + j];
         }
@@ -39,7 +45,6 @@ void computeEuclideanDistance(double* X, double* Y, double* D, int n, int m, int
 
     // YH = sum(Y.^2,2)
     for (int i = 0; i < m; i++) {
-        YH[i] = 0;
         for (int j = 0; j < d; j++) {
             YH[i] += Y[i * d + j] * Y[i * d + j];
         }
@@ -228,6 +233,24 @@ void tree(Node* root, std::vector<Point>& points)
         std::cout << std::endl;
         levels.push_back(level);
         level.clear();
+    }
+}
+
+void kNN(knnresult res)
+{
+    std::cout << "\nkNN results:\n\n";
+    for (int i = 0; i < res.m; i++) {
+        std::cout << "nidx[" << i << "]"
+                  << ":\t";
+        for (int j = 0; j < res.k; j++) {
+            std::cout << res.nidx[i * res.k + j] << "\t";
+        }
+        std::cout << "\nndist[" << i << "]"
+                  << ":\t";
+        for (int j = 0; j < res.k; j++) {
+            std::cout << res.ndist[i * res.k + j] << "\t";
+        }
+        std::cout << std::endl << std::endl;
     }
 }
 

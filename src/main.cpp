@@ -18,23 +18,23 @@ int main(int argc, char** argv)
 
     std::cout << std::endl;
 
-    // int d = 10;
-    // int k = 100;
-    // int b = 50;
-    // int n = 10000;
-
-    // std::string line;
-    // std::string fileName = "data.csv";
-    // std::ifstream myfile(fileName);
-
-    int d = 1;
-    int k = 4;
-    int b = 0;
-    int n = 8;
+    int d = 10;
+    int k = 100;
+    int b = 100;
+    int n = 20000;
 
     std::string line;
-    std::string fileName = "data2.csv";
+    std::string fileName = "data.csv";
     std::ifstream myfile(fileName);
+
+    // int d = 1;
+    // int k = 8;
+    // int b = 0;
+    // int n = 8;
+
+    // std::string line;
+    // std::string fileName = "data2.csv";
+    // std::ifstream myfile(fileName);
 
     // int d = 2;
     // int k = 4;
@@ -94,12 +94,12 @@ int main(int argc, char** argv)
 
     // t2       = std::chrono::high_resolution_clock::now();
     // duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
-    
+
     // // std::cout << "\nCorpus points:\n";
     // // prt::points(corpus);
 
     // std::cout << "\nVantage point tree building time: " << duration / 1e3 << "ms" << std::endl;
-    
+
     // // std::cout << "\nVantage point tree:\n\n";
     // // prt::tree(root, corpus);
     // // prt::point(root->right->right->leafPoints[0]);
@@ -107,7 +107,7 @@ int main(int argc, char** argv)
 
     // std::cout << std::endl;
 
-    /* ----------------------------------- v2 ----------------------------------- */
+    // /* ----------------------------------- v2 ----------------------------------- */
 
     // knnresult ans = knnresult();
     // ans.m         = query.size();
@@ -118,18 +118,18 @@ int main(int argc, char** argv)
     // std::fill_n(ans.nidx, ans.m * ans.k, D_MAX);
     // std::fill_n(ans.ndist, ans.m * ans.k, -1);
 
-    // // t1 = std::chrono::high_resolution_clock::now();
+    // t1 = std::chrono::high_resolution_clock::now();
 
-    // // for (auto p : query) {
-    // //     vpt.kNN(p, ans, p.index, *root);
-    // // }
+    // for (auto p : query) {
+    //     vpt.kNN(p, ans, p.index, *root);
+    // }
 
-    // // t2 = std::chrono::high_resolution_clock::now();
-    // // duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+    // t2       = std::chrono::high_resolution_clock::now();
+    // duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
-    // // // prt::kNN(ans);
+    // // prt::kNN(ans);
 
-    // // std::cout << "v2 time: " << duration / 1e3 << "ms" << std::endl;
+    // std::cout << "v2 time: " << duration / 1e3 << "ms" << std::endl;
 
     /* ----------------------------- Reconstruct VPT ---------------------------- */
 
@@ -183,9 +183,6 @@ int main(int argc, char** argv)
     // // prt::points(rV);
 
     /* ----------------------------- Distributed VPT ---------------------------- */
-
-
-
 
     /* -------------------------------------------------------------------------- */
 

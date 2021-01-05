@@ -119,8 +119,8 @@ knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, std::string fi
 
     MPI_Finalize();
 
-    if (process_rank == 0)
-        prt::kNN(ans);
+    // if (process_rank == 0)
+    // prt::kNN(ans);
 
     return ans;
 }
