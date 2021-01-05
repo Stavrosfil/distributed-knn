@@ -14,7 +14,7 @@
 #define D_MAX std::numeric_limits<double>::max()
 typedef std::priority_queue<heapItem, std::vector<heapItem>, comp::heapDist> pointHeap;
 
-#define Y_BLOCKS 1
+#define Y_BLOCKS 1000
 
 // X[n * d]
 // Y[m * d]

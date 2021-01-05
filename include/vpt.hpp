@@ -99,6 +99,10 @@ private:
         if (node.vpIndex == -1)
             return;
 
+        // updateKNN(_heap, qp, _points[node.vpIndex], _k);     // @Stavrosfil check this
+        // _tau = _heap.top().dist;
+
+        // TODO use updateKNN
         double dist = util::distance(qp, _points[node.vpIndex]);
 
         if (dist < _tau) {
@@ -128,6 +132,7 @@ private:
         }
     }
 
+    // TODO optimize leafKNN
     void leafKNN(Point& qp, Node& curNode)
     {
         for (int i = 0; i < curNode.leafPointsLen; i++) {

@@ -12,6 +12,26 @@ struct knnresult {
     int k;         //!< Number of nearest neighbors            [scalar]
 };
 
+namespace cl {
+
+auto t1       = std::chrono::high_resolution_clock::now();
+auto t2       = std::chrono::high_resolution_clock::now();
+auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+void start() 
+{
+    t1 = std::chrono::high_resolution_clock::now();
+}
+
+void stop(bool print, std::string operation) 
+{
+    t2       = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+    if (print == true)
+        std::cout << "\n" << operation << " time: " << duration / 1e3 << "ms\n" << std::endl;
+}
+
+}
+
 namespace util {
 
 void computeChunksDisplacements(int* cnt, int* displs, int processes, int row_s, int col_s)
@@ -271,15 +291,16 @@ void serVector(std::vector<Point>& points, int* _indices, double* _coords)
     }
 }
 
-void recVector(std::vector<Point>& points, int* _indices, double* _coords, int len, int d)
+void recVector(std::vector<Point>& points, int* _indices, double* _coords, int d)
 {
-    for (int i = 0; i < len; i++) {
-        points[i].coords = new double[d];
+    int _len = points.size();
+    for (int i = 0; i < _len; i++) {
         points[i].d      = d;
+        points[i].index = _indices[i];
+        points[i].coords = new double[d];
         for (int j = 0; j < d; j++) {
             points[i].coords[j] = _coords[i * d + j];
         }
-        points[i].index = _indices[i];
     }
 }
 
