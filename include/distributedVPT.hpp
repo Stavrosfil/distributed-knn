@@ -1,5 +1,5 @@
-#ifndef __DISTRIBUTED_H__
-#define __DISTRIBUTED_H__
+#ifndef __DISTRIBUTEDVPT_H__
+#define __DISTRIBUTEDVPT_H__
 
 #include <mpi.h>
 #include <stdio.h>
@@ -9,7 +9,7 @@
 
 namespace mpi {
 
-knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, std::string fileName)
+void distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::string fileName)         // TODO knnresult return
 {
     /* --------------------------- Init Communication --------------------------- */
 
@@ -20,12 +20,14 @@ knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, std::string fi
 
     int process_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
-
+    
     if (process_rank == 0) {
         X.resize(n * d);
         util::readToRowMajorVector(X, n, d, fileName);
         // prt::rowMajor(X.data(), n, d);
     }
+
+    // std::cout << "process " << process_rank << "\t X.size() = " << X.size() << std::endl;
 
     // Number of elements to distribute to each process
     std::vector<int> chunk_size(world_size);
@@ -42,6 +44,8 @@ knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, std::string fi
 
     /* ------------------------------ Distribute X ------------------------------ */
 
+    // cl::start();
+
     MPI_Scatterv(X.data(),
                  chunk_size.data(),
                  displs.data(),
@@ -52,80 +56,62 @@ knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, std::string fi
                  0,
                  MPI_COMM_WORLD);
 
+    // cl::stop(true, "Data distribution");
+    // std::cout << "process " << process_rank << " displs = " << displs[process_rank] << std::endl;
+    // prt::rowMajor(_X.data(), chunk_size[process_rank] / d, d);
+
+    /* ----------------------------- Build local VPT ---------------------------- */
+
+    // cl::start();
+
+    int* _indices = new int[chunk_size[process_rank] / d];
+    for (int i = 0; i < chunk_size[process_rank] / d; i++) {
+        _indices[i] = i + displs[process_rank] / d;
+    }
+
+    std::vector<Point> _corpus(chunk_size[process_rank] / d);
+    conv::recVector(_corpus, _indices, _X.data(), d);
+    // prt::points(_corpus);
+    
+    VPT _vpt(_corpus, b, k);
+    Node* _root = _vpt.buildTree(0, _corpus.size());
+
+    // cl::stop(true, "Build local tree");
+    // std::cout << "\nProcess " << process_rank << " local vantage point tree:\n\n";
+    // prt::tree(&_root, _corpus);
+    
     /* ------------------------------ Calculations ------------------------------ */
 
     _Y = _X;
+
+    std::vector<Point> _query(_corpus);
+
+    // prt::points(_query);
 
     knnresult _ans = knnresult();
     _ans.m         = chunk_size[process_rank] / d;
     _ans.k         = k;
     std::vector<int> nidx(_ans.m * _ans.k, -1);
     std::vector<double> ndist(_ans.m * _ans.k, D_MAX);
-    _ans.nidx  = nidx.data();
+    _ans.nidx = nidx.data();
     _ans.ndist = ndist.data();
 
     int prev_rank              = (world_size + process_rank - 1) % world_size;
     int next_rank              = (world_size + process_rank + 1) % world_size;
     unsigned rolling_prev_rank = world_size + process_rank + 1;
 
-    for (int i = 0; i < world_size; i++) {
-
-        rolling_prev_rank = (rolling_prev_rank + world_size - 1) % world_size;
-
-        MPI_Request* reqs = new MPI_Request[2];
-
-        MPI_Irecv(/* recv buffer: */ _Z.data(),
-                  /* count: */ MAX_CHUNK_S,
-                  /* type: */ MPI_DOUBLE,
-                  /* from: */ prev_rank,
-                  /* tag: */ 0,
-                  /* communicator: */ MPI_COMM_WORLD,
-                  /* request: */ &reqs[0]);
-        MPI_Isend(/* send buffer: */ _Y.data(),
-                  /* count: */ MAX_CHUNK_S,
-                  /* type: */ MPI_DOUBLE,
-                  /* to: */ next_rank,
-                  /* tag: */ 0,
-                  /* communicator: */ MPI_COMM_WORLD,
-                  /* request: */ &reqs[1]);
-
-        kNN(_ans,
-            _Y.data(),
-            _X.data(),
-            displs[rolling_prev_rank] / d,
-            chunk_size[rolling_prev_rank] / d,
-            chunk_size[process_rank] / d,
-            d,
-            k);
-
-        MPI_Waitall(2, reqs, MPI_STATUSES_IGNORE);
-
-        _Y = _Z;
+    for (auto p : _query) {
+        _vpt.kNN(p, _ans, p.index - displs[process_rank] / d, *_root);
     }
 
-    knnresult ans = knnresult();
-    ans.m         = n;
-    ans.k         = k;
-    ans.nidx      = new int[n * k];
-    ans.ndist     = new double[n * k];
+    // prt::kNN(_ans);
 
-    int* recv_chunks = new int[world_size];
-    int* recv_displs = new int[world_size];
-
-    util::computeChunksDisplacements(recv_chunks, recv_displs, world_size, n, k);
-
-    MPI_Gatherv(_ans.nidx, _ans.m * _ans.k, MPI_INT, ans.nidx, recv_chunks, recv_displs, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Gatherv(
-        _ans.ndist, _ans.m * _ans.k, MPI_DOUBLE, ans.ndist, recv_chunks, recv_displs, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    /* -------------------------------------------------------------------------- */
 
     MPI_Finalize();
 
-    // if (process_rank == 0)
-    // prt::kNN(ans);
-
-    return ans;
 }
 
 } // namespace mpi
 
-#endif // __DISTRIBUTED_H__
+#endif // __DISTRIBUTEDVPT_H__
