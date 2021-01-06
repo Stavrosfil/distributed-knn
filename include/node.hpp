@@ -4,7 +4,7 @@
 class Point {
 
   public:
-    uint32_t index;
+    int index;
     double* coords;
     int d;
 
@@ -12,19 +12,26 @@ class Point {
     Point(int index, double* coords, int d) : index(index), coords(coords), d(d) {}
 };
 
+class heapItem {
+
+  public:
+    double dist;
+    int index;
+
+    heapItem(double dist, int index) : dist(dist), index(index) {}
+};
+
 class Node {
 
   public:
     int vpIndex;
-    int parentIndex;
-    int leftIndex;
-    int rightIndex;
-    Point* leafPoints;
-    int leafPointsLen;
-
     double mu;
 
-    Node() : vpIndex(-1), parentIndex(-1), leftIndex(-1), rightIndex(-1), mu(-1.), leafPoints(nullptr), leafPointsLen(0)
-    {
-    }
+    Node* left;
+    Node* right;
+
+    int leafPointsIndex;
+    int leafPointsLen;
+
+    Node() : vpIndex(-1), left(nullptr), right(nullptr), mu(-1.), leafPointsIndex(-1), leafPointsLen(0) {}
 };

@@ -9,9 +9,9 @@
 
 namespace mpi {
 
-knnresult distrAllkNN(double* X, int n, int d, int k)
+knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, std::string fileName)
 {
-
+    /* --------------------------- Init Communication --------------------------- */
     MPI_Init(NULL, NULL);
 
     int world_size;
@@ -20,39 +20,48 @@ knnresult distrAllkNN(double* X, int n, int d, int k)
     int process_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
 
-    // Number of elements to distribute to each process
-    int* chunk_size = new int[world_size];
-    // The displacements where each chunk begins
-    int* displs = new int[world_size];
+    if (process_rank == 0) {
+        X.resize(n * d);
+        util::readToRowMajorVector(X, n, d, fileName);
+        // prt::rowMajor(X.data(), n, d);
+    }
 
-    util::computeChunksDisplacements(chunk_size, displs, world_size, n, d);
+    // Number of elements to distribute to each process
+    std::vector<int> chunk_size(world_size);
+    // The displacements where each chunk begins
+    std::vector<int> displs(world_size);
+
+    util::computeChunksDisplacements(chunk_size.data(), displs.data(), world_size, n, d);
 
     // First chunk is the first to be increased in size in case world_size is not perfectly divisible by n
     int MAX_CHUNK_S = chunk_size[0];
-    double* _X      = new double[chunk_size[process_rank]];
-    double* _Y      = new double[MAX_CHUNK_S];
-    double* _Z      = new double[MAX_CHUNK_S];
+    std::vector<double> _X(MAX_CHUNK_S);
+    std::vector<double> _Y(MAX_CHUNK_S);
+    std::vector<double> _Z(MAX_CHUNK_S);
 
     /* ------------------------------ Distribute X ------------------------------ */
 
-    MPI_Scatterv(X, chunk_size, displs, MPI_DOUBLE, _X, chunk_size[process_rank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Scatterv(X.data(),
+                 chunk_size.data(),
+                 displs.data(),
+                 MPI_DOUBLE,
+                 _X.data(),
+                 chunk_size[process_rank],
+                 MPI_DOUBLE,
+                 0,
+                 MPI_COMM_WORLD);
 
     /* ------------------------------ Calculations ------------------------------ */
 
-    memcpy(_Y, _X, MAX_CHUNK_S * sizeof(double));
+    _Y = _X;
 
     knnresult _ans = knnresult();
     _ans.m         = chunk_size[process_rank] / d;
     _ans.k         = k;
-    _ans.nidx      = new int[_ans.m * _ans.k]();
-    _ans.ndist     = new double[_ans.m * _ans.k]();
-
-    for (int i = 0; i < _ans.m; i++) {
-        for (int j = 0; j < k; j++) {
-            _ans.ndist[i * k + j] = D_MAX;
-            _ans.nidx[i * k + j]  = -1;
-        }
-    }
+    std::vector<int> nidx(_ans.m * _ans.k, -1);
+    std::vector<double> ndist(_ans.m * _ans.k, D_MAX);
+    _ans.nidx  = nidx.data();
+    _ans.ndist = ndist.data();
 
     int prev_rank              = (world_size + process_rank - 1) % world_size;
     int next_rank              = (world_size + process_rank + 1) % world_size;
@@ -60,18 +69,18 @@ knnresult distrAllkNN(double* X, int n, int d, int k)
 
     for (int i = 0; i < world_size; i++) {
 
-        rolling_prev_rank = --rolling_prev_rank % world_size;
+        rolling_prev_rank = (rolling_prev_rank + world_size - 1) % world_size;
 
         MPI_Request* reqs = new MPI_Request[2];
 
-        MPI_Irecv(/* recv buffer: */ _Z,
+        MPI_Irecv(/* recv buffer: */ _Z.data(),
                   /* count: */ MAX_CHUNK_S,
                   /* type: */ MPI_DOUBLE,
                   /* from: */ prev_rank,
                   /* tag: */ 0,
                   /* communicator: */ MPI_COMM_WORLD,
                   /* request: */ &reqs[0]);
-        MPI_Isend(/* send buffer: */ _Y,
+        MPI_Isend(/* send buffer: */ _Y.data(),
                   /* count: */ MAX_CHUNK_S,
                   /* type: */ MPI_DOUBLE,
                   /* to: */ next_rank,
@@ -80,8 +89,8 @@ knnresult distrAllkNN(double* X, int n, int d, int k)
                   /* request: */ &reqs[1]);
 
         kNN(_ans,
-            _Y,
-            _X,
+            _Y.data(),
+            _X.data(),
             displs[rolling_prev_rank] / d,
             chunk_size[rolling_prev_rank] / d,
             chunk_size[process_rank] / d,
@@ -90,14 +99,17 @@ knnresult distrAllkNN(double* X, int n, int d, int k)
 
         MPI_Waitall(2, reqs, MPI_STATUSES_IGNORE);
 
-        memcpy(_Y, _Z, MAX_CHUNK_S * sizeof(double));
+        _Y = _Z;
     }
 
     knnresult ans = knnresult();
-    ans.m         = n;
-    ans.k         = k;
-    ans.nidx      = new int[n * k];
-    ans.ndist     = new double[n * k];
+
+    if (process_rank == 0) {
+        ans.m     = n;
+        ans.k     = k;
+        ans.nidx  = new int[n * k];
+        ans.ndist = new double[n * k];
+    }
 
     int* recv_chunks = new int[world_size];
     int* recv_displs = new int[world_size];
@@ -110,8 +122,8 @@ knnresult distrAllkNN(double* X, int n, int d, int k)
 
     MPI_Finalize();
 
-    if (process_rank == 0)
-        prt::rowMajor(ans.ndist, ans.m, k);
+    // if (process_rank == 0)
+    //     prt::kNN(ans);
 
     return ans;
 }

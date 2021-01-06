@@ -12,55 +12,74 @@
 #include "utils.hpp"
 
 #define D_MAX std::numeric_limits<double>::max()
-typedef std::priority_queue<std::pair<double, Point>, std::vector<std::pair<double, Point>>, comp::heapDist> pointHeap;
+typedef std::priority_queue<heapItem, std::vector<heapItem>, comp::heapDist> pointHeap;
 
-struct knnresult {
-    int* nidx;     //!< Indices (0-based) of nearest neighbors [m-by-k]
-    double* ndist; //!< Distance of nearest neighbors          [m-by-k]
-    int m;         //!< Number of query points                 [scalar]
-    int k;         //!< Number of nearest neighbors            [scalar]
-};
+#define Y_BLOCKS 1000
+
+/* -------------------------------- kNN function -------------------------------- */
+
+// Finds for each point in a query set Y the k nearest neighbors in the corpus set X
+// X[n * d]
+// Y[m * d]
+// res.nidx[m * k]
+// res.dist[m * k]
 
 void kNN(knnresult& res, double* X, double* Y, int displacement, int n, int m, int d, int k)
 {
-    double* D = new double[n * m];
+    std::vector<int> chunk_size(Y_BLOCKS);
+    std::vector<int> displs(Y_BLOCKS);
 
-    util::computeEuclideanDistance(X, Y, D, n, m, d);
+    util::computeChunksDisplacements(chunk_size.data(), displs.data(), Y_BLOCKS, m, d);
 
-    for (int i = 0; i < m; i++) {
+    int cnt = 0;
+    for (auto displ : displs) {
 
-        std::vector<std::pair<double, int>> _D(n + k);
+        displ /= d;
+        int y_len = chunk_size[cnt++] / d;
 
-        for (int j = 0; j < n; j++) {
-            _D[j].first  = D[j * m + i];
-            _D[j].second = j + displacement;
-        }
+        std::vector<double> D(n * y_len, 0);
+        util::computeEuclideanDistance(X, Y + displ * d, D.data(), n, y_len, d);
 
-        for (int j = 0; j < k; j++) {
-            _D[n + j].first  = res.ndist[i * k + j];
-            _D[n + j].second = res.nidx[i * k + j];
-        }
+        for (int i = displ; i < displ + y_len; i++) {
 
-        std::partial_sort(_D.begin(), _D.begin() + k, _D.end(), comp::lessThanKey());
+            std::vector<std::pair<double, int>> _D(n + k);
 
-        for (int j = 0; j < k; j++) {
-            res.ndist[i * k + j] = _D[j].first;
-            res.nidx[i * k + j]  = _D[j].second;
+            for (int j = 0; j < n; j++) {
+                _D[j].first  = D[j * y_len + i - displ];
+                _D[j].second = j + displacement;
+            }
+
+            for (int j = 0; j < k; j++) {
+                _D[n + j].first  = res.ndist[i * k + j];
+                _D[n + j].second = res.nidx[i * k + j];
+            }
+
+            std::partial_sort(_D.begin(), _D.begin() + k, _D.end(), comp::lessThanKey());
+
+            for (int j = 0; j < k; j++) {
+                res.ndist[i * k + j] = _D[j].first;
+                res.nidx[i * k + j]  = _D[j].second;
+            }
         }
     }
 }
+
+/* ---------------------------- update kNN function ----------------------------- */
+
+// Used to update kNN in leafs of VPT
+// TODO optimize (use euclideanDistance)
 
 void updateKNN(pointHeap& heap, Point& queryPoint, Point& corpusPoint, int k)
 {
     double dist = util::distance(queryPoint, corpusPoint);
     if (heap.size() == k) {
-        if (dist < heap.top().first) {
+        if (dist < heap.top().dist) {
             heap.pop();
-            heap.push(std::make_pair(dist, corpusPoint));
+            heap.push(heapItem(dist, corpusPoint.index));
         }
     }
     else {
-        heap.push(std::make_pair(dist, corpusPoint));
+        heap.push(heapItem(dist, corpusPoint.index));
     }
 }
 
