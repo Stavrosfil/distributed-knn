@@ -103,13 +103,14 @@ knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, std::string fi
         _Y = _Z;
     }
 
-    // TODO if rank == 0
-
     knnresult ans = knnresult();
-    ans.m         = n;
-    ans.k         = k;
-    ans.nidx      = new int[n * k];
-    ans.ndist     = new double[n * k];
+
+    if (process_rank == 0) {
+        ans.m         = n;
+        ans.k         = k;
+        ans.nidx      = new int[n * k];
+        ans.ndist     = new double[n * k];
+    }
 
     int* recv_chunks = new int[world_size];
     int* recv_displs = new int[world_size];
@@ -123,7 +124,7 @@ knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, std::string fi
     MPI_Finalize();
 
     // if (process_rank == 0)
-    // prt::kNN(ans);
+    //     prt::kNN(ans);
 
     return ans;
 }

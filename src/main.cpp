@@ -29,7 +29,7 @@ int main(int argc, char** argv)
     // std::ifstream myfile(fileName);
 
     int d = 1;
-    int k = 4;
+    int k = 8;
     int b = 0;
     int n = 8;
 
@@ -63,15 +63,15 @@ int main(int argc, char** argv)
 
     /* ----------------------------------- v1 ----------------------------------- */
 
-    // std::vector<double> X;
+    std::vector<double> X;
 
-    // cl::start();
+    cl::start();
 
-    // struct knnresult result = mpi::distrAllkNN(X, n, d, k, fileName);
+    struct knnresult result = mpi::distrAllkNN(X, n, d, k, fileName);
 
-    // cl::stop(true, "v1");
+    cl::stop(true, "v1");
 
-    // // prt::kNN(result);
+    // prt::kNN(result);
 
     /* -------------------------------- Build VPT ------------------------------- */
 
@@ -162,15 +162,15 @@ int main(int argc, char** argv)
 
     /* -------------------------- Distributed VPT kNN --------------------------- */
 
-    cl::start();
+    // cl::start();
 
-    std::vector<double> X;
+    // std::vector<double> X;
 
-    struct knnresult result = mpi::distrVPTkNN(X, n, d, k, b, fileName);
+    // struct knnresult result = mpi::distrVPTkNN(X, n, d, k, b, fileName);
 
-    cl::stop(true, "Distributed VPT kNN");
+    // cl::stop(true, "Distributed VPT kNN");
 
-    // prt::kNN(result);
+    // // prt::kNN(result);
 
     /* -------------------------------------------------------------------------- */
 

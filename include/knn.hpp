@@ -16,8 +16,14 @@ typedef std::priority_queue<heapItem, std::vector<heapItem>, comp::heapDist> poi
 
 #define Y_BLOCKS 1000
 
+/* -------------------------------- kNN function -------------------------------- */
+
+// Finds for each point in a query set Y the k nearest neighbors in the corpus set X
 // X[n * d]
 // Y[m * d]
+// res.nidx[m * k]
+// res.dist[m * k]
+
 void kNN(knnresult& res, double* X, double* Y, int displacement, int n, int m, int d, int k)
 {
     std::vector<int> chunk_size(Y_BLOCKS);
@@ -57,6 +63,11 @@ void kNN(knnresult& res, double* X, double* Y, int displacement, int n, int m, i
         }
     }
 }
+
+/* ---------------------------- update kNN function ----------------------------- */
+
+// Used to update kNN in leafs of VPT 
+// TODO optimize (use euclideanDistance)
 
 void updateKNN(pointHeap& heap, Point& queryPoint, Point& corpusPoint, int k)
 {
