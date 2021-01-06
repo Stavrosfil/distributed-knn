@@ -13,6 +13,8 @@
 class VPT {
 
 public:
+    std::vector<Point>& _points;
+
     VPT(std::vector<Point>& points, int b, int k) : _points(points), _b(b), _k(k) {}
 
     // Partition and construct tree from _points[lo:hi]
@@ -90,7 +92,6 @@ private:
     int _k;
     int _b;
     double _tau = D_MAX;
-    std::vector<Point>& _points;
 
     pointHeap _heap;
 

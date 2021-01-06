@@ -28,14 +28,14 @@ int main(int argc, char** argv)
     // std::string fileName = "data.csv";
     // std::ifstream myfile(fileName);
 
-    // int d = 1;
-    // int k = 2;
-    // int b = 0;
-    // int n = 8;
+    int d = 1;
+    int k = 4;
+    int b = 0;
+    int n = 8;
 
-    // std::string line;
-    // std::string fileName = "data2.csv";
-    // std::ifstream myfile(fileName);
+    std::string line;
+    std::string fileName = "data2.csv";
+    std::ifstream myfile(fileName);
 
     // int d = 2;
     // int k = 2;
@@ -46,14 +46,14 @@ int main(int argc, char** argv)
     // std::string fileName = "data3.csv";
     // std::ifstream myfile(fileName);
 
-    int d = 10;
-    int k = 50;
-    int b = 50;
-    int n = 30000;
+    // int d = 10;
+    // int k = 50;
+    // int b = 50;
+    // int n = 30000;
 
-    std::string line;
-    std::string fileName = "data4.csv";
-    std::ifstream myfile(fileName);
+    // std::string line;
+    // std::string fileName = "data4.csv";
+    // std::ifstream myfile(fileName);
 
 
     if (argc == 2)

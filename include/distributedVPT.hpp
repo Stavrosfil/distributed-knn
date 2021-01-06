@@ -105,7 +105,7 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
     int next_rank              = (world_size + process_rank + 1) % world_size;
     unsigned rolling_prev_rank = world_size + process_rank + 1;
 
-    cl::start();
+    cl::start();    // MPI ring
 
     for (int i = 0; i < world_size; i++) {
 
@@ -144,53 +144,47 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
                     /* request: */ &reqs[3]);
 
 
-        // TODO reconstruct vector
+        // reconstruct vector
+        conv::recVector(_corpus, _Xindices.data(), _Xcoords.data(), d);                 // update _corpus with the received serialized _X
 
+        // reconstruct tree
+        VPT __vpt(_corpus, b, k);
+        Node* __root = __vpt.reconstructTree(0, _corpus.size());
+        
+        // _vpt._points = _corpus;                                                      // update _vpt._points with new _corpus
+        // _root = _vpt.reconstructTree(0, _corpus.size());
 
-
-
-        // TODO reconstruct tree
-
-
-
-
-        // TODO kNN
-
-
-
+        // std::cout << "\nprocess " << process_rank << " reconstructed vpt:\n";
+        // prt::tree(_root, _corpus);
+    
+        // kNN
+        for (auto p : _query) {
+            _vpt.kNN(p, _ans, p.index - displs[process_rank] / d, *_root);
+        }
+        // std::cout << "process " << process_rank << " local kNN:\n";
+        // prt::kNN(_ans);
 
         MPI_Waitall(4, reqs, MPI_STATUSES_IGNORE);
 
         _Xindices = _Zindices;
         _Xcoords = _Zcoords;
-
-        // std::cout << "Process " << process_rank << std::endl;
-        // prt::rowMajor(_Xindices.data(), 1, _Xindices.size());
-        // prt::rowMajor(_Xcoords.data(), 1, _Xcoords.size());
-    
     }
 
     cl::stop(true, "MPI ring");
-
-    // for (auto p : _query) {
-    //     _vpt.kNN(p, _ans, p.index - displs[process_rank] / d, *_root);
-    // }
-
-    // prt::kNN(_ans);
     
     /* ----------------------------- Gather results ----------------------------- */
 
-        knnresult ans = knnresult();
+    knnresult ans = knnresult();
 
-        if (process_rank == 0) {
-            ans.m         = n;
-            ans.k         = k;
-            ans.nidx      = new int[n * k];
-            ans.ndist     = new double[n * k];
-        }
+    if (process_rank == 0) {
+        ans.m         = n;
+        ans.k         = k;
+        ans.nidx      = new int[n * k];
+        ans.ndist     = new double[n * k];
+    }
 
-        int* recv_chunks = new int[world_size];;
-        int* recv_displs = new int[world_size];
+    int* recv_chunks = new int[world_size];;
+    int* recv_displs = new int[world_size];
 
     util::computeChunksDisplacements(recv_chunks, recv_displs, world_size, n, k);
 
