@@ -12,27 +12,32 @@ struct knnresult {
     int k;         //!< Number of nearest neighbors            [scalar]
 };
 
-namespace cl {
-
-auto t1       = std::chrono::high_resolution_clock::now();
-auto t2       = std::chrono::high_resolution_clock::now();
-auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
-void start() 
-{
-    t1 = std::chrono::high_resolution_clock::now();
-}
-
-void stop(bool print, std::string operation) 
-{
-    t2       = std::chrono::high_resolution_clock::now();
-    duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
-    if (print == true)
-        std::cout << "\n" << operation << " time: " << duration / 1e3 << "ms\n" << std::endl;
-}
-
-}
-
 namespace util {
+
+class Timer {
+  public:
+    Timer(bool print) : print(print) {}
+
+    void start(std::string operation_desc)
+    {
+        _operation_desc = operation_desc;
+        t1              = std::chrono::high_resolution_clock::now();
+    }
+
+    void stop()
+    {
+        t2       = std::chrono::high_resolution_clock::now();
+        duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+        if (print)
+            std::cout << "\n" << _operation_desc << " time: " << duration / 1e3 << "ms\n" << std::endl;
+    }
+
+  private:
+    double duration;
+    bool print;
+    std::string _operation_desc;
+    std::chrono::high_resolution_clock::time_point t1, t2;
+};
 
 void computeChunksDisplacements(int* cnt, int* displs, int processes, int row_s, int col_s)
 {
@@ -202,7 +207,7 @@ void rowMajor(std::pair<double, int>* a, int n, int m)
     }
 }
 
-void vector(std::vector<int> v) 
+void vector(std::vector<int> v)
 {
     for (int i = 0; i < v.size(); i++) {
         std::cout << v.data()[i] << "\t";
@@ -210,7 +215,7 @@ void vector(std::vector<int> v)
     std::cout << std::endl;
 }
 
-void vector(std::vector<double> v) 
+void vector(std::vector<double> v)
 {
     for (int i = 0; i < v.size(); i++) {
         std::cout << v.data()[i] << "\t";
@@ -231,11 +236,10 @@ void points(std::vector<Point> _points)
 
 void point(Point& p)
 {
-    std::cout << "( ";
+    std::cout << p.index << "( ";
     for (int i = 0; i < p.d; i++)
         std::cout << p.coords[i] << " ";
     std::cout << ")\t";
-    // std::cout << std::endl << std::endl;
 }
 
 void tree(Node* root, std::vector<Point>& points)
@@ -294,12 +298,11 @@ void kNN(knnresult res)
 
 namespace conv {
 
-void serVector(std::vector<Point>& points, int* _indices, double* _coords)
+void serVector(std::vector<Point>& points, std::vector<int>& _indices, std::vector<double>& _coords, int len)
 {
-    int _len = points.size();
-    int _d   = points[0].d;
+    int _d = points[0].d;
 
-    for (int i = 0; i < _len; i++) {
+    for (int i = 0; i < len; i++) {
         for (int j = 0; j < _d; j++) {
             _coords[i * _d + j] = points[i].coords[j];
         }
@@ -307,12 +310,11 @@ void serVector(std::vector<Point>& points, int* _indices, double* _coords)
     }
 }
 
-void recVector(std::vector<Point>& points, int* _indices, double* _coords, int d)
+void recVector(std::vector<Point>& points, std::vector<int>& _indices, std::vector<double>& _coords, int d, int len)
 {
-    int _len = points.size();
-    for (int i = 0; i < _len; i++) {
+    for (int i = 0; i < len; i++) {
         points[i].d      = d;
-        points[i].index = _indices[i];
+        points[i].index  = _indices[i];
         points[i].coords = new double[d];
         for (int j = 0; j < d; j++) {
             points[i].coords[j] = _coords[i * d + j];

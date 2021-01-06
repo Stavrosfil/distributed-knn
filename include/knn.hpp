@@ -66,7 +66,7 @@ void kNN(knnresult& res, double* X, double* Y, int displacement, int n, int m, i
 
 /* ---------------------------- update kNN function ----------------------------- */
 
-// Used to update kNN in leafs of VPT 
+// Used to update kNN in leafs of VPT
 // TODO optimize (use euclideanDistance)
 
 void updateKNN(pointHeap& heap, Point& queryPoint, Point& corpusPoint, int k)
@@ -75,11 +75,11 @@ void updateKNN(pointHeap& heap, Point& queryPoint, Point& corpusPoint, int k)
     if (heap.size() == k) {
         if (dist < heap.top().dist) {
             heap.pop();
-            heap.push(heapItem(dist, &corpusPoint));
+            heap.push(heapItem(dist, corpusPoint.index));
         }
     }
     else {
-        heap.push(heapItem(dist, &corpusPoint));
+        heap.push(heapItem(dist, corpusPoint.index));
     }
 }
 

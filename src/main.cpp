@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <chrono>
+// #include <benchmark/benchmark.h>
 
 #include "knn.hpp"
 #include "utils.hpp"
@@ -19,26 +20,28 @@ int main(int argc, char** argv)
 
     std::cout << std::endl;
 
-    // int d = 10;
-    // int k = 100;
-    // int b = 100;
-    // int n = 10000;
+    util::Timer timer(true);
 
-    // std::string line;
-    // std::string fileName = "data.csv";
-    // std::ifstream myfile(fileName);
-
-    int d = 1;
-    int k = 8;
-    int b = 0;
-    int n = 8;
+    int d = 10;
+    int k = 100;
+    int b = 100;
+    int n = 100000;
 
     std::string line;
-    std::string fileName = "data2.csv";
+    std::string fileName = "data.csv";
     std::ifstream myfile(fileName);
 
+    // int d = 1;
+    // int k = 8;
+    // int b = 0;
+    // int n = 8;
+
+    // std::string line;
+    // std::string fileName = "data2.csv";
+    // std::ifstream myfile(fileName);
+
     // int d = 2;
-    // int k = 2;
+    // int k = 4;
     // int b = 0;
     // int n = 4;
 
@@ -55,7 +58,6 @@ int main(int argc, char** argv)
     // std::string fileName = "data4.csv";
     // std::ifstream myfile(fileName);
 
-
     if (argc == 2)
         fileName = argv[1];
 
@@ -63,15 +65,15 @@ int main(int argc, char** argv)
 
     /* ----------------------------------- v1 ----------------------------------- */
 
-    std::vector<double> X;
+    // std::vector<double> X;
 
-    cl::start();
+    // timer.start("v1");
 
-    struct knnresult result = mpi::distrAllkNN(X, n, d, k, fileName);
+    // struct knnresult result = mpi::distrAllkNN(X, n, d, k, fileName);
 
-    cl::stop(true, "v1");
+    // timer.stop();
 
-    // prt::kNN(result);
+    // // prt::kNN(result);
 
     /* -------------------------------- Build VPT ------------------------------- */
 
@@ -81,11 +83,11 @@ int main(int argc, char** argv)
 
     // VPT vpt(corpus, b, k);
 
-    // cl::start();
+    // timer.start("Vantage point tree building");
 
     // Node* root = vpt.buildTree(0, corpus.size());
 
-    // cl::stop(true, "Vantage point tree building");
+    // timer.stop();
 
     // // std::cout << "\nCorpus points:\n";
     // // prt::points(corpus);
@@ -108,13 +110,13 @@ int main(int argc, char** argv)
     // std::fill_n(ans.nidx, ans.m * ans.k, D_MAX);
     // std::fill_n(ans.ndist, ans.m * ans.k, -1);
 
-    // cl::start();
+    // timer.start("v2");
 
     // for (auto p : query) {
     //     vpt.kNN(p, ans, p.index, *root);
     // }
 
-    // cl::stop(true, "v2");
+    // timer.stop();
 
     // // prt::kNN(ans);
 
@@ -122,11 +124,11 @@ int main(int argc, char** argv)
 
     // VPT vpt2(corpus, b, k);
 
-    // cl::start();
+    // timer.start("Vantage point tree reconstruction");
 
     // Node* root2 = vpt2.reconstructTree(0, corpus.size());
 
-    // cl::stop(true, "Vantage point tree reconstruction");
+    // timer.stop();
 
     // // std::cout << "\nReconstructed vantage point tree:\n\n";
 
@@ -134,14 +136,14 @@ int main(int argc, char** argv)
 
     /* ---------------------------- Serialize Vector ---------------------------- */
 
-    // cl::start();
+    // timer.start("Vector serialization");
 
     // int* indices   = new int[corpus.size()];
     // double* coords = new double[corpus[0].d * corpus.size()];
 
     // conv::serVector(corpus, indices, coords);
 
-    // cl::stop(true, "Vector serialization");
+    // timer.stop();
 
     // // std::cout << "\nVector serialization: \n" << "Coords:\t\t";
     // // prt::rowMajor(coords, 1, corpus[0].d * corpus.size());
@@ -150,27 +152,27 @@ int main(int argc, char** argv)
 
     /* --------------------------- Reconstruct Vector --------------------------- */
 
-    // cl::start();
+    // timer.start("Vector reconstruction");
 
     // std::vector<Point> rV(n);
     // conv::recVector(rV, indices, coords, d);
 
-    // cl::stop(true, "Vector reconstruction");
+    // timer.stop();
 
     // // std::cout << "\nVector reconstruction: \n";
     // // prt::points(rV);
 
     /* -------------------------- Distributed VPT kNN --------------------------- */
 
-    // cl::start();
+    timer.start("Distributed VPT kNN");
 
-    // std::vector<double> X;
+    std::vector<double> X;
 
-    // struct knnresult result = mpi::distrVPTkNN(X, n, d, k, b, fileName);
+    struct knnresult result = mpi::distrVPTkNN(X, n, d, k, b, fileName);
 
-    // cl::stop(true, "Distributed VPT kNN");
+    timer.stop();
 
-    // // prt::kNN(result);
+    // prt::kNN(result);
 
     /* -------------------------------------------------------------------------- */
 

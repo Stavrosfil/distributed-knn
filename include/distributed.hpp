@@ -12,7 +12,6 @@ namespace mpi {
 knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, std::string fileName)
 {
     /* --------------------------- Init Communication --------------------------- */
-
     MPI_Init(NULL, NULL);
 
     int world_size;
@@ -106,10 +105,10 @@ knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, std::string fi
     knnresult ans = knnresult();
 
     if (process_rank == 0) {
-        ans.m         = n;
-        ans.k         = k;
-        ans.nidx      = new int[n * k];
-        ans.ndist     = new double[n * k];
+        ans.m     = n;
+        ans.k     = k;
+        ans.nidx  = new int[n * k];
+        ans.ndist = new double[n * k];
     }
 
     int* recv_chunks = new int[world_size];

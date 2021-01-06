@@ -13,10 +13,12 @@ class Point {
 };
 
 class heapItem {
+
   public:
     double dist;
-    const Point* p;
-    heapItem(double dist, const Point* p) : p(p), dist(dist) {}
+    int index;
+
+    heapItem(double dist, int index) : dist(dist), index(index) {}
 };
 
 class Node {
