@@ -49,7 +49,7 @@ int main(int argc, char** argv)
     int d = 10;
     int k = 50;
     int b = 50;
-    int n = 15000;
+    int n = 30000;
 
     std::string line;
     std::string fileName = "data4.csv";
@@ -95,7 +95,7 @@ int main(int argc, char** argv)
     // // prt::point(root->right->right->leafPoints[0]);
     // // prt::point(root->right->leafPoints[0]);
 
-    // std::cout << std::endl;
+    // // std::cout << std::endl;
 
     /* ----------------------------------- v2 ----------------------------------- */
 
@@ -166,9 +166,11 @@ int main(int argc, char** argv)
 
     std::vector<double> X;
 
-    mpi::distrVPTkNN(X, n, d, k, b, fileName);
+    struct knnresult result = mpi::distrVPTkNN(X, n, d, k, b, fileName);
 
     cl::stop(true, "Distributed VPT kNN");
+
+    // prt::kNN(result);
 
     /* -------------------------------------------------------------------------- */
 

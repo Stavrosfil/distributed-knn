@@ -202,6 +202,22 @@ void rowMajor(std::pair<double, int>* a, int n, int m)
     }
 }
 
+void vector(std::vector<int> v) 
+{
+    for (int i = 0; i < v.size(); i++) {
+        std::cout << v.data()[i] << "\t";
+    }
+    std::cout << std::endl;
+}
+
+void vector(std::vector<double> v) 
+{
+    for (int i = 0; i < v.size(); i++) {
+        std::cout << v.data()[i] << "\t";
+    }
+    std::cout << std::endl;
+}
+
 void points(std::vector<Point> _points)
 {
     for (int i = 0; i < _points.size(); i++) {

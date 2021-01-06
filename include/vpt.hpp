@@ -51,7 +51,7 @@ public:
         _tau = D_MAX;
 
         search(qp, root);
-
+       
         for (int i = 0; i < _k; i++) {
             ans.ndist[_k * (queryIndex + 1) - i - 1] = _heap.top().dist;
             ans.nidx[_k * (queryIndex + 1) - i - 1] = _heap.top().p->index;
@@ -99,10 +99,6 @@ private:
         if (node.vpIndex == -1)
             return;
 
-        // updateKNN(_heap, qp, _points[node.vpIndex], _k);     // @Stavrosfil check this
-        // _tau = _heap.top().dist;
-
-        // TODO use updateKNN
         double dist = util::distance(qp, _points[node.vpIndex]);
 
         if (dist < _tau) {

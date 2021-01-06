@@ -103,6 +103,8 @@ knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, std::string fi
         _Y = _Z;
     }
 
+    // TODO if rank == 0
+
     knnresult ans = knnresult();
     ans.m         = n;
     ans.k         = k;
