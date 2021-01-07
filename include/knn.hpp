@@ -66,10 +66,7 @@ void kNN(knnresult& res, double* X, double* Y, int displacement, int n, int m, i
 
 /* ---------------------------- update kNN function ----------------------------- */
 
-// Used to update kNN in leafs of VPT
-// TODO optimize (use euclideanDistance)
-
-void updateKNN(pointHeap& heap, Point& queryPoint, Point& corpusPoint, int k)
+double updateKNN(pointHeap& heap, Point& queryPoint, Point& corpusPoint, int k)
 {
     double dist = util::distance(queryPoint, corpusPoint);
     if (heap.size() == k) {
@@ -81,6 +78,8 @@ void updateKNN(pointHeap& heap, Point& queryPoint, Point& corpusPoint, int k)
     else {
         heap.push(heapItem(dist, corpusPoint.index));
     }
+    
+    return dist;
 }
 
 #endif // __KNN_H__

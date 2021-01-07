@@ -27,10 +27,7 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
     if (process_rank == 0) {
         X.resize(n * d);
         util::readToRowMajorVector(X, n, d, fileName);
-        // prt::rowMajor(X.data(), n, d);
     }
-
-    // std::cout << "process " << process_rank << "\t X.size() = " << X.size() << std::endl;
 
     // Number of elements to distribute to each process
     std::vector<int> chunk_size(world_size);
@@ -50,8 +47,6 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
 
     /* ------------------------------ Distribute X ------------------------------ */
 
-    // cl::start();
-
     MPI_Scatterv(X.data(),
                  chunk_size.data(),
                  displs.data(),
@@ -61,10 +56,6 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
                  MPI_DOUBLE,
                  0,
                  MPI_COMM_WORLD);
-
-    // cl::stop(true, "Data distribution");
-    // std::cout << "process " << process_rank << " displs = " << displs[process_rank] << std::endl;
-    // prt::rowMajor(_Xcoords.data(), MAX_CHUNK_S / d, d);
 
     /* ----------------------------- Build local VPT ---------------------------- */
 
@@ -78,19 +69,11 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
     // _query is prefered to have the initial sort (before build tree) for simplicity in kNN
     std::vector<Point> _query(_corpus);
 
-    // prt::points(_query);
-
     VPT _vpt(_corpus, b, k, chunk_size[process_rank] / d);
     _vpt.build(chunk_size[process_rank] / d);
 
     // we need the sorted form of _X for tree reconstruction
     conv::serVector(_corpus, _Xindices, _Xcoords, chunk_size[process_rank] / d);
-
-    // prt::points(_corpus);
-    // prt::points(_query);
-
-    // std::cout << "\nProcess " << process_rank << " local vantage point tree:\n\n";
-    // prt::tree(_root, _corpus);
 
     /* ------------------------------ Calculations ------------------------------ */
 
@@ -150,29 +133,18 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
 
         _vpt.rebuild(chunk_size[rolling_prev_rank] / d);
 
-        // std::cout << "Process rank ->\t" << process_rank << std::endl;
-        // if (process_rank == 1)
-        // prt::points(_corpus);
-
-        // if (process_rank) {
-        //     std::cout << "\nprocess " << process_rank << " reconstructed vpt:\n";
-        //     _vpt.printTree();
-        // }
-
         // kNN
         for (int j = 0; j < chunk_size[process_rank] / d; j++) {
-            _vpt.computeKNN(_query[j], _ans, j);
+            _vpt._computeKNN(_query[j], _ans, j);
+            // std::cout << "nodes visits: " << _vpt.getNodesVisits() << std::endl;
         }
-
-        // std::cout << "process " << process_rank << " local kNN:\n";
-        // prt::kNN(_ans);
 
         MPI_Waitall(4, reqs, MPI_STATUSES_IGNORE);
 
         _Xindices = _Zindices;
         _Xcoords  = _Zcoords;
     }
-
+    
     timer.stop();
 
     /* ----------------------------- Gather results ----------------------------- */
@@ -196,7 +168,7 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
         _ans.ndist, _ans.m * _ans.k, MPI_DOUBLE, ans.ndist, recv_chunks, recv_displs, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
     // if (process_rank == 0)
-    // prt::kNN(ans);
+    //     prt::kNN(ans);
 
     /* -------------------------------------------------------------------------- */
 
