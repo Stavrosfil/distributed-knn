@@ -14,8 +14,6 @@
 #define D_MAX std::numeric_limits<double>::max()
 typedef std::priority_queue<heapItem, std::vector<heapItem>, comp::heapDist> pointHeap;
 
-#define Y_BLOCKS 1000
-
 /* -------------------------------- kNN function -------------------------------- */
 
 // Finds for each point in a query set Y the k nearest neighbors in the corpus set X
@@ -26,6 +24,13 @@ typedef std::priority_queue<heapItem, std::vector<heapItem>, comp::heapDist> poi
 
 void kNN(knnresult& res, double* X, double* Y, int displacement, int n, int m, int d, int k)
 {
+    int Y_BLOCKS;
+    if (n > 1000) 
+        Y_BLOCKS = n / 1000;
+    else {
+        Y_BLOCKS = 1;
+    }
+
     std::vector<int> chunk_size(Y_BLOCKS);
     std::vector<int> displs(Y_BLOCKS);
 

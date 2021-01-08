@@ -9,10 +9,10 @@
 
 namespace mpi {
 
-knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::string filePath)
+knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::string fileName)
 {
 
-    util::Timer timer(false);
+    util::Timer timer(true);
 
     /* --------------------------- Init Communication --------------------------- */
 
@@ -25,9 +25,11 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
     MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
 
     if (process_rank == 0) {
+        std::cout << std::endl;
         X.resize(n * d);
-        util::read(X, n, d, filePath);
+        util::read(X, n, d, fileName);
         // prt::rowMajor(X.data(), n, d);
+        timer.start("v2");
     }
 
     // Number of elements to distribute to each process
@@ -90,8 +92,6 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
     int next_rank              = (world_size + process_rank + 1) % world_size;
     unsigned rolling_prev_rank = world_size + process_rank + 1;
 
-    timer.start("MPI Ring");
-
     for (int i = 0; i < world_size; i++) {
 
         rolling_prev_rank = (rolling_prev_rank + world_size - 1) % world_size;
@@ -136,7 +136,7 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
 
         // kNN
         for (int j = 0; j < chunk_size[process_rank] / d; j++) {
-            _vpt._computeKNN(_query[j], _ans, j);
+            _vpt.computeKNN(_query[j], _ans, j);
             // std::cout << "nodes visits: " << _vpt.getNodesVisits() << std::endl;
         }
 
@@ -145,8 +145,6 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
         _Xindices = _Zindices;
         _Xcoords  = _Zcoords;
     }
-    
-    timer.stop();
 
     /* ----------------------------- Gather results ----------------------------- */
 
@@ -168,10 +166,13 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
     MPI_Gatherv(
         _ans.ndist, _ans.m * _ans.k, MPI_DOUBLE, ans.ndist, recv_chunks, recv_displs, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
-    // if (process_rank == 0)
-    //     prt::kNN(ans);
-
     /* -------------------------------------------------------------------------- */
+
+    if (process_rank == 0) {
+        timer.stop();
+        std::cout << std::endl;
+        // prt::kNN(ans);
+    }
 
     MPI_Finalize();
 

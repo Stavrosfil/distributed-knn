@@ -103,33 +103,14 @@ double distance(const Point& p1, const Point& p2)
     return util::computeEucledianNorm(p1.coords, p2.coords, p1.d);
 }
 
-void readNDimVector(std::vector<Point>& result, int n, int d, std::string filename)
+void readToRowMajorVector(std::vector<double>& result, int n, int d, std::string fileName)
 {
-    std::ifstream input(filename);
+    std::cout << fileName << std::endl;
+    std::string line;
+    std::string filePath = "./dataset/" + fileName;
+    std::ifstream myfile(filePath);
 
-    std::string s;
-
-    std::getline(input, s);
-    std::istringstream iss(s);
-    std::cout << s << std::endl;
-
-    for (int i = 0; i < n; i++) {
-        std::getline(input, s);
-        std::istringstream iss(s);
-
-        std::string num;
-        Point p(i, new double[d], d);
-        int j = 0;
-        while (std::getline(iss, num, ',')) {
-            p.coords[j++] = std::stof(num);
-        }
-        result[i] = p;
-    }
-}
-
-void readToRowMajorVector(std::vector<double>& result, int n, int d, std::string filename)
-{
-    std::ifstream input(filename);
+    std::ifstream input(filePath);
 
     std::string s;
 
@@ -149,15 +130,20 @@ void readToRowMajorVector(std::vector<double>& result, int n, int d, std::string
     }
 }
 
-void read(std::vector<double>& result, int n, int d, std::string filename)
+void read(std::vector<double>& result, int n, int d, std::string fileName)
 {
-    std::ifstream input(filename);
+    std::cout << fileName << std::endl;
+    std::string line;
+    std::string filePath = "./dataset/" + fileName;
+    std::ifstream myfile(filePath);
+
+    std::ifstream input(filePath);
 
     std::string s;
 
     std::getline(input, s);
     std::istringstream iss(s);
-    std::cout << s << std::endl << std::endl;
+    std::cout << s << std::endl;
 
     for (int i = 0; i < n; i++) {
         std::getline(input, s);

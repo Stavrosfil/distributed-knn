@@ -9,8 +9,10 @@
 
 namespace mpi {
 
-knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, std::string filePath)
+knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, std::string fileName)
 {
+    util::Timer timer(true);
+
     /* --------------------------- Init Communication --------------------------- */
     MPI_Init(NULL, NULL);
 
@@ -21,11 +23,13 @@ knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, std::string fi
     MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
 
     if (process_rank == 0) {
+        std::cout << std::endl;
         X.resize(n * d);
-        util::read(X, n, d, filePath);
+        util::read(X, n, d, fileName);
         // prt::rowMajor(X.data(), n, d);
+        timer.start("v1");
     }
-
+    
     // Number of elements to distribute to each process
     std::vector<int> chunk_size(world_size);
     // The displacements where each chunk begins
@@ -39,19 +43,19 @@ knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, std::string fi
     std::vector<double> _Y(MAX_CHUNK_S);
     std::vector<double> _Z(MAX_CHUNK_S);
 
-    /* ------------------------------ Distribute X ------------------------------ */
+/* ------------------------------ Distribute X ------------------------------ */
 
     MPI_Scatterv(X.data(),
-                 chunk_size.data(),
-                 displs.data(),
-                 MPI_DOUBLE,
-                 _X.data(),
-                 chunk_size[process_rank],
-                 MPI_DOUBLE,
-                 0,
-                 MPI_COMM_WORLD);
+                chunk_size.data(),
+                displs.data(),
+                MPI_DOUBLE,
+                _X.data(),
+                chunk_size[process_rank],
+                MPI_DOUBLE,
+                0,
+                MPI_COMM_WORLD);
 
-    /* ------------------------------ Calculations ------------------------------ */
+/* ------------------------------ Calculations ------------------------------ */
 
     _Y = _X;
 
@@ -74,19 +78,19 @@ knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, std::string fi
         MPI_Request* reqs = new MPI_Request[2];
 
         MPI_Irecv(/* recv buffer: */ _Z.data(),
-                  /* count: */ MAX_CHUNK_S,
-                  /* type: */ MPI_DOUBLE,
-                  /* from: */ prev_rank,
-                  /* tag: */ 0,
-                  /* communicator: */ MPI_COMM_WORLD,
-                  /* request: */ &reqs[0]);
+                /* count: */ MAX_CHUNK_S,
+                /* type: */ MPI_DOUBLE,
+                /* from: */ prev_rank,
+                /* tag: */ 0,
+                /* communicator: */ MPI_COMM_WORLD,
+                /* request: */ &reqs[0]);
         MPI_Isend(/* send buffer: */ _Y.data(),
-                  /* count: */ MAX_CHUNK_S,
-                  /* type: */ MPI_DOUBLE,
-                  /* to: */ next_rank,
-                  /* tag: */ 0,
-                  /* communicator: */ MPI_COMM_WORLD,
-                  /* request: */ &reqs[1]);
+                /* count: */ MAX_CHUNK_S,
+                /* type: */ MPI_DOUBLE,
+                /* to: */ next_rank,
+                /* tag: */ 0,
+                /* communicator: */ MPI_COMM_WORLD,
+                /* request: */ &reqs[1]);
 
         kNN(_ans,
             _Y.data(),
@@ -120,10 +124,13 @@ knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, std::string fi
     MPI_Gatherv(
         _ans.ndist, _ans.m * _ans.k, MPI_DOUBLE, ans.ndist, recv_chunks, recv_displs, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
-    MPI_Finalize();
+    if (process_rank == 0) {
+        timer.stop();
+        std::cout << std::endl;
+        //prt::kNN(ans);
+    }
 
-    // if (process_rank == 0)
-    //     prt::kNN(ans);
+    MPI_Finalize();
 
     return ans;
 }
