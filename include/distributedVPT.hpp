@@ -11,7 +11,6 @@ namespace mpi {
 
 knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::string fileName)
 {
-
     util::Timer timer(true);
 
     /* --------------------------- Init Communication --------------------------- */
@@ -92,6 +91,9 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
     int next_rank              = (world_size + process_rank + 1) % world_size;
     unsigned rolling_prev_rank = world_size + process_rank + 1;
 
+    double nodes_visits = 0;
+    // b = _Yindices.size() / 8500;
+
     for (int i = 0; i < world_size; i++) {
 
         rolling_prev_rank = (rolling_prev_rank + world_size - 1) % world_size;
@@ -137,7 +139,7 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
         // kNN
         for (int j = 0; j < chunk_size[process_rank] / d; j++) {
             _vpt.computeKNN(_query[j], _ans, j);
-            // std::cout << "nodes visits: " << _vpt.getNodesVisits() << std::endl;
+            nodes_visits += _vpt.getNodesVisits();
         }
 
         MPI_Waitall(4, reqs, MPI_STATUSES_IGNORE);
@@ -170,10 +172,14 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
 
     if (process_rank == 0) {
         timer.stop();
-        std::cout << std::endl;
+        
         // prt::kNN(ans);
     }
 
+    nodes_visits /= _Yindices.size();
+
+    std::cout << "process " << process_rank << " average nodes visits per qp: " << nodes_visits << std::endl << std::endl;
+    
     MPI_Finalize();
 
     return ans;

@@ -32,12 +32,19 @@ int main(int argc, char** argv)
 
     // std::string fileName = "data3.csv";
 
-    int d = 32;
+    // int d = 32;
+    // int k = 50;
+    // int b = 50;
+    // int n = 68040;
+
+    // std::string fileName = "ColorHistogram.asc";
+
+    int d = 9;
     int k = 50;
-    int b = 50;
+    int b = 20;
     int n = 68040;
 
-    std::string fileName = "ColorHistogram.asc";
+    std::string fileName = "ColorMoments.asc";
 
     if (argc == 2)
         fileName = argv[1];

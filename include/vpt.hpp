@@ -160,7 +160,8 @@ class VPT {
     {
         // kNN with vp
         double dist = updateKNN(_heap, qp, _points[subroot.vpIndex], _k);
-        
+        _nodes_visits++;
+
         // update tau
         if (_heap.size() == _k)
             _tau = _heap.top().dist;
