@@ -149,6 +149,30 @@ void readToRowMajorVector(std::vector<double>& result, int n, int d, std::string
     }
 }
 
+void read(std::vector<double>& result, int n, int d, std::string filename)
+{
+    std::ifstream input(filename);
+
+    std::string s;
+
+    std::getline(input, s);
+    std::istringstream iss(s);
+    std::cout << s << std::endl << std::endl;
+
+    for (int i = 0; i < n; i++) {
+        std::getline(input, s);
+        std::istringstream iss(s);
+
+        std::string num;
+        int j = 0;
+        int count = 0;
+        while (std::getline(iss, num, ' ')) {
+            if (count++)
+                result[i * d + j++] = std::stof(num);
+        }
+    }
+}
+
 } // namespace util
 
 namespace comp {

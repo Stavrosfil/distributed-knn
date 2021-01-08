@@ -9,7 +9,7 @@
 
 namespace mpi {
 
-knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, std::string fileName)
+knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, std::string filePath)
 {
     /* --------------------------- Init Communication --------------------------- */
     MPI_Init(NULL, NULL);
@@ -22,7 +22,7 @@ knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, std::string fi
 
     if (process_rank == 0) {
         X.resize(n * d);
-        util::readToRowMajorVector(X, n, d, fileName);
+        util::read(X, n, d, filePath);
         // prt::rowMajor(X.data(), n, d);
     }
 

@@ -9,7 +9,7 @@
 
 namespace mpi {
 
-knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::string fileName)
+knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::string filePath)
 {
 
     util::Timer timer(false);
@@ -26,7 +26,8 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
 
     if (process_rank == 0) {
         X.resize(n * d);
-        util::readToRowMajorVector(X, n, d, fileName);
+        util::read(X, n, d, filePath);
+        // prt::rowMajor(X.data(), n, d);
     }
 
     // Number of elements to distribute to each process
