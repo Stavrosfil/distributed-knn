@@ -111,7 +111,7 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
                   /* count: */ _Zcoords.size(),
                   /* type: */ MPI_DOUBLE,
                   /* from: */ prev_rank,
-                  /* tag: */ 0,
+                  /* tag: */ 1,
                   /* communicator: */ MPI_COMM_WORLD,
                   /* request: */ &reqs[1]);
 
@@ -126,7 +126,7 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
                   /* count: */ _Xcoords.size(),
                   /* type: */ MPI_DOUBLE,
                   /* to: */ next_rank,
-                  /* tag: */ 0,
+                  /* tag: */ 1,
                   /* communicator: */ MPI_COMM_WORLD,
                   /* request: */ &reqs[3]);
 
@@ -172,20 +172,50 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
 
     if (process_rank == 0) {
         timer.stop();
-        
         // prt::kNN(ans);
     }
 
     nodes_visits /= _Yindices.size();
-
-    std::cout << "process " << process_rank << " average nodes visits per qp: " << nodes_visits << std::endl << std::endl;
     
+    // send all local nodes_visits to p0 and compute average
+    if (process_rank != 0) {
+        MPI_Send( /* data: */ &nodes_visits,
+                  /* count: */ 1,
+                  /* type: */ MPI_DOUBLE,
+                  /* to: */ 0,
+                  /* tag: */ process_rank,
+                  /* communicator: */ MPI_COMM_WORLD);
+    }
+    else {
+        std::vector<double> all_nodes_visits(world_size);
+        all_nodes_visits[0] = nodes_visits;
+        
+        for (int i = 1; i < world_size; i ++) {
+            MPI_Recv( /* data: */ &all_nodes_visits[i],
+                      /* count: */ 1,
+                      /* type: */ MPI_DOUBLE,
+                      /* from: */ i,
+                      /* tag: */ i,
+                      /* communicator: */ MPI_COMM_WORLD,
+                      /* status: */ MPI_STATUS_IGNORE);
+        }
+
+        double av_nodes_visits = 0;
+
+        for (auto& n : all_nodes_visits)
+            av_nodes_visits += n;
+        
+        av_nodes_visits /= world_size;
+
+        std::cout << "average nodes visits per query point = " << av_nodes_visits << std::endl;
+    }
+
+    if (process_rank == 0)
+        std::cout << std::endl;
+
     MPI_Finalize();
 
     return ans;
-
-    MPI_Finalize();
-    return knnresult();
 }
 
 } // namespace mpi
