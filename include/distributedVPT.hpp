@@ -44,7 +44,7 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, int dat
 
     /* ----------------------------- Init variables ----------------------------- */
 
-    b = 2 * log2(n / world_size);
+    b = 0.3 * log2(n / world_size);
 
     if (process_rank == 0)
         timer.start("v2");
