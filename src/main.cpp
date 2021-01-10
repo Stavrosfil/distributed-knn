@@ -22,6 +22,8 @@ int main(int argc, char** argv)
     int d = 0;
     int k = 50;
     int b = 50;
+    int data = -1;
+    int version = -1;
 
     /* dataset:
         data = 0 -> corel, colorhistogram
@@ -30,10 +32,10 @@ int main(int argc, char** argv)
         data = 3 -> fma, features
     */
 
-    int data = -1;
-
-    if (argc == 2)
+    if (argc == 3) {
         data = std::stof(argv[1]);
+        version = std::stof(argv[2]);
+    }
 
     /* ------------------------------ Reader test ------------------------------- */
 
@@ -45,19 +47,27 @@ int main(int argc, char** argv)
 
     /* ----------------------------------- v1 ----------------------------------- */
 
-    // std::vector<double> X;
+    if (version == 1) {
 
-    // struct knnresult result = mpi::distrAllkNN(X, n, d, k, data);
+    std::vector<double> X;
 
-    // // prt::kNN(result);
+    struct knnresult result = mpi::distrAllkNN(X, n, d, k, data);
+
+    // prt::kNN(result);
+
+    }
 
     /* ----------------------------------- v2 ----------------------------------- */
+
+    if (version == 2) {
 
     std::vector<double> X;
 
     struct knnresult result = mpi::distrVPTkNN(X, n, d, k, b, data);
 
     // prt::kNN(result);
+
+    }
 
     /* -------------------------------------------------------------------------- */
 
