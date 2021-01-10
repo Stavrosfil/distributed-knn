@@ -1,7 +1,7 @@
 #!/bin/bash
 
 processors_nums=(1 2 4 8)
-datasets=(0 1 2)
+datasets=(0 1 2 3)
 
 for i in ${datasets[@]}
 do

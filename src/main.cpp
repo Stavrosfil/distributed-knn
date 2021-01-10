@@ -16,12 +16,13 @@
 int main(int argc, char** argv)
 {
 
-    /* ---------------------------- File preparations --------------------------- */
+    /* ----------------------------- Init variables ----------------------------- */
 
-    int n = 0;
-    int d = 0;
     int k = 50;
-    int b = 50;
+
+    int n = -1;
+    int d = -1;
+    int b = -1;
     int data = -1;
     int version = -1;
 
