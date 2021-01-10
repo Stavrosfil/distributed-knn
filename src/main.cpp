@@ -20,10 +20,10 @@ int main(int argc, char** argv)
 
     int k = 50;
 
-    int n = -1;
-    int d = -1;
-    int b = -1;
-    int data = -1;
+    int n       = -1;
+    int d       = -1;
+    int b       = -1;
+    int data    = -1;
     int version = -1;
 
     /* dataset:
@@ -34,7 +34,7 @@ int main(int argc, char** argv)
     */
 
     if (argc == 3) {
-        data = std::stof(argv[1]);
+        data    = std::stof(argv[1]);
         version = std::stof(argv[2]);
     }
 
@@ -50,24 +50,22 @@ int main(int argc, char** argv)
 
     if (version == 1) {
 
-    std::vector<double> X;
+        std::vector<double> X;
 
-    struct knnresult result = mpi::distrAllkNN(X, n, d, k, data);
+        struct knnresult result = mpi::distrAllkNN(X, n, d, k, data);
 
-    // prt::kNN(result);
-
+        // prt::kNN(result);
     }
 
     /* ----------------------------------- v2 ----------------------------------- */
 
     if (version == 2) {
 
-    std::vector<double> X;
+        std::vector<double> X;
 
-    struct knnresult result = mpi::distrVPTkNN(X, n, d, k, b, data);
+        struct knnresult result = mpi::distrVPTkNN(X, n, d, k, b, data);
 
-    // prt::kNN(result);
-
+        // prt::kNN(result);
     }
 
     /* -------------------------------------------------------------------------- */

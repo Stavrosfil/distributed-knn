@@ -25,7 +25,7 @@ typedef std::priority_queue<heapItem, std::vector<heapItem>, comp::heapDist> poi
 void kNN(knnresult& res, double* X, double* Y, int displacement, int n, int m, int d, int k)
 {
     int Y_BLOCKS;
-    if (n > 1000) 
+    if (n > 1000)
         Y_BLOCKS = n / 1000;
     else {
         Y_BLOCKS = 1;
@@ -83,7 +83,7 @@ double updateKNN(pointHeap& heap, Point& queryPoint, Point& corpusPoint, int k)
     else {
         heap.push(heapItem(dist, corpusPoint.index));
     }
-    
+
     return dist;
 }
 

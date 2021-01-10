@@ -150,7 +150,7 @@ void read(std::vector<double>& result, int n, int d, std::string fileName)
         std::istringstream iss(s);
 
         std::string num;
-        int j = 0;
+        int j     = 0;
         int count = 0;
         while (std::getline(iss, num, ' ')) {
             if (count++)

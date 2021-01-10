@@ -25,7 +25,7 @@ void colorHist(int& n, int& d, std::vector<double>& X, int process_rank)
             std::getline(input, s);
             std::istringstream iss(s);
             std::string num;
-            int j = 0;
+            int j     = 0;
             int count = 0;
             while (std::getline(iss, num, ' ')) {
                 if (count++)
@@ -56,7 +56,7 @@ void colorMom(int& n, int& d, std::vector<double>& X, int process_rank)
             std::getline(input, s);
             std::istringstream iss(s);
             std::string num;
-            int j = 0;
+            int j     = 0;
             int count = 0;
             while (std::getline(iss, num, ' ')) {
                 if (count++)
@@ -87,7 +87,7 @@ void coocTex(int& n, int& d, std::vector<double>& X, int process_rank)
             std::getline(input, s);
             std::istringstream iss(s);
             std::string num;
-            int j = 0;
+            int j     = 0;
             int count = 0;
             while (std::getline(iss, num, ' ')) {
                 if (count++)
@@ -122,7 +122,7 @@ void features(int& n, int& d, std::vector<double>& X, int process_rank)
             std::getline(input, s);
             std::istringstream iss(s);
             std::string num;
-            int j = 0;
+            int j     = 0;
             int count = 0;
             while (std::getline(iss, num, ',')) {
                 if (count++)

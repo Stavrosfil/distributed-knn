@@ -25,7 +25,7 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, int dat
     MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
 
     /* -------------------------------- Read data ------------------------------- */
-    switch(data) {
+    switch (data) {
     case 0:
         rdCorel::colorHist(n, d, X, process_rank);
         break;
@@ -194,35 +194,35 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, int dat
     }
 
     nodes_visits /= _Yindices.size();
-    
+
     // send all local nodes_visits to p0 and compute average
     if (process_rank != 0) {
-        MPI_Send( /* data: */ &nodes_visits,
-                  /* count: */ 1,
-                  /* type: */ MPI_DOUBLE,
-                  /* to: */ 0,
-                  /* tag: */ process_rank,
-                  /* communicator: */ MPI_COMM_WORLD);
+        MPI_Send(/* data: */ &nodes_visits,
+                 /* count: */ 1,
+                 /* type: */ MPI_DOUBLE,
+                 /* to: */ 0,
+                 /* tag: */ process_rank,
+                 /* communicator: */ MPI_COMM_WORLD);
     }
     else {
         std::vector<double> all_nodes_visits(world_size);
         all_nodes_visits[0] = nodes_visits;
-        
-        for (int i = 1; i < world_size; i ++) {
-            MPI_Recv( /* data: */ &all_nodes_visits[i],
-                      /* count: */ 1,
-                      /* type: */ MPI_DOUBLE,
-                      /* from: */ i,
-                      /* tag: */ i,
-                      /* communicator: */ MPI_COMM_WORLD,
-                      /* status: */ MPI_STATUS_IGNORE);
+
+        for (int i = 1; i < world_size; i++) {
+            MPI_Recv(/* data: */ &all_nodes_visits[i],
+                     /* count: */ 1,
+                     /* type: */ MPI_DOUBLE,
+                     /* from: */ i,
+                     /* tag: */ i,
+                     /* communicator: */ MPI_COMM_WORLD,
+                     /* status: */ MPI_STATUS_IGNORE);
         }
 
         double av_nodes_visits = 0;
 
         for (auto& n : all_nodes_visits)
             av_nodes_visits += n;
-        
+
         av_nodes_visits /= world_size;
 
         std::cout << "average nodes visits per query point = " << av_nodes_visits << std::endl;
