@@ -22,16 +22,24 @@ int main(int argc, char** argv)
     int d = 0;
     int k = 50;
     int b = 50;
-    std::string fileName = " ";
 
-    // if (argc == 2)
-    //     fileName = argv[1];
+    /* dataset:
+        data = 0 -> corel, colorhistogram
+        data = 1 -> corel, colormoments
+        data = 2 -> corel, cooctexture
+        data = 3 -> fma, features
+    */
+
+    int data = -1;
+
+    if (argc == 2)
+        data = std::stof(argv[1]);
 
     /* ------------------------------ Reader test ------------------------------- */
 
     // std::vector<double> X;
 
-    // rdFma::features(n, d, X, 0);
+    // rdMiniboone::mnbPid(n, d, X, 0);
 
     // // prt::vector(X);
 
@@ -39,17 +47,17 @@ int main(int argc, char** argv)
 
     // std::vector<double> X;
 
-    // struct knnresult result = mpi::distrAllkNN(X, n, d, k, fileName);
+    // struct knnresult result = mpi::distrAllkNN(X, n, d, k, data);
 
     // // prt::kNN(result);
 
     /* ----------------------------------- v2 ----------------------------------- */
 
-    // std::vector<double> X;
+    std::vector<double> X;
 
-    // struct knnresult result = mpi::distrVPTkNN(X, n, d, k, b, fileName);
+    struct knnresult result = mpi::distrVPTkNN(X, n, d, k, b, data);
 
-    // // prt::kNN(result);
+    // prt::kNN(result);
 
     /* -------------------------------------------------------------------------- */
 

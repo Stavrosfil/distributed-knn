@@ -10,11 +10,11 @@
 
 namespace mpi {
 
-knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::string fileName)
+knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, int data)
 {
     util::Timer timer(true);
 
-    /* --------------------------- Init Communication --------------------------- */
+    /* --------------------------- Init communication --------------------------- */
 
     MPI_Init(NULL, NULL);
 
@@ -24,8 +24,25 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
     int process_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
 
-    // rdCorel::colorHist(n, d, X, process_rank);
-    rdFma::features(n, d, X, process_rank);
+    /* -------------------------------- Read data ------------------------------- */
+    switch(data) {
+    case 0:
+        rdCorel::colorHist(n, d, X, process_rank);
+        break;
+    case 1:
+        rdCorel::colorMom(n, d, X, process_rank);
+        break;
+    case 2:
+        rdCorel::coocTex(n, d, X, process_rank);
+        break;
+    case 3:
+        rdFma::features(n, d, X, process_rank);
+        break;
+    default:
+        std::cout << "error in data reading\n";
+    }
+
+    /* ----------------------------- Init variables ----------------------------- */
 
     if (process_rank == 0)
         timer.start("v2");
