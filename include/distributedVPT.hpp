@@ -38,6 +38,9 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, int dat
     case 3:
         rdFma::features(n, d, X, process_rank);
         break;
+    case 4:
+        rdMiniboone::mnbPid(n, d, X, process_rank);
+        break;
     default:
         std::cout << "error in data reading\n";
     }

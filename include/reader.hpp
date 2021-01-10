@@ -136,40 +136,39 @@ void features(int& n, int& d, std::vector<double>& X, int process_rank)
 
 } // namespace rdFma
 
-// namespace rdMiniboone {
+namespace rdMiniboone {
 
-// void mnbPid(int& n, int& d, std::vector<double>& X, int process_rank)
-// {
-//     n = 130065;
-//     d = 50;
+void mnbPid(int& n, int& d, std::vector<double>& X, int process_rank)
+{
+    n = 130064;
+    d = 50;
 
-//     if (process_rank == 0) {
+    if (process_rank == 0) {
 
-//         X.resize(n * d);
+        X.resize(n * d);
 
-//         std::cout << "\nMiniBooNE_PID\t" << n << ", " << d << std::endl << std::endl;
-//         std::string filePath = "./dataset/miniboone/MiniBooNE_PID.txt";
-//         std::ifstream myfile(filePath);
-//         std::ifstream input(filePath);
-//         std::string s;
+        std::cout << "\nMiniBooNE_PID\t" << n << ", " << d << std::endl << std::endl;
+        std::string filePath = "./dataset/miniboone/MiniBooNE_PID.txt";
+        std::ifstream myfile(filePath);
+        std::ifstream input(filePath);
+        std::string s;
 
-//         for (int i = 0; i < 1; i++) {
-//             std::getline(input, s);
-//             std::istringstream iss(s);
-//             std::string num;
-//             int j = 0;
-//             int count = 0;
-//             while (std::getline(iss, num, ' ')) {
-//                 if (count++)
-//                     X[i * d + j++] = std::stof(num);
-//             }
-//         }
-//         std::cout << X[0] << std::endl;
-//         std::cout << "data reading by process 0 completed\n";
-//     }
-// }
+        for (int i = 0; i < n; i++) {
+            std::getline(input, s);
+            std::istringstream iss(s);
+            std::string num;
+            int j = 0;
+            
+            while (std::getline(iss, num, ' ')) {
+                X[i * d + j++] = std::stof(num);
+            }
+        }
 
-// } // namespace rdMiniboone
+        std::cout << "data reading by process 0 completed\n";
+    }
+}
+
+} // namespace rdMiniboone
 
 // namespace rdTvNewsCom {
 

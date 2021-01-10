@@ -31,6 +31,7 @@ int main(int argc, char** argv)
         data = 1 -> corel, colormoments
         data = 2 -> corel, cooctexture
         data = 3 -> fma, features
+        data = 4 -> miniboone, features
     */
 
     if (argc == 3) {

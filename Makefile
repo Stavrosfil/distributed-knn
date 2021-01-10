@@ -6,6 +6,10 @@ SRC_DIR=./src
 INCLUDE_DIR=./include
 SOURCES := $(shell find $(SRC_DIR) -name '*.cpp')
 
+NUM_OF_PROCESSES=8
+DATA=4
+VERSION=2
+
 $(info $(shell mkdir -p $(BUILD_DIR)))
 
 
@@ -20,7 +24,7 @@ all: mpi test
 
 test:
 	@printf "\n** Testing\n\n"
-	mpirun -np 8 ./build/main 3 2
+	mpirun -np $(NUM_OF_PROCESSES) ./build/main $(DATA) $(VERSION)
 
 clean:
 	rm -rf $(BUILD_DIR)
