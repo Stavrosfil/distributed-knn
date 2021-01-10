@@ -6,6 +6,7 @@
 
 #include "knn.hpp"
 #include "utils.hpp"
+#include "reader.hpp"
 
 namespace mpi {
 
@@ -22,13 +23,10 @@ knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, std::string fi
     int process_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
 
-    if (process_rank == 0) {
-        std::cout << std::endl;
-        X.resize(n * d);
-        util::read(X, n, d, fileName);
-        // prt::rowMajor(X.data(), n, d);
+    rdCorel::colorMom(n, d, X, process_rank);
+
+    if (process_rank == 0)
         timer.start("v1");
-    }
     
     // Number of elements to distribute to each process
     std::vector<int> chunk_size(world_size);

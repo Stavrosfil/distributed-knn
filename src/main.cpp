@@ -18,36 +18,26 @@ int main(int argc, char** argv)
 
     /* ---------------------------- File preparations --------------------------- */
 
-    // int d = 1;
-    // int k = 8;
-    // int b = 0;
-    // int n = 8;
-
-    // std::string fileName = "data2.csv";
-
-    // int d = 2;
-    // int k = 4;
-    // int b = 0;
-    // int n = 4;
-
-    // std::string fileName = "data3.csv";
-
-    // int d = 32;
-    // int k = 50;
-    // int b = 50;
-    // int n = 68040;
-
-    // std::string fileName = "ColorHistogram.asc";
-
-    int d = 9;
+    int n = 0;
+    int d = 0;
     int k = 50;
-    int b = 20;
-    int n = 68040;
+    int b = 50;
+    std::string fileName = " ";
 
-    std::string fileName = "ColorMoments.asc";
+    // if (argc == 2)
+    //     fileName = argv[1];
 
-    if (argc == 2)
-        fileName = argv[1];
+    /* ------------------------------ Reader test ------------------------------- */
+
+
+
+    // std::vector<double> X;
+
+    // rdCorel::coocTex(n, d, X, 0);
+
+    
+    // // prt::vector(X);
+
 
     /* ----------------------------------- v1 ----------------------------------- */
 
@@ -59,11 +49,11 @@ int main(int argc, char** argv)
 
     /* ----------------------------------- v2 ----------------------------------- */
 
-    std::vector<double> X;
+    // std::vector<double> X;
 
-    struct knnresult result = mpi::distrVPTkNN(X, n, d, k, b, fileName);
+    // struct knnresult result = mpi::distrVPTkNN(X, n, d, k, b, fileName);
 
-    // prt::kNN(result);
+    // // prt::kNN(result);
 
     /* -------------------------------------------------------------------------- */
 
