@@ -101,10 +101,40 @@ void coocTex(int& n, int& d, std::vector<double>& X, int process_rank)
 
 }   // namespace rdCorel
 
-// namespace rd
-// {
-    
-// } // namespace rd
+namespace rdFma {
+
+void features(int& n, int& d, std::vector<double>& X, int process_rank)
+{
+    n = 106574;
+    d = 518;
+
+    if (process_rank == 0) {
+
+        X.resize(n * d);
+
+        std::cout << "\nFMA features\t" << n << ", " << d << std::endl << std::endl;
+        std::string filePath = "./dataset/fma/features.csv";
+        std::ifstream myfile(filePath);
+        std::ifstream input(filePath);
+        std::string s;
+
+        for (int i = 0; i < n; i++) {
+            std::getline(input, s);
+            std::istringstream iss(s);
+            std::string num;
+            int j = 0;
+            int count = 0;
+            while (std::getline(iss, num, ',')) {
+                if (count++)
+                    X[i * d + j++] = std::stof(num);
+            }
+        }
+
+        std::cout << "data reading from process 0 completed\n";
+    }
+}
+
+} // namespace rd
 
 
 #endif // __READER_H__

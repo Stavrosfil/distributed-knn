@@ -24,7 +24,8 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
     int process_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
 
-    rdCorel::colorHist(n, d, X, process_rank);
+    // rdCorel::colorHist(n, d, X, process_rank);
+    rdFma::features(n, d, X, process_rank);
 
     if (process_rank == 0)
         timer.start("v2");

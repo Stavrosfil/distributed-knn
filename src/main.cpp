@@ -29,15 +29,11 @@ int main(int argc, char** argv)
 
     /* ------------------------------ Reader test ------------------------------- */
 
-
-
     // std::vector<double> X;
 
-    // rdCorel::coocTex(n, d, X, 0);
+    // rdFma::features(n, d, X, 0);
 
-    
     // // prt::vector(X);
-
 
     /* ----------------------------------- v1 ----------------------------------- */
 
