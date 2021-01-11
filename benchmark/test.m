@@ -1,0 +1,13 @@
+figure;
+speedup(corelcolorhistogram);
+hold on;
+speedup(corelcolormoments);
+hold on;
+speedup(corelcooctexture);
+hold on;
+speedup(corelcolorhistogram_v2);
+hold on;
+speedup(corelcolormoments_v2);
+hold on;
+speedup(corelcooctexture_v2);
+legend('corel colors hist v1', 'corel colors mom v1', 'corel cooc tex v1', 'corel colors hist v2', 'corel colors mom v2', 'corel cooc tex v2');
