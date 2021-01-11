@@ -25,6 +25,7 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, int dat
     MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
 
     /* -------------------------------- Read data ------------------------------- */
+    
     switch (data) {
     case 0:
         rdCorel::colorHist(n, d, X, process_rank);
@@ -40,6 +41,21 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, int dat
         break;
     case 4:
         rdMiniboone::mnbPid(n, d, X, process_rank);
+        break;
+    case 5:
+        rdTvNewsCom::BBC(n, d, X, process_rank);
+        break;
+    case 6:
+        rdTvNewsCom::CNN(n, d, X, process_rank);
+        break;
+    case 7:
+        rdTvNewsCom::CNNIBN(n, d, X, process_rank);
+        break;
+    case 8:
+        rdTvNewsCom::NDTV(n, d, X, process_rank);
+        break;
+    case 9:
+        rdTvNewsCom::TIMESNOW(n, d, X, process_rank);
         break;
     default:
         std::cout << "error in data reading\n";

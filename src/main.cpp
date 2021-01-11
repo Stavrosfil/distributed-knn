@@ -31,7 +31,12 @@ int main(int argc, char** argv)
         data = 1 -> corel, colormoments
         data = 2 -> corel, cooctexture
         data = 3 -> fma, features
-        data = 4 -> miniboone, features
+        data = 4 -> miniboone
+        data = 5 -> tv_news_com, BBC
+        data = 6 -> tv_news_com, CNN
+        data = 7 -> tv_news_com, CNNIBN
+        data = 8 -> tv_news_com, NDTV
+        data = 9 -> tv_news_com, TIMESNOW
     */
 
     if (argc == 3) {

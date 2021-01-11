@@ -39,8 +39,4 @@ build/
 
 data
 
-dataset/fma
-
-dataset/miniboone
-
-dataset/tv_news_com
+dataset

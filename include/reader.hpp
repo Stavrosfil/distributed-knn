@@ -172,37 +172,153 @@ void mnbPid(int& n, int& d, std::vector<double>& X, int process_rank)
 
 } // namespace rdMiniboone
 
-// namespace rdTvNewsCom {
+namespace rdTvNewsCom {
 
-// void features(int& n, int& d, std::vector<double>& X, int process_rank)
-// {
-//     n = 106574;
-//     d = 518;
+void BBC(int& n, int& d, std::vector<double>& X, int process_rank)
+{
+    n = 17720;
+    d = 17;
 
-//     if (process_rank == 0) {
+    if (process_rank == 0) {
 
-//         X.resize(n * d);
+        X.resize(n * d);
 
-//         std::cout << "\nFMA features\t" << n << ", " << d << std::endl << std::endl;
-//         std::string filePath = "./dataset/fma/features.csv";
-//         std::ifstream myfile(filePath);
-//         std::ifstream input(filePath);
-//         std::string s;
+        std::cout << "\nBBC\t" << n << ", " << d << std::endl << std::endl;
+        std::string filePath = "./dataset/tv_news_com/BBC.txt";
+        std::ifstream myfile(filePath);
+        std::ifstream input(filePath);
+        std::string s;
 
-//         for (int i = 0; i < n; i++) {
-//             std::getline(input, s);
-//             std::istringstream iss(s);
-//             std::string num;
-//             int j = 0;
-//             int count = 0;
-//             while (std::getline(iss, num, ',')) {
-//                 if (count++)
-//                     X[i * d + j++] = std::stof(num);
-//             }
-//         }
+        for (int i = 0; i < n; i++) {
+            std::getline(input, s);
+            std::istringstream iss(s);
+            std::string num;
+            int j = 0;
+            while (std::getline(iss, num, ' ')) {
+                    X[i * d + j++] = std::stof(num);
+            }
+        }
 
-//         std::cout << "data reading by process 0 completed\n";
-//     }
-// } // namespace rdTvNewsCom
+        std::cout << "data reading by process 0 completed\n";
+    }
+}
+
+void CNN(int& n, int& d, std::vector<double>& X, int process_rank)
+{
+    n = 22545;
+    d = 17;
+
+    if (process_rank == 0) {
+
+        X.resize(n * d);
+
+        std::cout << "\nCNN\t" << n << ", " << d << std::endl << std::endl;
+        std::string filePath = "./dataset/tv_news_com/CNN.txt";
+        std::ifstream myfile(filePath);
+        std::ifstream input(filePath);
+        std::string s;
+
+        for (int i = 0; i < n; i++) {
+            std::getline(input, s);
+            std::istringstream iss(s);
+            std::string num;
+            int j = 0;
+            while (std::getline(iss, num, ' ')) {
+                    X[i * d + j++] = std::stof(num);
+            }
+        }
+
+        std::cout << "data reading by process 0 completed\n";
+    }
+}
+
+void CNNIBN(int& n, int& d, std::vector<double>& X, int process_rank)
+{
+    n = 33117;
+    d = 17;
+
+    if (process_rank == 0) {
+
+        X.resize(n * d);
+
+        std::cout << "\nCNNIBN\t" << n << ", " << d << std::endl << std::endl;
+        std::string filePath = "./dataset/tv_news_com/CNNIBN.txt";
+        std::ifstream myfile(filePath);
+        std::ifstream input(filePath);
+        std::string s;
+
+        for (int i = 0; i < n; i++) {
+            std::getline(input, s);
+            std::istringstream iss(s);
+            std::string num;
+            int j = 0;
+            while (std::getline(iss, num, ' ')) {
+                    X[i * d + j++] = std::stof(num);
+            }
+        }
+
+        std::cout << "data reading by process 0 completed\n";
+    }
+}
+
+void NDTV(int& n, int& d, std::vector<double>& X, int process_rank)
+{
+    n = 17051;
+    d = 17;
+
+    if (process_rank == 0) {
+
+        X.resize(n * d);
+
+        std::cout << "\nNDTV\t" << n << ", " << d << std::endl << std::endl;
+        std::string filePath = "./dataset/tv_news_com/NDTV.txt";
+        std::ifstream myfile(filePath);
+        std::ifstream input(filePath);
+        std::string s;
+
+        for (int i = 0; i < n; i++) {
+            std::getline(input, s);
+            std::istringstream iss(s);
+            std::string num;
+            int j = 0;
+            while (std::getline(iss, num, ' ')) {
+                    X[i * d + j++] = std::stof(num);
+            }
+        }
+
+        std::cout << "data reading by process 0 completed\n";
+    }
+}
+
+void TIMESNOW(int& n, int& d, std::vector<double>& X, int process_rank)
+{
+    n = 39252;
+    d = 17;
+
+    if (process_rank == 0) {
+
+        X.resize(n * d);
+
+        std::cout << "\nTIMESNOW\t" << n << ", " << d << std::endl << std::endl;
+        std::string filePath = "./dataset/tv_news_com/TIMESNOW.txt";
+        std::ifstream myfile(filePath);
+        std::ifstream input(filePath);
+        std::string s;
+
+        for (int i = 0; i < n; i++) {
+            std::getline(input, s);
+            std::istringstream iss(s);
+            std::string num;
+            int j = 0;
+            while (std::getline(iss, num, ' ')) {
+                    X[i * d + j++] = std::stof(num);
+            }
+        }
+
+        std::cout << "data reading by process 0 completed\n";
+    }
+}
+
+}// namespace rdTvNewsCom
 
 #endif // __READER_H__
