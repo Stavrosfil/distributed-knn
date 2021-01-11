@@ -118,12 +118,14 @@ void features(int& n, int& d, std::vector<double>& X, int process_rank)
         std::ifstream input(filePath);
         std::string s;
 
-        for (int i = 0; i < n; i++) {
+        for (int i = -4; i < n; i++) {
             std::getline(input, s);
             std::istringstream iss(s);
             std::string num;
             int j     = 0;
             int count = 0;
+            if (i < 0)
+                continue;
             while (std::getline(iss, num, ',')) {
                 if (count++)
                     X[i * d + j++] = std::stof(num);

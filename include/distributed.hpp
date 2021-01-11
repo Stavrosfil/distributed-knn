@@ -15,6 +15,7 @@ knnresult distrAllkNN(std::vector<double> X, int n, int d, int k, int data)
     util::Timer timer(true);
 
     /* --------------------------- Init Communication --------------------------- */
+    
     MPI_Init(NULL, NULL);
 
     int world_size;
