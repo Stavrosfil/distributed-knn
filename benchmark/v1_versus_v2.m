@@ -1,6 +1,5 @@
-   function res = v1_versus_v2(v1, v2)
+   function res = v1_versus_v2(v1, v2, num_of_processors)
 
-    num_of_processors = [1 2 4 8 16 32 48 60];
     speedup = zeros(1, length(v1));
     
     for i = 1:length(v1)

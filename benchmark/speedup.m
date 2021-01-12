@@ -1,6 +1,6 @@
-function res = speedup(data)
+function res = speedup(data, num_of_processors)
 
-    num_of_processors = [1 2 4 8 16 32 48 60];
+    
     speedup = zeros(1, length(data));
     
     for i = 1:length(data)
@@ -12,7 +12,6 @@ function res = speedup(data)
     xlabel('number of processors');
     ylabel('speedup');
     xticks(num_of_processors);
-    yticks(0:2:30);
     title('v1 & v2 speedup');
     grid on;
 

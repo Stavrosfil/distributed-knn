@@ -8,7 +8,7 @@ SOURCES := $(shell find $(SRC_DIR) -name '*.cpp')
 
 NUM_OF_PROCESSES=8
 DATA=3
-VERSION=2
+VERSION=1
 
 $(info $(shell mkdir -p $(BUILD_DIR)))
 
