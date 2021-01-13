@@ -18,7 +18,7 @@ class VPT {
         _heaps.resize(queryIndexNum);
     }
 
-    void computeKNN(Point& qp, knnresult& ans, int queryIndex) 
+    void computeKNN(Point& qp, knnresult& ans, int queryIndex)
     {
         _nodes_visits = 0;
 
@@ -92,7 +92,7 @@ class VPT {
         }
 
         return node;
-    }    
+    }
 
     Node* rebuildTree(int lo, int hi)
     {
@@ -117,7 +117,7 @@ class VPT {
         return node;
     }
 
-    void search(Point& qp, Node& root) 
+    void search(Point& qp, Node& root)
     {
         // if (root.vpIndex == -1)
         //     return;
@@ -126,7 +126,7 @@ class VPT {
 
         // kNN with vp
         double dist = updateKNN(_heap, qp, _points[root.vpIndex], _k);
-        
+
         // update tau
         if (_heap.size() == _k)
             _tau = _heap.top().dist;
@@ -142,7 +142,7 @@ class VPT {
         // search
         if (dist < root.mu) {
             search(qp, *root.left);
-            
+
             if (checkRightInt(qp, root)) {
                 searchSubtree(qp, *root.right);
             }
@@ -156,7 +156,7 @@ class VPT {
         }
     }
 
-    void searchSubtree(Point& qp, Node& subroot) 
+    void searchSubtree(Point& qp, Node& subroot)
     {
         // kNN with vp
         double dist = updateKNN(_heap, qp, _points[subroot.vpIndex], _k);

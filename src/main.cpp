@@ -16,54 +16,63 @@
 int main(int argc, char** argv)
 {
 
-    /* ---------------------------- File preparations --------------------------- */
+    /* ----------------------------- Init variables ----------------------------- */
 
-    // int d = 1;
-    // int k = 8;
-    // int b = 0;
-    // int n = 8;
-
-    // std::string fileName = "data2.csv";
-
-    // int d = 2;
-    // int k = 4;
-    // int b = 0;
-    // int n = 4;
-
-    // std::string fileName = "data3.csv";
-
-    // int d = 32;
-    // int k = 50;
-    // int b = 50;
-    // int n = 68040;
-
-    // std::string fileName = "ColorHistogram.asc";
-
-    int d = 9;
     int k = 50;
-    int b = 20;
-    int n = 68040;
 
-    std::string fileName = "ColorMoments.asc";
+    int n       = -1;
+    int d       = -1;
+    int b       = -1;
+    int data    = -1;
+    int version = -1;
 
-    if (argc == 2)
-        fileName = argv[1];
+    /* dataset:
+        data = 0 -> corel, colorhistogram
+        data = 1 -> corel, colormoments
+        data = 2 -> corel, cooctexture
+        data = 3 -> fma, features
+        data = 4 -> miniboone
+        data = 5 -> tv_news_com, BBC
+        data = 6 -> tv_news_com, CNN
+        data = 7 -> tv_news_com, CNNIBN
+        data = 8 -> tv_news_com, NDTV
+        data = 9 -> tv_news_com, TIMESNOW
+    */
 
-    /* ----------------------------------- v1 ----------------------------------- */
+    if (argc == 3) {
+        data    = std::stof(argv[1]);
+        version = std::stof(argv[2]);
+    }
+
+    /* ------------------------------ Reader test ------------------------------- */
 
     // std::vector<double> X;
 
-    // struct knnresult result = mpi::distrAllkNN(X, n, d, k, fileName);
+    // rdMiniboone::mnbPid(n, d, X, 0);
 
-    // // prt::kNN(result);
+    // // prt::vector(X);
+
+    /* ----------------------------------- v1 ----------------------------------- */
+
+    if (version == 1) {
+
+        std::vector<double> X;
+
+        struct knnresult result = mpi::distrAllkNN(X, n, d, k, data);
+
+        // prt::kNN(result);
+    }
 
     /* ----------------------------------- v2 ----------------------------------- */
 
-    std::vector<double> X;
+    if (version == 2) {
 
-    struct knnresult result = mpi::distrVPTkNN(X, n, d, k, b, fileName);
+        std::vector<double> X;
 
-    // prt::kNN(result);
+        struct knnresult result = mpi::distrVPTkNN(X, n, d, k, b, data);
+
+        // prt::kNN(result);
+    }
 
     /* -------------------------------------------------------------------------- */
 

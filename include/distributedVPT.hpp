@@ -6,14 +6,15 @@
 
 #include "knn.hpp"
 #include "utils.hpp"
+#include "reader.hpp"
 
 namespace mpi {
 
-knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::string fileName)
+knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, int data)
 {
     util::Timer timer(true);
 
-    /* --------------------------- Init Communication --------------------------- */
+    /* --------------------------- Init communication --------------------------- */
 
     MPI_Init(NULL, NULL);
 
@@ -23,13 +24,49 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
     int process_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
 
-    if (process_rank == 0) {
-        std::cout << std::endl;
-        X.resize(n * d);
-        util::read(X, n, d, fileName);
-        // prt::rowMajor(X.data(), n, d);
-        timer.start("v2");
+    /* -------------------------------- Read data ------------------------------- */
+    
+    switch (data) {
+    case 0:
+        rdCorel::colorHist(n, d, X, process_rank);
+        break;
+    case 1:
+        rdCorel::colorMom(n, d, X, process_rank);
+        break;
+    case 2:
+        rdCorel::coocTex(n, d, X, process_rank);
+        break;
+    case 3:
+        rdFma::features(n, d, X, process_rank);
+        break;
+    case 4:
+        rdMiniboone::mnbPid(n, d, X, process_rank);
+        break;
+    case 5:
+        rdTvNewsCom::BBC(n, d, X, process_rank);
+        break;
+    case 6:
+        rdTvNewsCom::CNN(n, d, X, process_rank);
+        break;
+    case 7:
+        rdTvNewsCom::CNNIBN(n, d, X, process_rank);
+        break;
+    case 8:
+        rdTvNewsCom::NDTV(n, d, X, process_rank);
+        break;
+    case 9:
+        rdTvNewsCom::TIMESNOW(n, d, X, process_rank);
+        break;
+    default:
+        std::cout << "error in data reading\n";
     }
+
+    /* ----------------------------- Init variables ----------------------------- */
+
+    b = 0.3 * log2(n / world_size);
+
+    if (process_rank == 0)
+        timer.start("v2");
 
     // Number of elements to distribute to each process
     std::vector<int> chunk_size(world_size);
@@ -176,35 +213,35 @@ knnresult distrVPTkNN(std::vector<double> X, int n, int d, int k, int b, std::st
     }
 
     nodes_visits /= _Yindices.size();
-    
+
     // send all local nodes_visits to p0 and compute average
     if (process_rank != 0) {
-        MPI_Send( /* data: */ &nodes_visits,
-                  /* count: */ 1,
-                  /* type: */ MPI_DOUBLE,
-                  /* to: */ 0,
-                  /* tag: */ process_rank,
-                  /* communicator: */ MPI_COMM_WORLD);
+        MPI_Send(/* data: */ &nodes_visits,
+                 /* count: */ 1,
+                 /* type: */ MPI_DOUBLE,
+                 /* to: */ 0,
+                 /* tag: */ process_rank,
+                 /* communicator: */ MPI_COMM_WORLD);
     }
     else {
         std::vector<double> all_nodes_visits(world_size);
         all_nodes_visits[0] = nodes_visits;
-        
-        for (int i = 1; i < world_size; i ++) {
-            MPI_Recv( /* data: */ &all_nodes_visits[i],
-                      /* count: */ 1,
-                      /* type: */ MPI_DOUBLE,
-                      /* from: */ i,
-                      /* tag: */ i,
-                      /* communicator: */ MPI_COMM_WORLD,
-                      /* status: */ MPI_STATUS_IGNORE);
+
+        for (int i = 1; i < world_size; i++) {
+            MPI_Recv(/* data: */ &all_nodes_visits[i],
+                     /* count: */ 1,
+                     /* type: */ MPI_DOUBLE,
+                     /* from: */ i,
+                     /* tag: */ i,
+                     /* communicator: */ MPI_COMM_WORLD,
+                     /* status: */ MPI_STATUS_IGNORE);
         }
 
         double av_nodes_visits = 0;
 
         for (auto& n : all_nodes_visits)
             av_nodes_visits += n;
-        
+
         av_nodes_visits /= world_size;
 
         std::cout << "average nodes visits per query point = " << av_nodes_visits << std::endl;
