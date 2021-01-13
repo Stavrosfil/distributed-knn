@@ -5,7 +5,6 @@
 #include <fstream>
 #include <sstream>
 #include <chrono>
-// #include <benchmark/benchmark.h>
 
 #include "knn.hpp"
 #include "utils.hpp"
@@ -15,9 +14,6 @@
 
 int main(int argc, char** argv)
 {
-
-    /* ----------------------------- Init variables ----------------------------- */
-
     int k = 50;
 
     int n       = -1;
@@ -44,37 +40,21 @@ int main(int argc, char** argv)
         version = std::stof(argv[2]);
     }
 
-    /* ------------------------------ Reader test ------------------------------- */
-
-    // std::vector<double> X;
-
-    // rdMiniboone::mnbPid(n, d, X, 0);
-
-    // // prt::vector(X);
-
     /* ----------------------------------- v1 ----------------------------------- */
 
     if (version == 1) {
-
         std::vector<double> X;
-
         struct knnresult result = mpi::distrAllkNN(X, n, d, k, data);
-
         // prt::kNN(result);
     }
 
     /* ----------------------------------- v2 ----------------------------------- */
 
     if (version == 2) {
-
         std::vector<double> X;
-
         struct knnresult result = mpi::distrVPTkNN(X, n, d, k, b, data);
-
         // prt::kNN(result);
     }
-
-    /* -------------------------------------------------------------------------- */
 
     return 0;
 }
