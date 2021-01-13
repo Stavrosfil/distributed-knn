@@ -38,5 +38,10 @@ build/
 .vscode
 
 data
-
 dataset
+paper/
+callgrind*
+perf*
+poetry.lock
+pyproject.toml
+# benchmark/

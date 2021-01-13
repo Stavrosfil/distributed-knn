@@ -30,28 +30,6 @@ legend('corel color hist', 'corel color mom', 'corel cooc tex');
 
 %  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-% miniboone_pid
-
-num_of_processors = [1 2 4 8 16 32 48 60];
-
-
-figure;
-speedup(miniboonepid_v1, num_of_processors);
-hold on;
-legend('miniboonepid v1');
-
-figure;
-speedup(miniboonepid_v2, num_of_processors);
-legend('miniboonepid v2');
-
-
-figure;
-v1_versus_v2(miniboonepid_v1, miniboonepid_v2, num_of_processors);
-legend('miniboonepid');
-
-
-%  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 % tv_news_comm
 
 num_of_processors = [1 2 4 8 16];
@@ -66,7 +44,7 @@ hold on;
 speedup(ndtv_v1, num_of_processors);
 hold on;
 speedup(timesnow_v1, num_of_processors);
-legend('bbc v1', 'cnn v1', 'cnnibn tex v1', 'ndtv v1', 'timesnow v1')
+legend('bbc v1', 'cnn v1', 'cnnibn v1', 'ndtv v1', 'timesnow v1')
 
 
 figure;
@@ -99,24 +77,26 @@ legend('bbc', 'cnn', 'cnnibn', 'ndtv', 'timesnow');
 
 % fma features
 
-num_of_processors = [1 2 4 8 16];
+num_of_processors = [1 2 4 8 16 32 48 60];
 
 figure;
 speedup(features_v1, num_of_processors);
-legend('fma features v1');
-
+hold on;
+speedup(miniboonepid_v1, num_of_processors);
+legend('fma features v1', 'miniboonepid v1');
 
 figure;
 speedup(features_v2, num_of_processors);
-legend('fma features v2');
-
+hold on;
+speedup(miniboonepid_v2, num_of_processors);
+legend('fma features v2', 'miniboonepid v2');
 
 figure;
 v1_versus_v2(features_v1, features_v2, num_of_processors);
-legend('fma features');
+hold on;
+v1_versus_v2(miniboonepid_v1, miniboonepid_v2, num_of_processors);
+legend('fma features', 'miniboonepid');
 
-
-%  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
