@@ -12,7 +12,7 @@ function res = speedup(data, num_of_processors)
     xlabel('number of processors');
     ylabel('speedup');
     xticks(num_of_processors);
-    title('v1 & v2 speedup');
+    title('t_1 / t_p speedup');
     grid on;
 
     res = speedup;
